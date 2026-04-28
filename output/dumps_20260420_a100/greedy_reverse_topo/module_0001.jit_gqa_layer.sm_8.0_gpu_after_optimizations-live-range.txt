@@ -1,0 +1,116 @@
+HloLiveRange (max 46):
+  InstructionSequence:
+    0:Arg_5.6
+    1:triton_softmax.5
+    2:loop_convert_fusion.1
+    3:Arg_0.1
+    4:wrapped_convert.1
+    5:wrapped_broadcast.1
+    6:wrapped_multiply
+    7:wrapped_convert.2
+    8:Arg_1.2
+    9:Arg_2.3
+    10:Arg_3.4
+    11:input_concatenate_fusion
+    12:custom-call.1
+    13:get-tuple-element.3
+    14:loop_slice_fusion.1
+    15:get-tuple-element.5
+    16:loop_broadcast_fusion
+    17:bitcast.69.0
+    18:loop_slice_fusion
+    19:bitcast.70.0
+    20:gemm_fusion_dot.2
+    21:loop_broadcast_fusion.1
+    22:wrapped_iota
+    23:wrapped_iota.1
+    24:wrapped_compare
+    25:wrapped_broadcast
+    26:wrapped_select
+    27:triton_softmax.4
+    28:wrapped_exponential
+    29:triton_softmax.3
+    30:get-tuple-element.4
+    31:input_transpose_fusion
+    32:wrapped_broadcast.2
+    33:bitcast.73.0
+    34:custom-call.2
+    35:get-tuple-element.2.0
+    36:wrapped_transpose
+    37:bitcast.72.0
+    38:Arg_4.5
+    39:bitcast.76.0
+    40:custom-call.0
+    41:get-tuple-element.1.0
+    42:loop_convert_fusion
+    43:wrapped_convert
+    44:wrapped_add
+    45:wrapped_convert.3
+  BufferLiveRange:
+    Arg_5.6{}:0-46
+    wrapped_convert{}:43-44
+    wrapped_iota{}:22-24
+    wrapped_iota.1{}:23-24
+    wrapped_compare{}:24-25
+    wrapped_broadcast{}:25-26
+    triton_softmax.5{}:1-2
+    loop_convert_fusion.1{}:2-6
+    Arg_0.1{}:0-46
+    wrapped_convert.1{}:4-5
+    wrapped_broadcast.1{}:5-6
+    wrapped_multiply{}:6-7
+    wrapped_convert.2{}:7-12
+    Arg_3.4{}:0-46
+    Arg_2.3{}:0-46
+    Arg_1.2{}:0-46
+    input_concatenate_fusion{}:11-12
+    custom-call.1{}:12-13
+    custom-call.1{0}:12-18
+    custom-call.1{1}:12-12
+    loop_slice_fusion{}:18-20
+    loop_slice_fusion.1{}:14-30
+    loop_slice_fusion.1{0}:14-31
+    loop_slice_fusion.1{1}:14-16
+    loop_broadcast_fusion{}:16-20
+    gemm_fusion_dot.2{}:20-26
+    loop_broadcast_fusion.1{}:21-26
+    wrapped_select{}:26-27
+    triton_softmax.4{}:27-28
+    wrapped_exponential{}:28-29
+    triton_softmax.3{}:29-34
+    input_transpose_fusion{}:31-32
+    wrapped_broadcast.2{}:32-34
+    custom-call.2{}:34-35
+    custom-call.2{0}:34-36
+    custom-call.2{1}:34-34
+    wrapped_transpose{}:36-40
+    Arg_4.5{}:0-46
+    custom-call.0{}:40-41
+    custom-call.0{0}:40-42
+    custom-call.0{1}:40-40
+    loop_convert_fusion{}:42-44
+    wrapped_add{}:44-45
+    wrapped_convert.3{}:45-46
+  Live ranges at 27 (peak):
+    triton_softmax.4{}: 1073741824 bytes (cumulative: 1073741824 bytes)
+    wrapped_select{}: 1073741824 bytes (cumulative: 2147483648 bytes)
+    Arg_1.2{}: 33554432 bytes (cumulative: 2181038080 bytes)
+    Arg_4.5{}: 33554432 bytes (cumulative: 2214592512 bytes)
+    Arg_5.6{}: 33554432 bytes (cumulative: 2248146944 bytes)
+    Arg_2.3{}: 8388608 bytes (cumulative: 2256535552 bytes)
+    Arg_3.4{}: 8388608 bytes (cumulative: 2264924160 bytes)
+    loop_slice_fusion.1{0}: 8388608 bytes (cumulative: 2273312768 bytes)
+    Arg_0.1{}: 8192 bytes (cumulative: 2273320960 bytes)
+    loop_slice_fusion.1{}: 16 bytes (cumulative: 2273320976 bytes)
+  Stack trace breakdown for peak usage: 2 273 320 976 bytes
+    main.113 (100.0%, total: 2 273 320 976 bytes, current: 0 bytes, remaining: 2 273 320 976 bytes)
+      ├── jit(gqa_layer)/jit(main)/jit(_where)/select_n (47.2%, total: 1 073 741 824 bytes, current: 1 073 741 824 bytes, remaining: 1 199 579 152 bytes)
+      ├── jit(gqa_layer)/jit(main)/sub (47.2%, total: 1 073 741 824 bytes, current: 1 073 741 824 bytes, remaining: 125 837 328 bytes)
+      ├── wo (1.5%, total: 33 554 432 bytes, current: 33 554 432 bytes, remaining: 92 282 896 bytes)
+      ├── wq (1.5%, total: 33 554 432 bytes, current: 33 554 432 bytes, remaining: 58 728 464 bytes)
+      ├── x (1.5%, total: 33 554 432 bytes, current: 33 554 432 bytes, remaining: 25 174 032 bytes)
+      ├── jit(gqa_layer)/jit(main)/dot_general{0} (0.4%, total: 8 388 608 bytes, current: 8 388 608 bytes, remaining: 16 785 424 bytes)
+      ├── wk (0.4%, total: 8 388 608 bytes, current: 8 388 608 bytes, remaining: 8 396 816 bytes)
+      ├── wv (0.4%, total: 8 388 608 bytes, current: 8 388 608 bytes, remaining: 8 208 bytes)
+      ├── rms_weight (0.0%, total: 8 192 bytes, current: 8 192 bytes, remaining: 16 bytes)
+      └── jit(gqa_layer)/jit(main)/dot_general (0.0%, total: 16 bytes, current: 16 bytes, remaining: 0 bytes)

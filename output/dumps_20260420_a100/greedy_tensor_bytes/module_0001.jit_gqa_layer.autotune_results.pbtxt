@@ -1,0 +1,78 @@
+version: 3
+results {
+  device: "CUDA: 8.0, Cores: 108, GPU clock: 1.41 GHz, Memory bandwidth: 1555 GB/s, L2 cache: 40 MB, DNN version: 9.8.0"
+  hlo: "{\n  tmp_0 = bf16[32,128,4096]{2,1,0} parameter(0)\n  tmp_1 = bf16[32,4096,128]{2,1,0} transpose(bf16[32,128,4096]{2,1,0} tmp_0), dimensions={0,2,1}\n  tmp_2 = bf16[32,128,4096]{2,1,0} parameter(1)\n  tmp_3 = bf16[32,4096,4096]{2,1,0} dot(bf16[32,4096,128]{2,1,0} tmp_1, bf16[32,128,4096]{2,1,0} tmp_2), lhs_batch_dims={0}, lhs_contracting_dims={2}, rhs_batch_dims={0}, rhs_contracting_dims={1}\n  tmp_4 = f32[32,4096,4096]{2,1,0} convert(bf16[32,4096,4096]{2,1,0} tmp_3)\n  tmp_5 = bf16[] constant({...})\n  tmp_6 = bf16[32,4096,4096]{2,1,0} broadcast(bf16[] tmp_5), dimensions={}\n  tmp_7 = f32[32,4096,4096]{2,1,0} convert(bf16[32,4096,4096]{2,1,0} tmp_6)\n  tmp_8 = f32[32,4096,4096]{2,1,0} multiply(f32[32,4096,4096]{2,1,0} tmp_4, f32[32,4096,4096]{2,1,0} tmp_7)\n  ROOT tmp_9 = bf16[32,4096,4096]{2,1,0} convert(f32[32,4096,4096]{2,1,0} tmp_8)\n}"
+  result {
+    triton {
+      block_m: 64
+      block_n: 128
+      block_k: 16
+      split_k: 1
+      num_stages: 4
+      num_warps: 2
+      num_ctas: 1
+    }
+  }
+  version: 34
+}
+results {
+  device: "CUDA: 8.0, Cores: 108, GPU clock: 1.41 GHz, Memory bandwidth: 1555 GB/s, L2 cache: 40 MB, DNN version: 9.8.0"
+  hlo: "{\n  tmp_0 = bf16[32,4096,128]{2,1,0} parameter(0)\n  ROOT tmp_1 = bf16[4096,32,128]{2,1,0} transpose(bf16[32,4096,128]{2,1,0} tmp_0), dimensions={1,0,2}\n}"
+  result {
+    other {
+      name: "NATIVE_EMITTER"
+      config {
+        type_url: "type.googleapis.com/xla.gpu.NativeEmitterBackendConfig"
+        value: "\010\001\020\004"
+      }
+    }
+  }
+  version: 34
+}
+results {
+  device: "CUDA: 8.0, Cores: 108, GPU clock: 1.41 GHz, Memory bandwidth: 1555 GB/s, L2 cache: 40 MB, DNN version: 9.8.0"
+  hlo: "{\n  tmp_0 = bf16[32,4096,4096]{2,1,0} parameter(0)\n  tmp_1 = bf16[32,4096,128]{2,1,0} parameter(1)\n  tmp_2 = bf16[32,4096,128]{2,1,0} dot(bf16[32,4096,4096]{2,1,0} tmp_0, bf16[32,4096,128]{2,1,0} tmp_1), lhs_batch_dims={0}, lhs_contracting_dims={2}, rhs_batch_dims={0}, rhs_contracting_dims={1}\n  ROOT tmp_3 = bf16[4096,32,128]{2,1,0} transpose(bf16[32,4096,128]{2,1,0} tmp_2), dimensions={1,0,2}\n}"
+  result {
+    gemm {
+      algorithm: 1
+      autotune_workspace_size: 4194304
+    }
+  }
+  version: 34
+}
+results {
+  device: "CUDA: 8.0, Cores: 108, GPU clock: 1.41 GHz, Memory bandwidth: 1555 GB/s, L2 cache: 40 MB, DNN version: 9.8.0"
+  hlo: "{\n  tmp_0 = bf16[4096,4096]{1,0} parameter(0)\n  tmp_1 = bf16[4096,4096]{1,0} parameter(1)\n  ROOT tmp_2 = bf16[4096,4096]{1,0} dot(bf16[4096,4096]{1,0} tmp_0, bf16[4096,4096]{1,0} tmp_1), lhs_contracting_dims={1}, rhs_contracting_dims={0}\n}"
+  result {
+    gemm {
+      algorithm: 2
+      autotune_workspace_size: 4194304
+    }
+  }
+  version: 34
+}
+results {
+  device: "CUDA: 8.0, Cores: 108, GPU clock: 1.41 GHz, Memory bandwidth: 1555 GB/s, L2 cache: 40 MB, DNN version: 9.8.0"
+  hlo: "{\n  tmp_0 = bf16[4096,4096]{1,0} parameter(0)\n  tmp_1 = f32[4096,4096]{1,0} convert(bf16[4096,4096]{1,0} tmp_0)\n  tmp_2 = bf16[4096]{0} parameter(1)\n  tmp_3 = bf16[4096,4096]{1,0} broadcast(bf16[4096]{0} tmp_2), dimensions={1}\n  tmp_4 = f32[4096,4096]{1,0} convert(bf16[4096,4096]{1,0} tmp_3)\n  tmp_5 = f32[4096,4096]{1,0} multiply(f32[4096,4096]{1,0} tmp_1, f32[4096,4096]{1,0} tmp_4)\n  tmp_6 = bf16[4096,4096]{1,0} convert(f32[4096,4096]{1,0} tmp_5)\n  tmp_7 = bf16[4096,4096]{1,0} parameter(2)\n  tmp_8 = bf16[4096,1024]{1,0} parameter(3)\n  tmp_9 = bf16[4096,1024]{1,0} parameter(4)\n  tmp_10 = bf16[4096,6144]{1,0} concatenate(bf16[4096,4096]{1,0} tmp_7, bf16[4096,1024]{1,0} tmp_8, bf16[4096,1024]{1,0} tmp_9), dimensions={1}\n  ROOT tmp_11 = bf16[4096,6144]{0,1} dot(bf16[4096,4096]{1,0} tmp_6, bf16[4096,6144]{1,0} tmp_10), lhs_contracting_dims={1}, rhs_contracting_dims={0}\n}"
+  result {
+    gemm {
+      algorithm: 2
+      autotune_workspace_size: 4194304
+    }
+  }
+  version: 34
+}
+results {
+  device: "CUDA: 8.0, Cores: 108, GPU clock: 1.41 GHz, Memory bandwidth: 1555 GB/s, L2 cache: 40 MB, DNN version: 9.8.0"
+  hlo: "{\n  tmp_0 = bf16[4096,6144]{0,1} parameter(0)\n  tmp_1 = bf16[6144,4096]{1,0} bitcast(bf16[4096,6144]{0,1} tmp_0)\n  tmp_2 = bf16[1024,4096]{1,0} slice(bf16[6144,4096]{1,0} tmp_1), slice={[5120:6144], [0:4096]}\n  tmp_3 = bf16[8,128,4096]{2,1,0} bitcast(bf16[1024,4096]{1,0} tmp_2)\n  tmp_4 = bf16[8,4096,128]{2,1,0} transpose(bf16[8,128,4096]{2,1,0} tmp_3), dimensions={0,2,1}\n  tmp_5 = bf16[1,8,4,4096,128]{4,3,2,1,0} broadcast(bf16[8,4096,128]{2,1,0} tmp_4), dimensions={1,3,4}\n  tmp_6 = bf16[4096,4096]{1,0} slice(bf16[6144,4096]{1,0} tmp_1), slice={[0:4096], [0:4096]}\n  tmp_7 = bf16[1024,4096]{1,0} slice(bf16[6144,4096]{1,0} tmp_1), slice={[4096:5120], [0:4096]}\n  tmp_8 = bf16[8,128,4096]{2,1,0} bitcast(bf16[1024,4096]{1,0} tmp_7)\n  tmp_9 = bf16[1,8,4,128,4096]{4,3,2,1,0} broadcast(bf16[8,128,4096]{2,1,0} tmp_8), dimensions={1,3,4}\n  ROOT tmp_10 = (bf16[1,8,4,4096,128]{4,3,2,1,0}, bf16[4096,4096]{1,0}, bf16[1,8,4,128,4096]{4,3,2,1,0}) tuple(bf16[1,8,4,4096,128]{4,3,2,1,0} tmp_5, bf16[4096,4096]{1,0} tmp_6, bf16[1,8,4,128,4096]{4,3,2,1,0} tmp_9)\n}"
+  result {
+    other {
+      name: "NATIVE_EMITTER"
+      config {
+        type_url: "type.googleapis.com/xla.gpu.NativeEmitterBackendConfig"
+        value: "\010\001\020\002"
+      }
+    }
+  }
+  version: 34
+}

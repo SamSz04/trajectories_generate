@@ -1,0 +1,3486 @@
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "convert_element_type.15.0"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.1"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "mul.44.0"
+    consumer_names: "convert.19.0"
+    us_fused: 97.0065
+    us_unfused: 191.621
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "convert_element_type.1.0"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "cosine.1"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.3.0"
+    consumer_names: "pow.3.0"
+    us_fused: 1.18525
+    us_unfused: 2.18875
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "sine.1"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "concatenate.1.0"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.2"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "mul.51.0"
+    consumer_names: "mul.52.0"
+    us_fused: 192.983
+    us_unfused: 381.212
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "transpose.25.0"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.40.0"
+    consumer_names: "divide.2"
+    us_fused: 4.021
+    us_unfused: 7.9465
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "convert.20.0"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "transpose.26.0"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "convert.17.0"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "iota.2.0"
+    consumer_names: "compare.2"
+    us_fused: 118.069748
+    us_unfused: 306.298737
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "convert.24.0"
+    consumer_names: "broadcast.50.0"
+    us_fused: 97.0065
+    us_unfused: 100.295753
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.5"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.6"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "convert.21.0"
+    consumer_names: "add.9.0"
+    us_fused: 235.139496
+    us_unfused: 423.368744
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.7"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.43.0"
+    consumer_names: "subtract.1"
+    us_fused: 7192.68408
+    us_unfused: 13185.0117
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "sub.6.0"
+    consumer_names: "convert.4.0"
+    us_fused: 118.069748
+    us_unfused: 212.684
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "add.9.0"
+    consumer_names: "convert.23.0"
+    us_fused: 235.139496
+    us_unfused: 423.368744
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "transpose.27.0"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "iota.7.0"
+    consumer_names: "mul.71.0"
+    us_fused: 1.0035
+    us_unfused: 2.007
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "concatenate.0.0"
+    consumer_names: "convert.18.0"
+    us_fused: 141.576508
+    us_unfused: 236.191
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "divide.1.0"
+    consumer_names: "convert.17.0"
+    us_fused: 7493.46436
+    us_unfused: 13485.791
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "convert_element_type.21.0"
+    consumer_names: "multiply.1.0"
+    us_fused: 1.00675
+    us_unfused: 2.01025
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.5.0"
+    consumer_names: "mul.71.0"
+    us_fused: 1.00675
+    us_unfused: 2.01025
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "convert.13.0"
+    consumer_names: "split.4.0"
+    consumer_names: "split.5.0"
+    us_fused: 142.473
+    us_unfused: 330.702515
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "reduce.4.0"
+    reason: "fusion into output of a reduce fusion would create a loop fusion"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "mul.52.0"
+    consumer_names: "convert_element_type.15.0"
+    us_fused: 235.139496
+    us_unfused: 423.368744
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "convert.12.0"
+    consumer_names: "split.6.0"
+    consumer_names: "split.7.0"
+    us_fused: 37.1185
+    us_unfused: 84.9252472
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.37.0"
+    consumer_names: "select.2"
+    us_fused: 216.365
+    us_unfused: 404.594
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.38.0"
+    consumer_names: "compare.1.0"
+    us_fused: 122.750504
+    us_unfused: 310.979492
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "mul.71.0"
+    consumer_names: "convert_element_type.21.0"
+    us_fused: 1.00675
+    us_unfused: 2.01025
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.41.0"
+    consumer_names: "divide.2"
+    us_fused: 3.9995
+    us_unfused: 7.925
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "mul.83.0"
+    consumer_names: "add.8.0"
+    us_fused: 47.82
+    us_unfused: 72.2235
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "mul.79.0"
+    consumer_names: "sub.7.0"
+    us_fused: 47.82
+    us_unfused: 72.2235
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "multiply.1.0"
+    consumer_names: "pow.3.0"
+    us_fused: 1.186
+    us_unfused: 2.192
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "split.6.0"
+    consumer_names: "mul.75.0"
+    consumer_names: "mul.87.0"
+    us_fused: 72.2235
+    us_unfused: 96.627
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "convert.7.0"
+    consumer_names: "concatenate.1.0"
+    us_fused: 30.2867508
+    us_unfused: 42.9887505
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "convert.6.0"
+    consumer_names: "concatenate.1.0"
+    us_fused: 30.2867508
+    us_unfused: 42.9887505
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.8.0"
+    consumer_names: "multiply.1.0"
+    us_fused: 1.00675
+    us_unfused: 2.01025
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "mul.87.0"
+    consumer_names: "add.8.0"
+    us_fused: 47.82
+    us_unfused: 72.2235
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "sub.7.0"
+    consumer_names: "convert.6.0"
+    us_fused: 30.2675
+    us_unfused: 54.671
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "convert.5.0"
+    consumer_names: "concatenate.0.0"
+    us_fused: 118.147
+    us_unfused: 165.954
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "select.2"
+    consumer_names: "compare.1.0"
+    us_fused: 328.753754
+    us_unfused: 516.983
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "mul.75.0"
+    consumer_names: "sub.7.0"
+    us_fused: 47.82
+    us_unfused: 72.2235
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "compare.1.0"
+    consumer_names: "broadcast.39.0"
+    us_fused: 6742.89551
+    us_unfused: 1275.20874
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "mul.60.0"
+    consumer_names: "mul.61.0"
+    consumer_names: "mul.69.0"
+    us_fused: 228.481506
+    us_unfused: 350.302765
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "convert.4.0"
+    consumer_names: "concatenate.0.0"
+    us_fused: 118.147
+    us_unfused: 165.954
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.42.0"
+    consumer_names: "select.1.0"
+    us_fused: 6892.6792
+    us_unfused: 12885.0068
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "reduce.3.0"
+    reason: "fusion into output of a reduce fusion would create a loop fusion"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "subtract.1"
+    consumer_names: "exponential.1"
+    us_fused: 9037.01074
+    us_unfused: 15029.3389
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.36.0"
+    consumer_names: "select.2"
+    us_fused: 216.365
+    us_unfused: 404.594
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "mul.78.0"
+    consumer_names: "mul.79.0"
+    consumer_names: "mul.87.0"
+    us_fused: 59.937
+    us_unfused: 90.4837494
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.50.0"
+    consumer_names: "mul.70.0"
+    us_fused: 192.961502
+    us_unfused: 381.190491
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "exponential.1"
+    consumer_names: "divide.1.0"
+    consumer_names: "bitcast.137.0"
+    us_fused: 12081.042
+    us_unfused: 15030.3389
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.39.0"
+    consumer_names: "select.1.0"
+    us_fused: 9303.25195
+    us_unfused: 10802.084
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "add.8.0"
+    consumer_names: "convert.7.0"
+    us_fused: 30.2675
+    us_unfused: 54.671
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "iota.3.0"
+    consumer_names: "compare.2"
+    us_fused: 118.069748
+    us_unfused: 306.298737
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "convert.16.0"
+    consumer_names: "select.1.0"
+    us_fused: 8242.38
+    us_unfused: 14234.707
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "select.1.0"
+    consumer_names: "subtract.1"
+    consumer_names: "bitcast.135.0"
+    us_fused: 19478.7715
+    us_unfused: 18729.2031
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "mul.65.0"
+    consumer_names: "add.7.0"
+    us_fused: 188.280746
+    us_unfused: 282.895
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "mul.61.0"
+    consumer_names: "sub.6.0"
+    us_fused: 188.280746
+    us_unfused: 282.895
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "split.4.0"
+    consumer_names: "mul.57.0"
+    consumer_names: "mul.69.0"
+    us_fused: 282.895
+    us_unfused: 377.509491
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "convert.18.0"
+    consumer_names: "mul.70.0"
+    us_fused: 235.139496
+    us_unfused: 423.368744
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "mul.56.0"
+    consumer_names: "mul.57.0"
+    consumer_names: "mul.65.0"
+    us_fused: 228.481506
+    us_unfused: 350.302765
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "add.7.0"
+    consumer_names: "convert.5.0"
+    us_fused: 118.069748
+    us_unfused: 212.684
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "convert_element_type.14.0"
+    consumer_names: "mul.51.0"
+    us_fused: 97.0175
+    us_unfused: 100.351
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "mul.70.0"
+    consumer_names: "convert.20.0"
+    us_fused: 235.139496
+    us_unfused: 423.368744
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.44.0"
+    consumer_names: "divide.1.0"
+    us_fused: 7192.68408
+    us_unfused: 13185.0117
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "pow.3.0"
+    consumer_names: "broadcast.41.0"
+    us_fused: 6.05575
+    us_unfused: 3.72125
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "divide.2"
+    consumer_names: "sine.1"
+    consumer_names: "cosine.1"
+    us_fused: 11.134
+    us_unfused: 14.803
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "compare.2"
+    consumer_names: "select.2"
+    us_fused: 469.175751
+    us_unfused: 516.983
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "split.7.0"
+    consumer_names: "mul.79.0"
+    consumer_names: "mul.83.0"
+    us_fused: 72.2235
+    us_unfused: 96.627
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "split.5.0"
+    consumer_names: "mul.61.0"
+    consumer_names: "mul.65.0"
+    us_fused: 282.895
+    us_unfused: 377.509491
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "mul.57.0"
+    consumer_names: "sub.6.0"
+    us_fused: 188.280746
+    us_unfused: 282.895
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "mul.69.0"
+    consumer_names: "add.7.0"
+    us_fused: 188.280746
+    us_unfused: 282.895
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "mul.74.0"
+    consumer_names: "mul.75.0"
+    consumer_names: "mul.83.0"
+    us_fused: 59.937
+    us_unfused: 90.4837494
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "convert_element_type.13.0"
+    consumer_names: "triton_softmax.1"
+    consumer_names: "add.9.0"
+    us_fused: 376.768
+    us_unfused: 611.753
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "triton_softmax.1"
+    consumer_names: "mul.52.0"
+    us_fused: 282.050262
+    us_unfused: 470.27951
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.20"
+    producer_name: "bitcast.175.0"
+    consumer_name: "convert.21.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.20"
+    consumer_names: "add.9.0"
+    us_fused: 235.139496
+    us_unfused: 423.368744
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.5"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.21"
+    producer_name: "bitcast.172.0"
+    consumer_name: "transpose.27.0"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.7"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.21"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.22"
+    producer_name: "bitcast.168.0"
+    consumer_name: "convert.16.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.22"
+    consumer_names: "select.1.0"
+    us_fused: 8242.38
+    us_unfused: 14234.707
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.6"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.23"
+    producer_name: "bitcast.164.0"
+    consumer_name: "convert.13.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.23"
+    consumer_names: "split.4.0"
+    consumer_names: "split.5.0"
+    us_fused: 142.473
+    us_unfused: 330.702515
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.2"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.24"
+    producer_name: "bitcast.160.0"
+    consumer_name: "convert.12.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.24"
+    consumer_names: "split.6.0"
+    consumer_names: "split.7.0"
+    us_fused: 37.1185
+    us_unfused: 84.9252472
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.1"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.25"
+    producer_name: "bitcast.137.0"
+    consumer_name: "reduce.4.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "exponential.1"
+    consumer_names: "divide.1.0"
+    consumer_names: "fusion.25"
+    us_fused: 3.4195
+    us_unfused: 2999.0835
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.25"
+    reason: "fusion into output of a reduce fusion would create a loop fusion"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.26"
+    producer_name: "bitcast.135.0"
+    consumer_name: "reduce.3.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "select.1.0"
+    consumer_names: "subtract.1"
+    consumer_names: "fusion.26"
+    us_fused: 19481.1914
+    us_unfused: 21727.2871
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.26"
+    reason: "fusion into output of a reduce fusion would create a loop fusion"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.27"
+    producer_name: "bitcast.86.0"
+    consumer_name: "transpose.25.0"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.27"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "convert.20.0"
+    consumer_names: "fusion.27"
+    us_fused: 1545.69104
+    us_unfused: 1687.11279
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.28"
+    producer_name: "bitcast.88.0"
+    consumer_name: "transpose.26.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "convert.17.0"
+    consumer_names: "fusion.28"
+    us_fused: 49431.1055
+    us_unfused: 53925.6
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.28"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.29"
+    producer_name: "bitcast.9.0"
+    consumer_name: "mul.78.0"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.30"
+    producer_name: "bitcast.9.0"
+    consumer_name: "mul.60.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.29"
+    consumer_names: "mul.79.0"
+    consumer_names: "mul.87.0"
+    us_fused: 59.937
+    us_unfused: 90.4837494
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "sine.1"
+    consumer_names: "fusion.30"
+    consumer_names: "fusion.29"
+    us_fused: 148.612747
+    us_unfused: 90.375
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.30"
+    consumer_names: "mul.61.0"
+    consumer_names: "mul.69.0"
+    us_fused: 228.481506
+    us_unfused: 350.302765
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.31"
+    producer_name: "bitcast.8.0"
+    consumer_name: "mul.74.0"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.32"
+    producer_name: "bitcast.8.0"
+    consumer_name: "mul.56.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "cosine.1"
+    consumer_names: "fusion.32"
+    consumer_names: "fusion.31"
+    us_fused: 148.612747
+    us_unfused: 90.375
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.31"
+    consumer_names: "mul.75.0"
+    consumer_names: "mul.83.0"
+    us_fused: 59.937
+    us_unfused: 90.4837494
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.32"
+    consumer_names: "mul.57.0"
+    consumer_names: "mul.65.0"
+    us_fused: 228.481506
+    us_unfused: 350.302765
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.33"
+    producer_name: "bitcast.7.0"
+    consumer_name: "broadcast.40.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "convert_element_type.1.0"
+    consumer_names: "fusion.33"
+    us_fused: 2.55825
+    us_unfused: 3.603
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.33"
+    consumer_names: "divide.2"
+    us_fused: 4.021
+    us_unfused: 7.9465
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.34"
+    producer_name: "broadcast.44.0"
+    consumer_name: "divide.1.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "exponential.1"
+    consumer_names: "fusion.34"
+    consumer_names: "fusion.25"
+    us_fused: -1795.95947
+    us_unfused: -1795.95947
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.34"
+    consumer_names: "convert.17.0"
+    us_fused: 5696.50488
+    us_unfused: 11688.832
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.25"
+    reason: "fusion into output of a reduce fusion would create a loop fusion"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.35"
+    producer_name: "subtract.1"
+    consumer_name: "exponential.1"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "select.1.0"
+    consumer_names: "fusion.35"
+    consumer_names: "fusion.26"
+    us_fused: 48.3672485
+    us_unfused: 48.3675
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.43.0"
+    consumer_names: "fusion.35"
+    us_fused: 48.3675
+    us_unfused: 48.3675
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.35"
+    consumer_names: "fusion.34"
+    consumer_names: "fusion.25"
+    us_fused: 16281.1348
+    us_unfused: 19228.7793
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.35"
+    producer_name: "broadcast.43.0"
+    consumer_name: "fusion.35"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.26"
+    reason: "fusion into output of a reduce fusion would create a loop fusion"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "select.1.0"
+    consumer_names: "fusion.35"
+    consumer_names: "fusion.26"
+    us_fused: -1795.95947
+    us_unfused: -1795.95947
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.35"
+    consumer_names: "fusion.34"
+    consumer_names: "fusion.25"
+    us_fused: 12687.2158
+    us_unfused: 17431.8184
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.36"
+    producer_name: "broadcast.42.0"
+    consumer_name: "select.1.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.36"
+    consumer_names: "fusion.35"
+    consumer_names: "fusion.26"
+    us_fused: 12039.8379
+    us_unfused: 17131.8145
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.22"
+    consumer_names: "fusion.36"
+    us_fused: -2844.88062
+    us_unfused: -2844.88062
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.39.0"
+    consumer_names: "fusion.36"
+    us_fused: -2844.88062
+    us_unfused: -2844.88062
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.37"
+    producer_name: "fusion.34"
+    consumer_name: "convert.17.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.37"
+    consumer_names: "fusion.28"
+    us_fused: 50642.4336
+    us_unfused: 55125.957
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.35"
+    consumer_names: "fusion.37"
+    consumer_names: "fusion.25"
+    us_fused: -1495.1792
+    us_unfused: -1495.1792
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.25"
+    reason: "fusion into output of a reduce fusion would create a loop fusion"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.36"
+    producer_name: "fusion.22"
+    consumer_name: "fusion.36"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.39.0"
+    consumer_names: "fusion.36"
+    us_fused: -1495.1792
+    us_unfused: -1495.1792
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.6"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.36"
+    consumer_names: "fusion.35"
+    consumer_names: "fusion.26"
+    us_fused: 9047.47949
+    us_unfused: 15635.6348
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.35"
+    producer_name: "fusion.36"
+    consumer_name: "fusion.35"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.26"
+    producer_name: "fusion.36"
+    consumer_name: "fusion.26"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.6"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.26"
+    reason: "fusion into output of a reduce fusion would create a loop fusion"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.39.0"
+    consumer_names: "fusion.26"
+    consumer_names: "fusion.35"
+    us_fused: 3216.67236
+    us_unfused: 3651.97974
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.35"
+    consumer_names: "fusion.37"
+    consumer_names: "fusion.25"
+    us_fused: 9999.38086
+    us_unfused: 15339.8115
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.37"
+    producer_name: "fusion.35"
+    consumer_name: "fusion.37"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.25"
+    producer_name: "fusion.35"
+    consumer_name: "fusion.25"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.26"
+    reason: "both the producer and the consumer contain a reduce"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.25"
+    reason: "fusion into output of a reduce fusion would create a loop fusion"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.6"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.37"
+    consumer_names: "fusion.28"
+    us_fused: 99984.8359
+    us_unfused: 55777.8516
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.39.0"
+    consumer_names: "fusion.26"
+    consumer_names: "fusion.25"
+    consumer_names: "fusion.37"
+    us_fused: 2920.84961
+    us_unfused: 3356.15698
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.26"
+    producer_name: "broadcast.39.0"
+    consumer_name: "fusion.26"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.25"
+    producer_name: "broadcast.39.0"
+    consumer_name: "fusion.25"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.37"
+    producer_name: "broadcast.39.0"
+    consumer_name: "fusion.37"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.26"
+    reason: "both the producer and the consumer contain a reduce"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.37"
+    consumer_names: "fusion.28"
+    us_fused: 53842.25
+    us_unfused: 55342.5469
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.25"
+    reason: "fusion into output of a reduce fusion would create a loop fusion"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.6"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "compare.1.0"
+    consumer_names: "fusion.37"
+    consumer_names: "fusion.26"
+    consumer_names: "fusion.25"
+    us_fused: 28134.8281
+    us_unfused: 11308.3984
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.28"
+    producer_name: "fusion.37"
+    consumer_name: "fusion.28"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.26"
+    reason: "both the producer and the consumer contain a reduce"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.28"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.6"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.25"
+    reason: "fusion into output of a reduce fusion would create a loop fusion"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "compare.1.0"
+    consumer_names: "fusion.28"
+    consumer_names: "fusion.26"
+    consumer_names: "fusion.25"
+    us_fused: 164459.469
+    us_unfused: 59237.5547
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "triton_softmax.1"
+    producer_name: "convert_element_type.13.0"
+    consumer_name: "triton_softmax.1"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.38"
+    producer_name: "convert_element_type.13.0"
+    consumer_name: "add.9.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.38"
+    consumer_names: "convert.23.0"
+    us_fused: 188.384
+    us_unfused: 376.613
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.20"
+    consumer_names: "fusion.38"
+    us_fused: -45.7555
+    us_unfused: -45.7557487
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "triton_softmax.1"
+    consumer_names: "mul.52.0"
+    us_fused: 235.294754
+    us_unfused: 423.523743
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.39"
+    producer_name: "fusion.23"
+    consumer_name: "split.4.0"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.40"
+    producer_name: "fusion.23"
+    consumer_name: "split.5.0"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.2"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.40"
+    consumer_names: "mul.61.0"
+    consumer_names: "mul.65.0"
+    us_fused: 236.139496
+    us_unfused: 354.1315
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.39"
+    consumer_names: "mul.57.0"
+    consumer_names: "mul.69.0"
+    us_fused: 236.139496
+    us_unfused: 354.1315
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.41"
+    producer_name: "convert.18.0"
+    consumer_name: "mul.70.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "concatenate.0.0"
+    consumer_names: "fusion.41"
+    us_fused: 94.666
+    us_unfused: 94.666
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.41"
+    consumer_names: "convert.20.0"
+    us_fused: 188.384
+    us_unfused: 376.613
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.50.0"
+    consumer_names: "fusion.41"
+    us_fused: -45.7557487
+    us_unfused: -45.7557487
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.42"
+    producer_name: "select.2"
+    consumer_name: "compare.1.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.37.0"
+    consumer_names: "fusion.42"
+    us_fused: 24.455
+    us_unfused: 24.455
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.38.0"
+    consumer_names: "fusion.42"
+    us_fused: 118.069504
+    us_unfused: 118.069504
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "compare.2"
+    consumer_names: "fusion.42"
+    us_fused: 24.4552498
+    us_unfused: 24.455
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.36.0"
+    consumer_names: "fusion.42"
+    us_fused: 24.455
+    us_unfused: 24.455
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.42"
+    consumer_names: "fusion.28"
+    consumer_names: "fusion.26"
+    consumer_names: "fusion.25"
+    us_fused: 220801.625
+    us_unfused: 59354.625
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.43"
+    producer_name: "mul.52.0"
+    consumer_name: "convert_element_type.15.0"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.43"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "mul.51.0"
+    consumer_names: "fusion.43"
+    us_fused: -45.7557487
+    us_unfused: -45.7557487
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "triton_softmax.1"
+    consumer_names: "fusion.43"
+    us_fused: -45.7555
+    us_unfused: -45.7557487
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.44"
+    producer_name: "fusion.41"
+    consumer_name: "convert.20.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.50.0"
+    consumer_names: "fusion.44"
+    us_fused: -45.7555
+    us_unfused: -45.7555
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "concatenate.0.0"
+    consumer_names: "fusion.44"
+    us_fused: -45.7555
+    us_unfused: -45.7555
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.44"
+    consumer_names: "fusion.27"
+    us_fused: 3043.62622
+    us_unfused: 1734.02319
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.45"
+    producer_name: "fusion.38"
+    consumer_name: "convert.23.0"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.45"
+    reason: "No users to fuse"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.20"
+    consumer_names: "fusion.45"
+    us_fused: -45.7557487
+    us_unfused: -45.7555
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.45"
+    producer_name: "fusion.20"
+    consumer_name: "fusion.45"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.45"
+    reason: "No users to fuse"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.5"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.44"
+    producer_name: "broadcast.50.0"
+    consumer_name: "fusion.44"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "concatenate.0.0"
+    consumer_names: "fusion.44"
+    us_fused: -87.9337463
+    us_unfused: -87.9337463
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.44"
+    consumer_names: "fusion.27"
+    us_fused: 1550.47498
+    us_unfused: 1645.08948
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "convert.24.0"
+    consumer_names: "fusion.44"
+    us_fused: 1.15475
+    us_unfused: 1.155
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.42"
+    producer_name: "broadcast.38.0"
+    consumer_name: "fusion.42"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "compare.2"
+    consumer_names: "fusion.42"
+    us_fused: -87.9337463
+    us_unfused: -87.9337463
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.42"
+    consumer_names: "fusion.28"
+    consumer_names: "fusion.26"
+    consumer_names: "fusion.25"
+    us_fused: 167329.031
+    us_unfused: 59265.6914
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.37.0"
+    consumer_names: "fusion.42"
+    us_fused: -87.9337463
+    us_unfused: -87.9337463
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.36.0"
+    consumer_names: "fusion.42"
+    us_fused: -87.9337463
+    us_unfused: -87.9337463
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.42"
+    producer_name: "broadcast.37.0"
+    consumer_name: "fusion.42"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "compare.2"
+    consumer_names: "fusion.42"
+    us_fused: -87.9337463
+    us_unfused: -87.9337463
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.36.0"
+    consumer_names: "fusion.42"
+    us_fused: -87.9337463
+    us_unfused: -87.9337463
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.42"
+    consumer_names: "fusion.28"
+    consumer_names: "fusion.26"
+    consumer_names: "fusion.25"
+    us_fused: 113856.438
+    us_unfused: 59176.7578
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.42"
+    producer_name: "broadcast.36.0"
+    consumer_name: "fusion.42"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "compare.2"
+    consumer_names: "fusion.42"
+    us_fused: -87.9337463
+    us_unfused: -87.9337463
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.42"
+    consumer_names: "fusion.28"
+    consumer_names: "fusion.26"
+    consumer_names: "fusion.25"
+    us_fused: 60383.8359
+    us_unfused: 59087.8242
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.46"
+    producer_name: "iota.3.0"
+    consumer_name: "compare.2"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "iota.2.0"
+    consumer_names: "fusion.46"
+    us_fused: -92.6145
+    us_unfused: -92.6145
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.46"
+    consumer_names: "fusion.42"
+    us_fused: 132.215256
+    us_unfused: 180.022247
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.46"
+    producer_name: "iota.2.0"
+    consumer_name: "fusion.46"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.46"
+    consumer_names: "fusion.42"
+    us_fused: 38.60075
+    us_unfused: 86.407753
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.43"
+    producer_name: "mul.51.0"
+    consumer_name: "fusion.43"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.43"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "convert_element_type.14.0"
+    consumer_names: "fusion.43"
+    us_fused: 47.9105
+    us_unfused: 47.9105
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "triton_softmax.1"
+    consumer_names: "fusion.43"
+    us_fused: -91.4227524
+    us_unfused: -87.9122467
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.43"
+    producer_name: "triton_softmax.1"
+    consumer_name: "fusion.43"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.43"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "convert_element_type.14.0"
+    consumer_names: "fusion.43"
+    us_fused: -47.3945
+    us_unfused: -49.1107483
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.47"
+    producer_name: "fusion.32"
+    consumer_name: "mul.57.0"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.48"
+    producer_name: "fusion.32"
+    consumer_name: "mul.65.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "cosine.1"
+    consumer_names: "fusion.48"
+    consumer_names: "fusion.31"
+    consumer_names: "fusion.47"
+    us_fused: 272.589752
+    us_unfused: 251.448746
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.47"
+    consumer_names: "sub.6.0"
+    us_fused: 161.074
+    us_unfused: 255.688248
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.39"
+    consumer_names: "fusion.47"
+    consumer_names: "mul.69.0"
+    us_fused: -26.2067509
+    us_unfused: -26.2067509
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.48"
+    consumer_names: "add.7.0"
+    us_fused: 161.074
+    us_unfused: 255.688248
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.40"
+    consumer_names: "mul.61.0"
+    consumer_names: "fusion.48"
+    us_fused: -26.2067509
+    us_unfused: -26.2067509
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.49"
+    producer_name: "fusion.30"
+    consumer_name: "mul.61.0"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.50"
+    producer_name: "fusion.30"
+    consumer_name: "mul.69.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.49"
+    consumer_names: "sub.6.0"
+    us_fused: 161.074
+    us_unfused: 255.688248
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.39"
+    consumer_names: "fusion.47"
+    consumer_names: "fusion.50"
+    us_fused: -26.2067509
+    us_unfused: -26.2067509
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.40"
+    consumer_names: "fusion.49"
+    consumer_names: "fusion.48"
+    us_fused: -26.2067509
+    us_unfused: -26.2067509
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "sine.1"
+    consumer_names: "fusion.50"
+    consumer_names: "fusion.29"
+    consumer_names: "fusion.49"
+    us_fused: 272.589752
+    us_unfused: 251.448746
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.50"
+    consumer_names: "add.7.0"
+    us_fused: 161.074
+    us_unfused: 255.688248
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.49"
+    producer_name: "fusion.40"
+    consumer_name: "fusion.49"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.48"
+    producer_name: "fusion.40"
+    consumer_name: "fusion.48"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.2"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "cosine.1"
+    consumer_names: "fusion.48"
+    consumer_names: "fusion.31"
+    consumer_names: "fusion.47"
+    us_fused: 271.93576
+    us_unfused: 228.071
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.48"
+    consumer_names: "add.7.0"
+    us_fused: 137.696
+    us_unfused: 232.310501
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "sine.1"
+    consumer_names: "fusion.50"
+    consumer_names: "fusion.29"
+    consumer_names: "fusion.49"
+    us_fused: 271.93576
+    us_unfused: 228.071
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.49"
+    consumer_names: "sub.6.0"
+    us_fused: 137.696
+    us_unfused: 232.310501
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.47"
+    producer_name: "fusion.39"
+    consumer_name: "fusion.47"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.50"
+    producer_name: "fusion.39"
+    consumer_name: "fusion.50"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.2"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "sine.1"
+    consumer_names: "fusion.50"
+    consumer_names: "fusion.29"
+    consumer_names: "fusion.49"
+    us_fused: 271.281738
+    us_unfused: 204.693253
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.50"
+    consumer_names: "add.7.0"
+    us_fused: 137.696
+    us_unfused: 232.310501
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "cosine.1"
+    consumer_names: "fusion.48"
+    consumer_names: "fusion.31"
+    consumer_names: "fusion.47"
+    us_fused: 271.281738
+    us_unfused: 204.693253
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.47"
+    consumer_names: "sub.6.0"
+    us_fused: 137.696
+    us_unfused: 232.310501
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.51"
+    producer_name: "fusion.50"
+    consumer_name: "add.7.0"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.2"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.51"
+    consumer_names: "convert.5.0"
+    us_fused: 114.318
+    us_unfused: 208.932495
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "sine.1"
+    consumer_names: "fusion.51"
+    consumer_names: "fusion.29"
+    consumer_names: "fusion.49"
+    us_fused: 294.208252
+    us_unfused: 251.526245
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.48"
+    consumer_names: "fusion.51"
+    us_fused: -2.7515
+    us_unfused: -2.7515
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.52"
+    producer_name: "fusion.51"
+    consumer_name: "convert.5.0"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.2"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.52"
+    consumer_names: "concatenate.0.0"
+    us_fused: 161.2285
+    us_unfused: 209.035507
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "sine.1"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.29"
+    consumer_names: "fusion.49"
+    us_fused: 273.484741
+    us_unfused: 228.148254
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.48"
+    consumer_names: "fusion.52"
+    us_fused: -22.3777504
+    us_unfused: -22.378
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.53"
+    producer_name: "fusion.49"
+    consumer_name: "sub.6.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.53"
+    consumer_names: "convert.4.0"
+    us_fused: 114.318
+    us_unfused: 208.932495
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.2"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "sine.1"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.29"
+    consumer_names: "fusion.53"
+    us_fused: 296.411255
+    us_unfused: 274.981262
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.47"
+    consumer_names: "fusion.53"
+    us_fused: -2.7515
+    us_unfused: -2.7515
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.54"
+    producer_name: "fusion.53"
+    consumer_name: "convert.4.0"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.2"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.54"
+    consumer_names: "concatenate.0.0"
+    us_fused: 161.2285
+    us_unfused: 209.035507
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "sine.1"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.29"
+    consumer_names: "fusion.54"
+    us_fused: 275.687744
+    us_unfused: 251.603256
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.47"
+    consumer_names: "fusion.54"
+    us_fused: -22.3777504
+    us_unfused: -22.378
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.27"
+    producer_name: "fusion.44"
+    consumer_name: "fusion.27"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.27"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "concatenate.0.0"
+    consumer_names: "fusion.27"
+    us_fused: 1452.02502
+    us_unfused: 1452.02478
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "convert.24.0"
+    consumer_names: "fusion.27"
+    us_fused: 1452.02478
+    us_unfused: 1452.02478
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.55"
+    producer_name: "mul.44.0"
+    consumer_name: "convert.19.0"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.55"
+    reason: "No users to fuse"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.52"
+    producer_name: "fusion.48"
+    consumer_name: "fusion.52"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.2"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.52"
+    consumer_names: "concatenate.0.0"
+    us_fused: 157.477249
+    us_unfused: 205.284256
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "cosine.1"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.31"
+    consumer_names: "fusion.47"
+    us_fused: 274.32724
+    us_unfused: 224.397
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "sine.1"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.29"
+    consumer_names: "fusion.54"
+    us_fused: 276.530243
+    us_unfused: 247.852
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.54"
+    producer_name: "fusion.47"
+    consumer_name: "fusion.54"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.2"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.54"
+    consumer_names: "concatenate.0.0"
+    us_fused: 157.477249
+    us_unfused: 205.284256
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "cosine.1"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.31"
+    consumer_names: "fusion.54"
+    us_fused: 277.372742
+    us_unfused: 244.100754
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "sine.1"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.29"
+    consumer_names: "fusion.54"
+    us_fused: 277.372742
+    us_unfused: 244.100754
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.27"
+    producer_name: "concatenate.0.0"
+    consumer_name: "fusion.27"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.27"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.54"
+    consumer_names: "fusion.27"
+    us_fused: 2226.25415
+    us_unfused: 1456.86072
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "convert.24.0"
+    consumer_names: "fusion.27"
+    us_fused: 1.10325
+    us_unfused: 1.10325
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.52"
+    consumer_names: "fusion.27"
+    us_fused: 2226.25415
+    us_unfused: 1456.86072
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.42"
+    producer_name: "fusion.46"
+    consumer_name: "fusion.42"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.42"
+    consumer_names: "fusion.28"
+    consumer_names: "fusion.26"
+    consumer_names: "fusion.25"
+    us_fused: 57973.5391
+    us_unfused: 59064.4727
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.28"
+    producer_name: "fusion.42"
+    consumer_name: "fusion.28"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.26"
+    producer_name: "fusion.42"
+    consumer_name: "fusion.26"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.25"
+    producer_name: "fusion.42"
+    consumer_name: "fusion.25"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.28"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.25"
+    reason: "fusion into output of a reduce fusion would create a loop fusion"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.26"
+    reason: "both the producer and the consumer contain a reduce"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.6"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.56"
+    producer_name: "fusion.24"
+    consumer_name: "split.6.0"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.57"
+    producer_name: "fusion.24"
+    consumer_name: "split.7.0"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.1"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.57"
+    consumer_names: "mul.79.0"
+    consumer_names: "mul.83.0"
+    us_fused: 60.535
+    us_unfused: 90.782753
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.56"
+    consumer_names: "mul.75.0"
+    consumer_names: "mul.87.0"
+    us_fused: 60.535
+    us_unfused: 90.782753
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.58"
+    producer_name: "fusion.31"
+    consumer_name: "mul.75.0"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.59"
+    producer_name: "fusion.31"
+    consumer_name: "mul.83.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "cosine.1"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.59"
+    consumer_names: "fusion.54"
+    consumer_names: "fusion.58"
+    us_fused: 309.809509
+    us_unfused: 285.777496
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.57"
+    consumer_names: "mul.79.0"
+    consumer_names: "fusion.59"
+    us_fused: -5.14325
+    us_unfused: -5.14325
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.59"
+    consumer_names: "add.8.0"
+    us_fused: 41.6767502
+    us_unfused: 66.0802536
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.56"
+    consumer_names: "fusion.58"
+    consumer_names: "mul.87.0"
+    us_fused: -5.14325
+    us_unfused: -5.14325
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.58"
+    consumer_names: "sub.7.0"
+    us_fused: 41.6767502
+    us_unfused: 66.0802536
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.60"
+    producer_name: "fusion.29"
+    consumer_name: "mul.79.0"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.61"
+    producer_name: "fusion.29"
+    consumer_name: "mul.87.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.57"
+    consumer_names: "fusion.60"
+    consumer_names: "fusion.59"
+    us_fused: -5.14325
+    us_unfused: -5.14325
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.60"
+    consumer_names: "sub.7.0"
+    us_fused: 41.6767502
+    us_unfused: 66.0802536
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "sine.1"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.61"
+    consumer_names: "fusion.54"
+    consumer_names: "fusion.60"
+    us_fused: 309.809509
+    us_unfused: 285.777496
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.56"
+    consumer_names: "fusion.58"
+    consumer_names: "fusion.61"
+    us_fused: -5.14325
+    us_unfused: -5.14325
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.61"
+    consumer_names: "add.8.0"
+    us_fused: 41.6767502
+    us_unfused: 66.0802536
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.60"
+    producer_name: "fusion.57"
+    consumer_name: "fusion.60"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.59"
+    producer_name: "fusion.57"
+    consumer_name: "fusion.59"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.1"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.60"
+    consumer_names: "sub.7.0"
+    us_fused: 35.8322487
+    us_unfused: 60.236
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "sine.1"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.61"
+    consumer_names: "fusion.54"
+    consumer_names: "fusion.60"
+    us_fused: 309.316254
+    us_unfused: 279.933258
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "cosine.1"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.59"
+    consumer_names: "fusion.54"
+    consumer_names: "fusion.58"
+    us_fused: 309.316254
+    us_unfused: 279.933258
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.59"
+    consumer_names: "add.8.0"
+    us_fused: 35.8322487
+    us_unfused: 60.236
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.58"
+    producer_name: "fusion.56"
+    consumer_name: "fusion.58"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.61"
+    producer_name: "fusion.56"
+    consumer_name: "fusion.61"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.58"
+    consumer_names: "sub.7.0"
+    us_fused: 35.8322487
+    us_unfused: 60.236
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.1"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "sine.1"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.61"
+    consumer_names: "fusion.54"
+    consumer_names: "fusion.60"
+    us_fused: 308.823
+    us_unfused: 274.089
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.61"
+    consumer_names: "add.8.0"
+    us_fused: 35.8322487
+    us_unfused: 60.236
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "cosine.1"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.59"
+    consumer_names: "fusion.54"
+    consumer_names: "fusion.58"
+    us_fused: 308.823
+    us_unfused: 274.089
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.62"
+    producer_name: "fusion.61"
+    consumer_name: "add.8.0"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.1"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.62"
+    consumer_names: "convert.7.0"
+    us_fused: 29.988
+    us_unfused: 54.3915
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.59"
+    consumer_names: "fusion.62"
+    us_fused: 0.7205
+    us_unfused: 0.7205
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "sine.1"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.62"
+    consumer_names: "fusion.54"
+    consumer_names: "fusion.60"
+    us_fused: 315.180237
+    us_unfused: 285.797
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.63"
+    producer_name: "fusion.60"
+    consumer_name: "sub.7.0"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.1"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.63"
+    consumer_names: "convert.6.0"
+    us_fused: 29.988
+    us_unfused: 54.3915
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "sine.1"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.62"
+    consumer_names: "fusion.54"
+    consumer_names: "fusion.63"
+    us_fused: 321.537506
+    us_unfused: 297.505
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.58"
+    consumer_names: "fusion.63"
+    us_fused: 0.7205
+    us_unfused: 0.7205
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.62"
+    producer_name: "fusion.59"
+    consumer_name: "fusion.62"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "cosine.1"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.62"
+    consumer_names: "fusion.54"
+    consumer_names: "fusion.58"
+    us_fused: 314.900513
+    us_unfused: 285.517487
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.1"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.62"
+    consumer_names: "convert.7.0"
+    us_fused: 29.7085
+    us_unfused: 54.112
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "sine.1"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.62"
+    consumer_names: "fusion.54"
+    consumer_names: "fusion.63"
+    us_fused: 321.257751
+    us_unfused: 297.225494
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.63"
+    producer_name: "fusion.58"
+    consumer_name: "fusion.63"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "sine.1"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.62"
+    consumer_names: "fusion.54"
+    consumer_names: "fusion.63"
+    us_fused: 320.978
+    us_unfused: 296.946
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "cosine.1"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.62"
+    consumer_names: "fusion.54"
+    consumer_names: "fusion.63"
+    us_fused: 320.978
+    us_unfused: 296.946
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.1"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.63"
+    consumer_names: "convert.6.0"
+    us_fused: 29.7085
+    us_unfused: 54.112
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.64"
+    producer_name: "fusion.63"
+    consumer_name: "convert.6.0"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.1"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "cosine.1"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.62"
+    consumer_names: "fusion.54"
+    consumer_names: "fusion.64"
+    us_fused: 315.695
+    us_unfused: 291.101746
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "sine.1"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.62"
+    consumer_names: "fusion.54"
+    consumer_names: "fusion.64"
+    us_fused: 315.695
+    us_unfused: 291.101746
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.64"
+    consumer_names: "concatenate.1.0"
+    us_fused: 41.436
+    us_unfused: 54.138
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.65"
+    producer_name: "fusion.62"
+    consumer_name: "convert.7.0"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.1"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "sine.1"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.65"
+    consumer_names: "fusion.54"
+    consumer_names: "fusion.64"
+    us_fused: 310.412
+    us_unfused: 285.257507
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "cosine.1"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.65"
+    consumer_names: "fusion.54"
+    consumer_names: "fusion.64"
+    us_fused: 310.412
+    us_unfused: 285.257507
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.65"
+    consumer_names: "concatenate.1.0"
+    us_fused: 41.436
+    us_unfused: 54.138
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.66"
+    producer_name: "fusion.65"
+    consumer_name: "concatenate.1.0"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.66"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.1"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "cosine.1"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.66"
+    consumer_names: "fusion.54"
+    consumer_names: "fusion.64"
+    us_fused: 321.578247
+    us_unfused: 296.985
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "sine.1"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.66"
+    consumer_names: "fusion.54"
+    consumer_names: "fusion.64"
+    us_fused: 321.578247
+    us_unfused: 296.985
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.64"
+    consumer_names: "fusion.66"
+    us_fused: 9.2295
+    us_unfused: 18.0065
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.66"
+    producer_name: "fusion.64"
+    consumer_name: "fusion.66"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.66"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.1"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "sine.1"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.66"
+    consumer_names: "fusion.54"
+    us_fused: 309.489258
+    us_unfused: 275.506
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "cosine.1"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.66"
+    consumer_names: "fusion.54"
+    us_fused: 309.489258
+    us_unfused: 275.506
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.67"
+    producer_name: "fusion.33"
+    consumer_name: "divide.2"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "convert_element_type.1.0"
+    consumer_names: "fusion.67"
+    us_fused: 2.4635
+    us_unfused: 2.4635
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.67"
+    consumer_names: "sine.1"
+    consumer_names: "cosine.1"
+    us_fused: 9.4555
+    us_unfused: 13.435
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.41.0"
+    consumer_names: "fusion.67"
+    us_fused: -0.368
+    us_unfused: -0.368
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.68"
+    producer_name: "fusion.67"
+    consumer_name: "sine.1"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.69"
+    producer_name: "fusion.67"
+    consumer_name: "cosine.1"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "convert_element_type.1.0"
+    consumer_names: "fusion.69"
+    consumer_names: "fusion.68"
+    us_fused: 6.46625
+    us_unfused: 6.4345
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.69"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.66"
+    consumer_names: "fusion.54"
+    us_fused: 311.076508
+    us_unfused: 275.526764
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.41.0"
+    consumer_names: "fusion.69"
+    consumer_names: "fusion.68"
+    us_fused: 7.685
+    us_unfused: 6.4345
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.68"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.66"
+    consumer_names: "fusion.54"
+    us_fused: 311.076508
+    us_unfused: 275.526764
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.27"
+    producer_name: "convert.24.0"
+    consumer_name: "fusion.27"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.27"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.52"
+    consumer_names: "fusion.27"
+    us_fused: 2380.44287
+    us_unfused: 1658.85596
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.54"
+    consumer_names: "fusion.27"
+    us_fused: 2380.44287
+    us_unfused: 1658.85596
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.69"
+    producer_name: "broadcast.41.0"
+    consumer_name: "fusion.69"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.68"
+    producer_name: "broadcast.41.0"
+    consumer_name: "fusion.68"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "convert_element_type.1.0"
+    consumer_names: "fusion.69"
+    consumer_names: "fusion.68"
+    us_fused: 1.861
+    us_unfused: 1.861
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "pow.3.0"
+    consumer_names: "fusion.68"
+    consumer_names: "fusion.69"
+    us_fused: 19.275
+    us_unfused: 10.50175
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.69"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.66"
+    consumer_names: "fusion.54"
+    us_fused: 308.897
+    us_unfused: 275.457245
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.68"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.66"
+    consumer_names: "fusion.54"
+    us_fused: 308.897
+    us_unfused: 275.457245
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.43"
+    producer_name: "convert_element_type.14.0"
+    consumer_name: "fusion.43"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.43"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.69"
+    producer_name: "convert_element_type.1.0"
+    consumer_name: "fusion.69"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.68"
+    producer_name: "convert_element_type.1.0"
+    consumer_name: "fusion.68"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "pow.3.0"
+    consumer_names: "fusion.68"
+    consumer_names: "fusion.69"
+    us_fused: 19.307
+    us_unfused: 10.5342503
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.69"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.66"
+    consumer_names: "fusion.54"
+    us_fused: 310.187744
+    us_unfused: 275.473511
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.68"
+    consumer_names: "fusion.52"
+    consumer_names: "fusion.66"
+    consumer_names: "fusion.54"
+    us_fused: 310.187744
+    us_unfused: 275.473511
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.70"
+    producer_name: "multiply.1.0"
+    consumer_name: "pow.3.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "convert_element_type.21.0"
+    consumer_names: "fusion.70"
+    us_fused: 1.18
+    us_unfused: 1.17925
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.3.0"
+    consumer_names: "fusion.70"
+    us_fused: 1.00075
+    us_unfused: 1.00075
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.70"
+    consumer_names: "fusion.68"
+    consumer_names: "fusion.69"
+    us_fused: 19.3465
+    us_unfused: 10.535
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.8.0"
+    consumer_names: "fusion.70"
+    us_fused: 1.17925
+    us_unfused: 1.17925
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.70"
+    producer_name: "broadcast.8.0"
+    consumer_name: "fusion.70"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.3.0"
+    consumer_names: "fusion.70"
+    us_fused: 1
+    us_unfused: 1
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "convert_element_type.21.0"
+    consumer_names: "fusion.70"
+    us_fused: 1
+    us_unfused: 1
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.70"
+    consumer_names: "fusion.68"
+    consumer_names: "fusion.69"
+    us_fused: 19.3465
+    us_unfused: 10.535
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.71"
+    producer_name: "mul.71.0"
+    consumer_name: "convert_element_type.21.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "iota.7.0"
+    consumer_names: "fusion.71"
+    us_fused: 1
+    us_unfused: 1
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.5.0"
+    consumer_names: "fusion.71"
+    us_fused: 1
+    us_unfused: 1
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.71"
+    consumer_names: "fusion.70"
+    us_fused: 1.1875
+    us_unfused: 2.19275
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.70"
+    producer_name: "fusion.71"
+    consumer_name: "fusion.70"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.5.0"
+    consumer_names: "fusion.70"
+    us_fused: 1.18075
+    us_unfused: 1.18075
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "iota.7.0"
+    consumer_names: "fusion.70"
+    us_fused: 1.18375
+    us_unfused: 1.18075
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.70"
+    consumer_names: "fusion.68"
+    consumer_names: "fusion.69"
+    us_fused: 19.4185
+    us_unfused: 10.5365
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.3.0"
+    consumer_names: "fusion.70"
+    us_fused: 1.0015
+    us_unfused: 1.0015
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.70"
+    producer_name: "broadcast.5.0"
+    consumer_name: "fusion.70"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.3.0"
+    consumer_names: "fusion.70"
+    us_fused: 1
+    us_unfused: 1
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "iota.7.0"
+    consumer_names: "fusion.70"
+    us_fused: 1
+    us_unfused: 1
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.70"
+    consumer_names: "fusion.68"
+    consumer_names: "fusion.69"
+    us_fused: 19.4185
+    us_unfused: 10.5365
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.70"
+    producer_name: "broadcast.3.0"
+    consumer_name: "fusion.70"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.70"
+    consumer_names: "fusion.68"
+    consumer_names: "fusion.69"
+    us_fused: 19.4185
+    us_unfused: 10.5365
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "iota.7.0"
+    consumer_names: "fusion.70"
+    us_fused: 1
+    us_unfused: 1
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.70"
+    producer_name: "iota.7.0"
+    consumer_name: "fusion.70"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.70"
+    consumer_names: "fusion.68"
+    consumer_names: "fusion.69"
+    us_fused: 19.411
+    us_unfused: 10.5362501
+  }
+}
+gpu_device_info {
+  threads_per_block_limit: 1024
+  threads_per_warp: 32
+  shared_memory_per_block: 49152
+  shared_memory_per_core: 102400
+  threads_per_core_limit: 1536
+  core_count: 76
+  fpus_per_core: 128
+  block_dim_limit_x: 2147483647
+  block_dim_limit_y: 65535
+  block_dim_limit_z: 65535
+  memory_bandwidth: 716864000000
+  l2_cache_size: 67108864
+  clock_rate_ghz: 2.505
+  device_memory_size: 16860184576
+  shared_memory_per_block_optin: 101376
+  cuda_compute_capability {
+    major: 8
+    minor: 9
+    feature_extension: NONE
+  }
+  registers_per_core_limit: 65536
+  registers_per_block_limit: 65536
+}
+hlo_module_before_fusion: "HloModule jit_forward_pure, entry_computation_layout={(bf16[4096]{0}, bf16[4096,8,128]{2,1,0}, bf16[32,128,4096]{2,1,0}, bf16[4096,32,128]{2,1,0}, bf16[4096,8,128]{2,1,0}, /*index=5*/bf16[1,4096,4096]{2,1,0}, s32[1,4096]{1,0})->bf16[1,4096,4096]{2,1,0}}, allow_spmd_sharding_propagation_to_parameters={false,false,false,false,false,false,false}, allow_spmd_sharding_propagation_to_output={true}\n\nparameter_0 {\n  ROOT parameter_0.8 = bf16[4096,4096]{1,0} parameter(0)\n}\n\nparameter_1 {\n  ROOT parameter_0.9 = bf16[4096,1024]{1,0} parameter(0)\n}\n\ngemm_fusion_dot_computation {\n  parameter_0 = bf16[4096,4096]{1,0} parameter(0)\n  block_fusion = bf16[4096,4096]{1,0} fusion(parameter_0), kind=kCustom, calls=parameter_0\n  parameter_1 = bf16[4096,1024]{1,0} parameter(1)\n  block_fusion.1 = bf16[4096,1024]{1,0} fusion(parameter_1), kind=kCustom, calls=parameter_1\n  ROOT dot.8 = bf16[4096,1024]{1,0} dot(block_fusion, block_fusion.1), lhs_contracting_dims={1}, rhs_contracting_dims={0}\n}\n\nparameter_0.1 {\n  ROOT parameter_0.10 = bf16[4096,4096]{1,0} parameter(0)\n}\n\nparameter_1.1 {\n  ROOT parameter_0.11 = bf16[4096,1024]{1,0} parameter(0)\n}\n\ngemm_fusion_dot.1_computation {\n  parameter_0.1 = bf16[4096,4096]{1,0} parameter(0)\n  block_fusion.2 = bf16[4096,4096]{1,0} fusion(parameter_0.1), kind=kCustom, calls=parameter_0.1\n  parameter_1.1 = bf16[4096,1024]{1,0} parameter(1)\n  block_fusion.3 = bf16[4096,1024]{1,0} fusion(parameter_1.1), kind=kCustom, calls=parameter_1.1\n  ROOT dot.9 = bf16[4096,1024]{1,0} dot(block_fusion.2, block_fusion.3), lhs_contracting_dims={1}, rhs_contracting_dims={0}\n}\n\nparameter_0.2 {\n  ROOT parameter_0.12 = bf16[4096,4096]{1,0} parameter(0)\n}\n\nparameter_1.2 {\n  ROOT parameter_0.13 = bf16[4096,4096]{1,0} parameter(0)\n}\n\ngemm_fusion_dot.2_computation {\n  parameter_0.2 = bf16[4096,4096]{1,0} parameter(0)\n  block_fusion.4 = bf16[4096,4096]{1,0} fusion(parameter_0.2), kind=kCustom, calls=parameter_0.2\n  parameter_1.2 = bf16[4096,4096]{1,0} parameter(1)\n  block_fusion.5 = bf16[4096,4096]{1,0} fusion(parameter_1.2), kind=kCustom, calls=parameter_1.2\n  ROOT dot.10 = bf16[4096,4096]{1,0} dot(block_fusion.4, block_fusion.5), lhs_contracting_dims={1}, rhs_contracting_dims={0}\n}\n\nparameter_0.3 {\n  ROOT parameter_0.14 = bf16[8,4096,128]{2,0,1} parameter(0)\n}\n\nparameter_1.3 {\n  ROOT parameter_0.15 = bf16[8,128,16384]{2,1,0} parameter(0)\n}\n\ngemm_fusion_dot.6_computation {\n  parameter_0.3 = bf16[8,4096,128]{2,0,1} parameter(0)\n  block_fusion.6 = bf16[8,4096,128]{2,0,1} fusion(parameter_0.3), kind=kCustom, calls=parameter_0.3\n  parameter_1.3 = bf16[8,128,16384]{2,1,0} parameter(1)\n  block_fusion.7 = bf16[8,128,16384]{2,1,0} fusion(parameter_1.3), kind=kCustom, calls=parameter_1.3\n  ROOT dot.11 = bf16[8,4096,16384]{2,1,0} dot(block_fusion.6, block_fusion.7), lhs_batch_dims={0}, lhs_contracting_dims={2}, rhs_batch_dims={0}, rhs_contracting_dims={1}\n}\n\nparameter_0.4 {\n  ROOT parameter_0.16 = bf16[8,128,4096]{1,0,2} parameter(0)\n}\n\nparameter_1.4 {\n  ROOT parameter_0.17 = bf16[8,4096,16384]{2,1,0} parameter(0)\n}\n\ngemm_fusion_dot.7_computation {\n  parameter_0.4 = bf16[8,128,4096]{1,0,2} parameter(0)\n  block_fusion.8 = bf16[8,128,4096]{1,0,2} fusion(parameter_0.4), kind=kCustom, calls=parameter_0.4\n  parameter_1.4 = bf16[8,4096,16384]{2,1,0} parameter(1)\n  block_fusion.9 = bf16[8,4096,16384]{2,1,0} fusion(parameter_1.4), kind=kCustom, calls=parameter_1.4\n  ROOT dot.12 = bf16[8,128,16384]{2,1,0} dot(block_fusion.8, block_fusion.9), lhs_batch_dims={0}, lhs_contracting_dims={2}, rhs_batch_dims={0}, rhs_contracting_dims={1}\n}\n\nparameter_0.5 {\n  ROOT parameter_0.18 = bf16[4096,4096]{1,0} parameter(0)\n}\n\nparameter_1.5 {\n  ROOT parameter_0.19 = bf16[4096,4096]{1,0} parameter(0)\n}\n\ngemm_fusion_dot.5_computation {\n  parameter_0.5 = bf16[4096,4096]{1,0} parameter(0)\n  block_fusion.10 = bf16[4096,4096]{1,0} fusion(parameter_0.5), kind=kCustom, calls=parameter_0.5\n  parameter_1.5 = bf16[4096,4096]{1,0} parameter(1)\n  block_fusion.11 = bf16[4096,4096]{1,0} fusion(parameter_1.5), kind=kCustom, calls=parameter_1.5\n  ROOT dot.13 = bf16[4096,4096]{1,0} dot(block_fusion.10, block_fusion.11), lhs_contracting_dims={1}, rhs_contracting_dims={0}\n}\n\nregion_1.4 {\n  reduce_max.3 = f32[] parameter(0)\n  reduce_max.4 = f32[] parameter(1)\n  ROOT reduce_max.5.0 = f32[] maximum(reduce_max.3, reduce_max.4)\n}\n\nregion_0.1.clone {\n  reduce_sum.0 = f32[] parameter(0)\n  reduce_sum.1 = f32[] parameter(1)\n  ROOT reduce_sum.2.0 = f32[] add(reduce_sum.0, reduce_sum.1)\n}\n\nregion_0.1 {\n  reduce_sum.3 = f32[] parameter(0)\n  reduce_sum.4 = f32[] parameter(1)\n  ROOT reduce_sum.5.0 = f32[] add(reduce_sum.3, reduce_sum.4)\n}\n\ntriton_softmax_computation.1 {\n  parameter_0.7 = f32[1,4096,4096]{2,1,0} parameter(0)\n  square.2 = f32[1,4096,4096]{2,1,0} multiply(parameter_0.7, parameter_0.7)\n  bitcast.150 = f32[4096,4096]{1,0} bitcast(square.2)\n  constant.6 = f32[] constant(0)\n  reduce.6 = f32[4096]{0} reduce(bitcast.150, constant.6), dimensions={1}, to_apply=region_0.1\n  bitcast.151 = f32[1,4096]{1,0} bitcast(reduce.6)\n  constant.7 = f32[] constant(0.000244140625)\n  broadcast.47 = f32[1,4096]{1,0} broadcast(constant.7), dimensions={}\n  multiply.5 = f32[1,4096]{1,0} multiply(bitcast.151, broadcast.47)\n  constant.8 = f32[] constant(1e-05)\n  broadcast.48 = f32[1,4096]{1,0} broadcast(constant.8), dimensions={}\n  add.2 = f32[1,4096]{1,0} add(multiply.5, broadcast.48)\n  rsqrt.3 = f32[1,4096]{1,0} rsqrt(add.2)\n  bitcast.152 = f32[4096]{0} bitcast(rsqrt.3)\n  mul.2 = f32[1,4096,4096]{2,1,0} broadcast(bitcast.152), dimensions={1}\n  ROOT mul.3 = f32[1,4096,4096]{2,1,0} multiply(parameter_0.7, mul.2)\n}\n\nENTRY main.6 {\n  constant.13.0 = bf16[] constant(0.08838)\n  mul.44.0 = bf16[1,4096,32,128]{3,2,1,0} broadcast(constant.13.0), dimensions={}\n  convert.19.0 = f32[1,4096,32,128]{3,2,1,0} convert(mul.44.0)\n  x_2_.1 = bf16[1,4096,4096]{2,1,0} parameter(5), sharding={replicated}\n  convert_element_type.13.0 = f32[1,4096,4096]{2,1,0} convert(x_2_.1)\n  triton_softmax.1 = f32[1,4096,4096]{2,1,0} fusion(convert_element_type.13.0), kind=kCustom, calls=triton_softmax_computation.1\n  x_0___scale___value.1 = bf16[4096]{0} parameter(0), sharding={replicated}\n  convert_element_type.14.0 = f32[4096]{0} convert(x_0___scale___value.1)\n  mul.51.0 = f32[1,4096,4096]{2,1,0} broadcast(convert_element_type.14.0), dimensions={2}\n  mul.52.0 = f32[1,4096,4096]{2,1,0} multiply(triton_softmax.1, mul.51.0)\n  convert_element_type.15.0 = bf16[1,4096,4096]{2,1,0} convert(mul.52.0)\n  bitcast.158.0 = bf16[4096,4096]{1,0} bitcast(convert_element_type.15.0)\n  x_1___value_projection____kernel___value.1 = bf16[4096,8,128]{2,1,0} parameter(4), sharding={replicated}\n  bitcast.157.0 = bf16[4096,1024]{1,0} bitcast(x_1___value_projection____kernel___value.1)\n  gemm_fusion_dot = bf16[4096,1024]{1,0} fusion(bitcast.158.0, bitcast.157.0), kind=kCustom, calls=gemm_fusion_dot_computation\n  bitcast.154.0 = bf16[8,128,4096]{1,0,2} bitcast(gemm_fusion_dot)\n  iota.2.0 = s32[4096,4096]{1,0} iota(), iota_dimension=0\n  iota.3.0 = s32[4096,4096]{1,0} iota(), iota_dimension=1\n  compare.2 = pred[4096,4096]{1,0} compare(iota.2.0, iota.3.0), direction=LE\n  constant.21.0 = f32[] constant(0)\n  broadcast.36.0 = f32[4096,4096]{1,0} broadcast(constant.21.0), dimensions={}\n  constant.20.0 = f32[] constant(-2.38197633e+38)\n  broadcast.37.0 = f32[4096,4096]{1,0} broadcast(constant.20.0), dimensions={}\n  select.2 = f32[4096,4096]{1,0} select(compare.2, broadcast.36.0, broadcast.37.0)\n  constant.12.0 = f32[] constant(-1.19098816e+38)\n  broadcast.38.0 = f32[4096,4096]{1,0} broadcast(constant.12.0), dimensions={}\n  compare.1.0 = pred[4096,4096]{1,0} compare(select.2, broadcast.38.0), direction=GE\n  broadcast.39.0 = pred[1,8,4096,4096,4]{4,3,2,1,0} broadcast(compare.1.0), dimensions={2,3}\n  x_1___key_projection____kernel___value.1 = bf16[4096,8,128]{2,1,0} parameter(1), sharding={replicated}\n  bitcast.161.0 = bf16[4096,1024]{1,0} bitcast(x_1___key_projection____kernel___value.1)\n  gemm_fusion_dot.1 = bf16[4096,1024]{1,0} fusion(bitcast.158.0, bitcast.161.0), kind=kCustom, calls=gemm_fusion_dot.1_computation\n  bitcast.160.0 = bf16[1,4096,8,128]{3,2,1,0} bitcast(gemm_fusion_dot.1)\n  convert.12.0 = f32[1,4096,8,128]{3,2,1,0} convert(bitcast.160.0)\n  split.6.0 = f32[1,4096,8,64]{3,2,1,0} slice(convert.12.0), slice={[0:1], [0:4096], [0:8], [0:64]}\n  x_3_.1 = s32[1,4096]{1,0} parameter(6), sharding={replicated}\n  convert_element_type.1.0 = f32[1,4096]{1,0} convert(x_3_.1)\n  bitcast.7.0 = f32[4096]{0} bitcast(convert_element_type.1.0)\n  broadcast.40.0 = f32[1,1,4096,64]{3,2,1,0} broadcast(bitcast.7.0), dimensions={2}\n  constant.14.0 = f32[] constant(10000)\n  broadcast.3.0 = f32[64]{0} broadcast(constant.14.0), dimensions={}\n  iota.7.0 = s32[64]{0} iota(), iota_dimension=0\n  constant.16.0 = s32[] constant(2)\n  broadcast.5.0 = s32[64]{0} broadcast(constant.16.0), dimensions={}\n  mul.71.0 = s32[64]{0} multiply(iota.7.0, broadcast.5.0)\n  convert_element_type.21.0 = f32[64]{0} convert(mul.71.0)\n  constant.1.0 = f32[] constant(0.0078125)\n  broadcast.8.0 = f32[64]{0} broadcast(constant.1.0), dimensions={}\n  multiply.1.0 = f32[64]{0} multiply(convert_element_type.21.0, broadcast.8.0)\n  pow.3.0 = f32[64]{0} power(broadcast.3.0, multiply.1.0)\n  broadcast.41.0 = f32[1,1,4096,64]{3,2,1,0} broadcast(pow.3.0), dimensions={3}\n  divide.2 = f32[1,1,4096,64]{3,2,1,0} divide(broadcast.40.0, broadcast.41.0)\n  cosine.1 = f32[1,1,4096,64]{3,2,1,0} cosine(divide.2)\n  bitcast.8.0 = f32[4096,64]{1,0} bitcast(cosine.1)\n  mul.74.0 = f32[1,4096,8,64]{3,2,1,0} broadcast(bitcast.8.0), dimensions={1,3}\n  mul.75.0 = f32[1,4096,8,64]{3,2,1,0} multiply(split.6.0, mul.74.0)\n  split.7.0 = f32[1,4096,8,64]{3,2,1,0} slice(convert.12.0), slice={[0:1], [0:4096], [0:8], [64:128]}\n  sine.1 = f32[1,1,4096,64]{3,2,1,0} sine(divide.2)\n  bitcast.9.0 = f32[4096,64]{1,0} bitcast(sine.1)\n  mul.78.0 = f32[1,4096,8,64]{3,2,1,0} broadcast(bitcast.9.0), dimensions={1,3}\n  mul.79.0 = f32[1,4096,8,64]{3,2,1,0} multiply(split.7.0, mul.78.0)\n  sub.7.0 = f32[1,4096,8,64]{3,2,1,0} subtract(mul.75.0, mul.79.0)\n  convert.6.0 = bf16[1,4096,8,64]{3,2,1,0} convert(sub.7.0)\n  mul.83.0 = f32[1,4096,8,64]{3,2,1,0} multiply(split.7.0, mul.74.0)\n  mul.87.0 = f32[1,4096,8,64]{3,2,1,0} multiply(split.6.0, mul.78.0)\n  add.8.0 = f32[1,4096,8,64]{3,2,1,0} add(mul.83.0, mul.87.0)\n  convert.7.0 = bf16[1,4096,8,64]{3,2,1,0} convert(add.8.0)\n  concatenate.1.0 = bf16[1,4096,8,128]{3,2,1,0} concatenate(convert.6.0, convert.7.0), dimensions={3}\n  bitcast.170.0 = bf16[8,4096,128]{2,0,1} bitcast(concatenate.1.0)\n  x_1___query_projection____kernel___value.1 = bf16[4096,32,128]{2,1,0} parameter(3), sharding={replicated}\n  bitcast.165.0 = bf16[4096,4096]{1,0} bitcast(x_1___query_projection____kernel___value.1)\n  gemm_fusion_dot.2 = bf16[4096,4096]{1,0} fusion(bitcast.158.0, bitcast.165.0), kind=kCustom, calls=gemm_fusion_dot.2_computation\n  bitcast.164.0 = bf16[1,4096,32,128]{3,2,1,0} bitcast(gemm_fusion_dot.2)\n  convert.13.0 = f32[1,4096,32,128]{3,2,1,0} convert(bitcast.164.0)\n  split.4.0 = f32[1,4096,32,64]{3,2,1,0} slice(convert.13.0), slice={[0:1], [0:4096], [0:32], [0:64]}\n  mul.56.0 = f32[1,4096,32,64]{3,2,1,0} broadcast(bitcast.8.0), dimensions={1,3}\n  mul.57.0 = f32[1,4096,32,64]{3,2,1,0} multiply(split.4.0, mul.56.0)\n  split.5.0 = f32[1,4096,32,64]{3,2,1,0} slice(convert.13.0), slice={[0:1], [0:4096], [0:32], [64:128]}\n  mul.60.0 = f32[1,4096,32,64]{3,2,1,0} broadcast(bitcast.9.0), dimensions={1,3}\n  mul.61.0 = f32[1,4096,32,64]{3,2,1,0} multiply(split.5.0, mul.60.0)\n  sub.6.0 = f32[1,4096,32,64]{3,2,1,0} subtract(mul.57.0, mul.61.0)\n  convert.4.0 = bf16[1,4096,32,64]{3,2,1,0} convert(sub.6.0)\n  mul.65.0 = f32[1,4096,32,64]{3,2,1,0} multiply(split.5.0, mul.56.0)\n  mul.69.0 = f32[1,4096,32,64]{3,2,1,0} multiply(split.4.0, mul.60.0)\n  add.7.0 = f32[1,4096,32,64]{3,2,1,0} add(mul.65.0, mul.69.0)\n  convert.5.0 = bf16[1,4096,32,64]{3,2,1,0} convert(add.7.0)\n  concatenate.0.0 = bf16[1,4096,32,128]{3,2,1,0} concatenate(convert.4.0, convert.5.0), dimensions={3}\n  convert.18.0 = f32[1,4096,32,128]{3,2,1,0} convert(concatenate.0.0)\n  convert.24.0 = f32[] convert(constant.13.0)\n  broadcast.50.0 = f32[1,4096,32,128]{3,2,1,0} broadcast(convert.24.0), dimensions={}\n  mul.70.0 = f32[1,4096,32,128]{3,2,1,0} multiply(convert.18.0, broadcast.50.0)\n  convert.20.0 = bf16[1,4096,32,128]{3,2,1,0} convert(mul.70.0)\n  bitcast.86.0 = bf16[4096,8,4,128]{3,2,1,0} bitcast(convert.20.0)\n  transpose.25.0 = bf16[8,128,4096,4]{3,2,1,0} transpose(bitcast.86.0), dimensions={1,3,0,2}\n  bitcast.169.0 = bf16[8,128,16384]{2,1,0} bitcast(transpose.25.0)\n  gemm_fusion_dot.6 = bf16[8,4096,16384]{2,1,0} fusion(bitcast.170.0, bitcast.169.0), kind=kCustom, calls=gemm_fusion_dot.6_computation\n  bitcast.168.0 = bf16[1,8,4096,4096,4]{4,3,2,1,0} bitcast(gemm_fusion_dot.6)\n  convert.16.0 = f32[1,8,4096,4096,4]{4,3,2,1,0} convert(bitcast.168.0)\n  broadcast.42.0 = f32[1,8,4096,4096,4]{4,3,2,1,0} broadcast(constant.20.0), dimensions={}\n  select.1.0 = f32[1,8,4096,4096,4]{4,3,2,1,0} select(broadcast.39.0, convert.16.0, broadcast.42.0)\n  bitcast.135.0 = f32[8,4096,4096,4]{3,2,1,0} bitcast(select.1.0)\n  constant.19.0 = f32[] constant(-inf)\n  reduce.3.0 = f32[8,4096,4]{2,1,0} reduce(bitcast.135.0, constant.19.0), dimensions={1}, to_apply=region_1.4\n  broadcast.43.0 = f32[1,8,4096,4096,4]{4,3,2,1,0} broadcast(reduce.3.0), dimensions={1,3,4}\n  subtract.1 = f32[1,8,4096,4096,4]{4,3,2,1,0} subtract(select.1.0, broadcast.43.0)\n  exponential.1 = f32[1,8,4096,4096,4]{4,3,2,1,0} exponential(subtract.1)\n  bitcast.137.0 = f32[8,4096,4096,4]{3,2,1,0} bitcast(exponential.1)\n  reduce.4.0 = f32[8,4096,4]{2,1,0} reduce(bitcast.137.0, constant.21.0), dimensions={1}, to_apply=region_0.1.clone\n  broadcast.44.0 = f32[1,8,4096,4096,4]{4,3,2,1,0} broadcast(reduce.4.0), dimensions={1,3,4}\n  divide.1.0 = f32[1,8,4096,4096,4]{4,3,2,1,0} divide(exponential.1, broadcast.44.0)\n  convert.17.0 = bf16[1,8,4096,4096,4]{4,3,2,1,0} convert(divide.1.0)\n  bitcast.88.0 = bf16[32768,4096,4]{2,1,0} bitcast(convert.17.0)\n  transpose.26.0 = bf16[32768,4,4096]{2,1,0} transpose(bitcast.88.0), dimensions={0,2,1}\n  bitcast.173.0 = bf16[8,4096,16384]{2,1,0} bitcast(transpose.26.0)\n  gemm_fusion_dot.7 = bf16[8,128,16384]{2,1,0} fusion(bitcast.154.0, bitcast.173.0), kind=kCustom, calls=gemm_fusion_dot.7_computation\n  bitcast.172.0 = bf16[8,128,4,4096]{3,2,1,0} bitcast(gemm_fusion_dot.7)\n  transpose.27.0 = bf16[4096,8,4,128]{3,2,1,0} transpose(bitcast.172.0), dimensions={3,0,2,1}\n  bitcast.177.0 = bf16[4096,4096]{1,0} bitcast(transpose.27.0)\n  x_1___out_projection____kernel___value.1 = bf16[32,128,4096]{2,1,0} parameter(2), sharding={replicated}\n  bitcast.176.0 = bf16[4096,4096]{1,0} bitcast(x_1___out_projection____kernel___value.1)\n  gemm_fusion_dot.5 = bf16[4096,4096]{1,0} fusion(bitcast.177.0, bitcast.176.0), kind=kCustom, calls=gemm_fusion_dot.5_computation\n  bitcast.175.0 = bf16[1,4096,4096]{2,1,0} bitcast(gemm_fusion_dot.5)\n  convert.21.0 = f32[1,4096,4096]{2,1,0} convert(bitcast.175.0)\n  add.9.0 = f32[1,4096,4096]{2,1,0} add(convert.21.0, convert_element_type.13.0)\n  ROOT convert.23.0 = bf16[1,4096,4096]{2,1,0} convert(add.9.0)\n}\n\n"

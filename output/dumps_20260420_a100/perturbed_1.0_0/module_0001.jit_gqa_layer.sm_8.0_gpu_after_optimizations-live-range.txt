@@ -1,0 +1,94 @@
+HloLiveRange (max 33):
+  InstructionSequence:
+    0:Arg_1.2
+    1:Arg_2.3
+    2:Arg_3.4
+    3:input_concatenate_fusion
+    4:Arg_0.1
+    5:Arg_5.6
+    6:fusion.20
+    7:custom-call.1
+    8:get-tuple-element.3
+    9:loop_slice_fusion.1
+    10:get-tuple-element.5
+    11:loop_broadcast_fusion
+    12:bitcast.69.0
+    13:loop_slice_fusion
+    14:bitcast.70.0
+    15:gemm_fusion_dot.2
+    16:loop_broadcast_fusion.1
+    17:wrapped_iota
+    18:wrapped_iota.1
+    19:triton_softmax.3
+    20:get-tuple-element.4
+    21:input_transpose_fusion
+    22:wrapped_broadcast
+    23:bitcast.73.0
+    24:custom-call.2
+    25:get-tuple-element.2.0
+    26:wrapped_transpose
+    27:bitcast.72.0
+    28:Arg_4.5
+    29:bitcast.76.0
+    30:custom-call.0
+    31:get-tuple-element.1.0
+    32:loop_convert_fusion
+  BufferLiveRange:
+    Arg_5.6{}:0-33
+    Arg_0.1{}:0-33
+    fusion.20{}:6-7
+    Arg_3.4{}:0-33
+    Arg_2.3{}:0-33
+    Arg_1.2{}:0-33
+    input_concatenate_fusion{}:3-7
+    custom-call.1{}:7-8
+    custom-call.1{0}:7-13
+    custom-call.1{1}:7-7
+    loop_slice_fusion{}:13-15
+    loop_slice_fusion.1{}:9-20
+    loop_slice_fusion.1{0}:9-21
+    loop_slice_fusion.1{1}:9-11
+    loop_broadcast_fusion{}:11-15
+    gemm_fusion_dot.2{}:15-19
+    loop_broadcast_fusion.1{}:16-19
+    wrapped_iota{}:17-19
+    wrapped_iota.1{}:18-19
+    triton_softmax.3{}:19-24
+    input_transpose_fusion{}:21-22
+    wrapped_broadcast{}:22-24
+    custom-call.2{}:24-25
+    custom-call.2{0}:24-26
+    custom-call.2{1}:24-24
+    wrapped_transpose{}:26-30
+    Arg_4.5{}:0-33
+    custom-call.0{}:30-31
+    custom-call.0{0}:30-32
+    custom-call.0{1}:30-30
+    loop_convert_fusion{}:32-33
+  Live ranges at 19 (peak):
+    gemm_fusion_dot.2{}: 1073741824 bytes (cumulative: 1073741824 bytes)
+    loop_broadcast_fusion.1{}: 1073741824 bytes (cumulative: 2147483648 bytes)
+    triton_softmax.3{}: 1073741824 bytes (cumulative: 3221225472 bytes)
+    wrapped_iota{}: 67108864 bytes (cumulative: 3288334336 bytes)
+    wrapped_iota.1{}: 67108864 bytes (cumulative: 3355443200 bytes)
+    Arg_1.2{}: 33554432 bytes (cumulative: 3388997632 bytes)
+    Arg_4.5{}: 33554432 bytes (cumulative: 3422552064 bytes)
+    Arg_5.6{}: 33554432 bytes (cumulative: 3456106496 bytes)
+    Arg_2.3{}: 8388608 bytes (cumulative: 3464495104 bytes)
+    Arg_3.4{}: 8388608 bytes (cumulative: 3472883712 bytes)
+    loop_slice_fusion.1{0}: 8388608 bytes (cumulative: 3481272320 bytes)
+    Arg_0.1{}: 8192 bytes (cumulative: 3481280512 bytes)
+    loop_slice_fusion.1{}: 16 bytes (cumulative: 3481280528 bytes)
+  Stack trace breakdown for peak usage: 3 481 280 528 bytes
+    main.113 (100.0%, total: 3 481 280 528 bytes, current: 0 bytes, remaining: 3 481 280 528 bytes)
+      ├── jit(gqa_layer)/jit(main)/dot_general (30.8%, total: 1 073 741 840 bytes, current: 1 073 741 840 bytes, remaining: 2 407 538 688 bytes)
+      ├── jit(gqa_layer)/jit(main)/div (30.8%, total: 1 073 741 824 bytes, current: 1 073 741 824 bytes, remaining: 1 333 796 864 bytes)
+      ├── jit(gqa_layer)/jit(main)/jit(_where)/broadcast_in_dim (30.8%, total: 1 073 741 824 bytes, current: 1 073 741 824 bytes, remaining: 260 055 040 bytes)
+      ├── jit(gqa_layer)/jit(main)/jit(tril)/iota (3.9%, total: 134 217 728 bytes, current: 134 217 728 bytes, remaining: 125 837 312 bytes)
+      ├── wo (1.0%, total: 33 554 432 bytes, current: 33 554 432 bytes, remaining: 92 282 880 bytes)
+      ├── wq (1.0%, total: 33 554 432 bytes, current: 33 554 432 bytes, remaining: 58 728 448 bytes)
+      ├── x (1.0%, total: 33 554 432 bytes, current: 33 554 432 bytes, remaining: 25 174 016 bytes)
+      ├── jit(gqa_layer)/jit(main)/dot_general{0} (0.2%, total: 8 388 608 bytes, current: 8 388 608 bytes, remaining: 16 785 408 bytes)
+      ├── wk (0.2%, total: 8 388 608 bytes, current: 8 388 608 bytes, remaining: 8 396 800 bytes)
+      ├── wv (0.2%, total: 8 388 608 bytes, current: 8 388 608 bytes, remaining: 8 192 bytes)
+      └── rms_weight (0.0%, total: 8 192 bytes, current: 8 192 bytes, remaining: 0 bytes)

@@ -1,0 +1,6 @@
+{
+    "gpu_target": "a100",
+    "gpu_name": "A100",
+    "compute_capability": "8.0",
+    "timestamp": "2026-04-20T12:03:28Z"
+}

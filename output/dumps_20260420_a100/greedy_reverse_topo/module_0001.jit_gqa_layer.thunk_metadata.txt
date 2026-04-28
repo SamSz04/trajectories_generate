@@ -1,0 +1,232 @@
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "command_buffer_1"
+  }
+  thunk_kind: "kCommandBuffer"
+}
+thunk_metadata {
+  thunk_info {
+  }
+  thunk_kind: "kSequential"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "triton_softmax.5"
+    thunk_id: 1
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "loop_convert_fusion.1"
+    thunk_id: 2
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "wrapped_convert.1"
+    thunk_id: 3
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "wrapped_broadcast.1"
+    thunk_id: 4
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "wrapped_multiply"
+    thunk_id: 5
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "wrapped_convert.2"
+    thunk_id: 6
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "input_concatenate_fusion"
+    thunk_id: 7
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "custom-call.1"
+    thunk_id: 8
+  }
+  thunk_kind: "kCublasLtMatmul"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "command_buffer_9"
+  }
+  thunk_kind: "kCommandBuffer"
+}
+thunk_metadata {
+  thunk_info {
+  }
+  thunk_kind: "kSequential"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "loop_slice_fusion.1"
+    thunk_id: 9
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "loop_broadcast_fusion"
+    thunk_id: 10
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "loop_slice_fusion"
+    thunk_id: 11
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "gemm_fusion_dot.2"
+    thunk_id: 12
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "loop_broadcast_fusion.1"
+    thunk_id: 13
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "wrapped_iota"
+    thunk_id: 14
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "wrapped_iota.1"
+    thunk_id: 15
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "wrapped_compare"
+    thunk_id: 16
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "wrapped_broadcast"
+    thunk_id: 17
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "wrapped_select"
+    thunk_id: 18
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "triton_softmax.4"
+    thunk_id: 19
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "wrapped_exponential"
+    thunk_id: 20
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "triton_softmax.3"
+    thunk_id: 21
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "input_transpose_fusion"
+    thunk_id: 22
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "wrapped_broadcast.2"
+    thunk_id: 23
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "custom-call.2"
+    thunk_id: 24
+  }
+  thunk_kind: "kCublasLtMatmul"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "wrapped_transpose"
+    thunk_id: 25
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "custom-call.0"
+    thunk_id: 26
+  }
+  thunk_kind: "kCublasLtMatmul"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "loop_convert_fusion"
+    thunk_id: 27
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "wrapped_convert"
+    thunk_id: 28
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "wrapped_add"
+    thunk_id: 29
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "wrapped_convert.3"
+    thunk_id: 30
+  }
+  thunk_kind: "kKernel"
+}

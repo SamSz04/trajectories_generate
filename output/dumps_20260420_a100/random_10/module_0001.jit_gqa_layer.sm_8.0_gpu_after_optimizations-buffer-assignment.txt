@@ -1,0 +1,52 @@
+BufferAssignment:
+allocation 0: size 33554432, output shape is |bf16[1,4096,4096]|, maybe-live-out:
+ value: <89 fusion.23 @0> (size=33554432,offset=0): bf16[4096,4096]{1,0}
+ value: <98 loop_broadcast_slice_fusion{0} @0> (size=33554432,offset=0): bf16[1,8,4,4096,128]{4,3,2,1,0}
+ value: <106 wrapped_transpose @0> (size=33554432,offset=0): bf16[4096,32,128]{2,1,0}
+ value: <111 loop_convert_fusion @0> (size=33554432,offset=0): bf16[1,4096,4096]{2,1,0}
+allocation 1: size 33554432, parameter 5, shape |bf16[1,4096,4096]| at ShapeIndex {}:
+ value: <87 Arg_5.6 @0> (size=33554432,offset=0): bf16[1,4096,4096]{2,1,0}
+allocation 2: size 33554432, parameter 1, shape |bf16[4096,32,128]| at ShapeIndex {}:
+ value: <92 Arg_1.2 @0> (size=33554432,offset=0): bf16[4096,32,128]{2,1,0}
+allocation 3: size 33554432, parameter 4, shape |bf16[32,128,4096]| at ShapeIndex {}:
+ value: <107 Arg_4.5 @0> (size=33554432,offset=0): bf16[32,128,4096]{2,1,0}
+allocation 4: size 8388608, parameter 3, shape |bf16[4096,8,128]| at ShapeIndex {}:
+ value: <90 Arg_3.4 @0> (size=8388608,offset=0): bf16[4096,8,128]{2,1,0}
+allocation 5: size 8388608, parameter 2, shape |bf16[4096,8,128]| at ShapeIndex {}:
+ value: <91 Arg_2.3 @0> (size=8388608,offset=0): bf16[4096,8,128]{2,1,0}
+allocation 6: size 8192, parameter 0, shape |bf16[4096]| at ShapeIndex {}:
+ value: <88 Arg_0.1 @0> (size=8192,offset=0): bf16[4096]{0}
+allocation 7: size 2, thread-local:
+ value: <5 maximum.83.0 @0> (size=2,offset=0): bf16[]
+allocation 8: size 2, thread-local:
+ value: <4 Arg_1.82 @0> (size=2,offset=0): bf16[]
+allocation 9: size 2, thread-local:
+ value: <3 Arg_0.81 @0> (size=2,offset=0): bf16[]
+allocation 10: size 4, thread-local:
+ value: <8 add.1.0 @0> (size=4,offset=0): f32[]
+allocation 11: size 4, thread-local:
+ value: <7 Arg_1.0 @0> (size=4,offset=0): f32[]
+allocation 12: size 4, thread-local:
+ value: <0 Arg_0.22 @0> (size=4,offset=0): f32[]
+allocation 13: size 4, thread-local:
+ value: <1 Arg_1.23 @0> (size=4,offset=0): f32[]
+allocation 14: size 4, thread-local:
+ value: <2 add.24.0 @0> (size=4,offset=0): f32[]
+allocation 15: size 4, thread-local:
+ value: <6 Arg_0.0 @0> (size=4,offset=0): f32[]
+allocation 16: size 2147484440, preallocated-temp:
+ value: <93 input_concatenate_fusion @0> (size=50331648,offset=50331648): bf16[4096,6144]{1,0}
+ value: <94 custom-call.1{} @0> (size=16,offset=2147484160): (bf16[4096,6144]{0,1}, s8[4194304]{0})
+ value: <95 custom-call.1{0} @0> (size=50331648,offset=0): bf16[4096,6144]{0,1}
+ value: <96 custom-call.1{1} @0> (size=4194304,offset=100663296): s8[4194304]{0}
+ value: <97 loop_broadcast_slice_fusion{} @0> (size=24,offset=2147484416): (bf16[1,8,4,4096,128]{4,3,2,1,0}, bf16[4096,4096]{1,0}, bf16[1,8,4,128,4096]{4,3,2,1,0})
+ value: <99 loop_broadcast_slice_fusion{1} @0> (size=33554432,offset=1073741824): bf16[4096,4096]{1,0}
+ value: <100 loop_broadcast_slice_fusion{2} @0> (size=33554432,offset=1107296256): bf16[1,8,4,128,4096]{4,3,2,1,0}
+ value: <101 gemm_fusion_dot.2 @0> (size=1073741824,offset=0): bf16[32,4096,4096]{2,1,0}
+ value: <102 triton_softmax.3 @0> (size=1073741824,offset=1073741824): bf16[32,4096,4096]{2,1,0}
+ value: <103 custom-call.2{} @0> (size=16,offset=2147483904): (bf16[32,4096,128]{2,1,0}, s8[4194304]{0})
+ value: <104 custom-call.2{0} @0> (size=33554432,offset=0): bf16[32,4096,128]{2,1,0}
+ value: <105 custom-call.2{1} @0> (size=4194304,offset=33554432): s8[4194304]{0}
+ value: <108 custom-call.0{} @0> (size=16,offset=2147483648): (bf16[4096,4096]{1,0}, s8[4194304]{0})
+ value: <109 custom-call.0{0} @0> (size=33554432,offset=0): bf16[4096,4096]{1,0}
+ value: <110 custom-call.0{1} @0> (size=4194304,offset=33554432): s8[4194304]{0}

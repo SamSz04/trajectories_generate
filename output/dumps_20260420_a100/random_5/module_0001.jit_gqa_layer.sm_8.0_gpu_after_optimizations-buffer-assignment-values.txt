@@ -1,0 +1,220 @@
+
+Total bytes used: 2298487606 (2.14GiB)
+
+Used values:
+<0 Arg_0.22 @0>
+ positions:
+  Arg_0.22
+ uses:
+  add.24.0, operand 0
+ from instruction: %Arg_0.22 = f32[] parameter(0), metadata={op_name="jit(gqa_layer)/jit(main)/reduce_sum"}
+<1 Arg_1.23 @0>
+ positions:
+  Arg_1.23
+ uses:
+  add.24.0, operand 1
+ from instruction: %Arg_1.23 = f32[] parameter(1), metadata={op_name="jit(gqa_layer)/jit(main)/reduce_sum"}
+<2 add.24.0 @0>
+ positions:
+  add.24.0
+ uses:
+ from instruction: %add.24.0 = f32[] add(%Arg_0.22, %Arg_1.23), metadata={op_name="jit(gqa_layer)/jit(main)/reduce_sum" source_file="<stdin>" source_line=27}
+<3 Arg_0.81 @0>
+ positions:
+  Arg_0.81
+ uses:
+  maximum.83.0, operand 0
+ from instruction: %Arg_0.81 = bf16[] parameter(0), metadata={op_name="jit(gqa_layer)/jit(main)/reduce_max"}
+<4 Arg_1.82 @0>
+ positions:
+  Arg_1.82
+ uses:
+  maximum.83.0, operand 1
+ from instruction: %Arg_1.82 = bf16[] parameter(1), metadata={op_name="jit(gqa_layer)/jit(main)/reduce_max"}
+<5 maximum.83.0 @0>
+ positions:
+  maximum.83.0
+ uses:
+ from instruction: %maximum.83.0 = bf16[] maximum(%Arg_0.81, %Arg_1.82), metadata={op_name="jit(gqa_layer)/jit(main)/reduce_max" source_file="<stdin>" source_line=51}
+<6 Arg_0.0 @0>
+ positions:
+  Arg_0.0
+ uses:
+  add.1.0, operand 0
+ from instruction: %Arg_0.0 = f32[] parameter(0), metadata={op_name="jit(gqa_layer)/jit(main)/reduce_sum"}
+<7 Arg_1.0 @0>
+ positions:
+  Arg_1.0
+ uses:
+  add.1.0, operand 1
+ from instruction: %Arg_1.0 = f32[] parameter(1), metadata={op_name="jit(gqa_layer)/jit(main)/reduce_sum"}
+<8 add.1.0 @0>
+ positions:
+  add.1.0
+ uses:
+ from instruction: %add.1.0 = f32[] add(%Arg_0.0, %Arg_1.0), metadata={op_name="jit(gqa_layer)/jit(main)/reduce_sum" source_file="<stdin>" source_line=27}
+<87 Arg_5.6 @0>
+ positions:
+  Arg_5.6
+ uses:
+  loop_convert_fusion, operand 1
+  fusion.22, operand 0
+ from instruction: %Arg_5.6 = bf16[1,4096,4096]{2,1,0} parameter(5), metadata={op_name="x"}
+<88 Arg_0.1 @0>
+ positions:
+  Arg_0.1
+ uses:
+  fusion.22, operand 1
+ from instruction: %Arg_0.1 = bf16[4096]{0} parameter(0), metadata={op_name="rms_weight"}
+<89 fusion.22 @0>
+ positions:
+  fusion.22
+ uses:
+  custom-call.1, operand 0
+ from instruction: %fusion.22 = bf16[4096,4096]{1,0} fusion(%Arg_5.6, %Arg_0.1), kind=kCustom, calls=%fused_computation.12, backend_config={"operation_queue_id":"0","fusion_backend_config":{"kind":"__triton","block_level_fusion_config":{"num_warps":"8","output_tiles":[{"sizes":["4","4096"]}],"num_ctas":1,"num_stages":1,"is_tma_allowed":false,"is_warp_specialization_allowed":false,"waves_per_eu":0}},"force_earliest_schedule":false,"reification_cost":[],"device_type":"DEVICE_TYPE_INVALID"}
+<90 Arg_3.4 @0>
+ positions:
+  Arg_3.4
+ uses:
+  input_concatenate_fusion, operand 0
+ from instruction: %Arg_3.4 = bf16[4096,8,128]{2,1,0} parameter(3), metadata={op_name="wv"}
+<91 Arg_2.3 @0>
+ positions:
+  Arg_2.3
+ uses:
+  input_concatenate_fusion, operand 1
+ from instruction: %Arg_2.3 = bf16[4096,8,128]{2,1,0} parameter(2), metadata={op_name="wk"}
+<92 Arg_1.2 @0>
+ positions:
+  Arg_1.2
+ uses:
+  input_concatenate_fusion, operand 2
+ from instruction: %Arg_1.2 = bf16[4096,32,128]{2,1,0} parameter(1), metadata={op_name="wq"}
+<93 input_concatenate_fusion @0>
+ positions:
+  input_concatenate_fusion
+ uses:
+  custom-call.1, operand 1
+ from instruction: %input_concatenate_fusion = bf16[4096,6144]{1,0} fusion(%Arg_3.4, %Arg_2.3, %Arg_1.2), kind=kInput, calls=%fused_concatenate, metadata={op_name="jit(gqa_layer)/jit(main)/reshape" source_file="<stdin>" source_line=31}
+<94 custom-call.1{} @0>
+ positions:
+  custom-call.1 {}
+ uses:
+  get-tuple-element.3, operand 0 {}
+ from instruction: %custom-call.1 = (bf16[4096,6144]{0,1}, s8[4194304]{0}) custom-call(%fusion.22, %input_concatenate_fusion), custom_call_target="__cublas$lt$matmul", metadata={op_name="jit(gqa_layer)/jit(main)/dot_general" source_file="<stdin>" source_line=31}, backend_config={"operation_queue_id":"0","gemm_backend_config":{"selected_algorithm":"2","alpha_real":1,"beta":0,"dot_dimension_numbers":{"lhs_contracting_dimensions":["1"],"rhs_contracting_dimensions":["0"],"lhs_batch_dimensions":[],"rhs_batch_dimensions":[]},"alpha_imag":0,"precision_config":{"operand_precision":["DEFAULT","DEFAULT"],"algorithm":"ALG_UNSET"},"epilogue":"DEFAULT","lhs_stride":"16777216","rhs_stride":"25165824","grad_x":false,"grad_y":false,"damax_output":false,"autotune_workspace_size":"4194304","scale_mode":0},"force_earliest_schedule":false,"reification_cost":[],"device_type":"DEVICE_TYPE_INVALID"}
+<95 custom-call.1{0} @0>
+ positions:
+  custom-call.1 {0}
+  get-tuple-element.3
+ uses:
+  loop_broadcast_slice_fusion, operand 0
+ from instruction: %custom-call.1 = (bf16[4096,6144]{0,1}, s8[4194304]{0}) custom-call(%fusion.22, %input_concatenate_fusion), custom_call_target="__cublas$lt$matmul", metadata={op_name="jit(gqa_layer)/jit(main)/dot_general" source_file="<stdin>" source_line=31}, backend_config={"operation_queue_id":"0","gemm_backend_config":{"selected_algorithm":"2","alpha_real":1,"beta":0,"dot_dimension_numbers":{"lhs_contracting_dimensions":["1"],"rhs_contracting_dimensions":["0"],"lhs_batch_dimensions":[],"rhs_batch_dimensions":[]},"alpha_imag":0,"precision_config":{"operand_precision":["DEFAULT","DEFAULT"],"algorithm":"ALG_UNSET"},"epilogue":"DEFAULT","lhs_stride":"16777216","rhs_stride":"25165824","grad_x":false,"grad_y":false,"damax_output":false,"autotune_workspace_size":"4194304","scale_mode":0},"force_earliest_schedule":false,"reification_cost":[],"device_type":"DEVICE_TYPE_INVALID"}
+<96 custom-call.1{1} @0>
+ positions:
+  custom-call.1 {1}
+ uses:
+ from instruction: %custom-call.1 = (bf16[4096,6144]{0,1}, s8[4194304]{0}) custom-call(%fusion.22, %input_concatenate_fusion), custom_call_target="__cublas$lt$matmul", metadata={op_name="jit(gqa_layer)/jit(main)/dot_general" source_file="<stdin>" source_line=31}, backend_config={"operation_queue_id":"0","gemm_backend_config":{"selected_algorithm":"2","alpha_real":1,"beta":0,"dot_dimension_numbers":{"lhs_contracting_dimensions":["1"],"rhs_contracting_dimensions":["0"],"lhs_batch_dimensions":[],"rhs_batch_dimensions":[]},"alpha_imag":0,"precision_config":{"operand_precision":["DEFAULT","DEFAULT"],"algorithm":"ALG_UNSET"},"epilogue":"DEFAULT","lhs_stride":"16777216","rhs_stride":"25165824","grad_x":false,"grad_y":false,"damax_output":false,"autotune_workspace_size":"4194304","scale_mode":0},"force_earliest_schedule":false,"reification_cost":[],"device_type":"DEVICE_TYPE_INVALID"}
+<97 loop_broadcast_slice_fusion{} @0>
+ positions:
+  loop_broadcast_slice_fusion {}
+ uses:
+  get-tuple-element.4, operand 0 {}
+  get-tuple-element.5, operand 0 {}
+  get-tuple-element.6, operand 0 {}
+ from instruction: %loop_broadcast_slice_fusion = (bf16[1,8,4,4096,128]{4,3,2,1,0}, bf16[4096,4096]{1,0}, bf16[1,8,4,128,4096]{4,3,2,1,0}) fusion(%get-tuple-element.3), kind=kInput, calls=%fused_broadcast_slice, metadata={op_name="jit(gqa_layer)/jit(main)/broadcast_in_dim" source_file="<stdin>" source_line=37}, backend_config={"operation_queue_id":"0","force_earliest_schedule":false,"reification_cost":[],"device_type":"DEVICE_TYPE_INVALID","native_emitter_backend_config":{"type":"NATIVE_EMITTER_TYPE_LOOP","unroll_factor":2}}
+<98 loop_broadcast_slice_fusion{0} @0>
+ positions:
+  loop_broadcast_slice_fusion {0}
+  bitcast.73.0
+  get-tuple-element.4
+ uses:
+  custom-call.2, operand 1
+  bitcast.73.0, operand 0
+ from instruction: %loop_broadcast_slice_fusion = (bf16[1,8,4,4096,128]{4,3,2,1,0}, bf16[4096,4096]{1,0}, bf16[1,8,4,128,4096]{4,3,2,1,0}) fusion(%get-tuple-element.3), kind=kInput, calls=%fused_broadcast_slice, metadata={op_name="jit(gqa_layer)/jit(main)/broadcast_in_dim" source_file="<stdin>" source_line=37}, backend_config={"operation_queue_id":"0","force_earliest_schedule":false,"reification_cost":[],"device_type":"DEVICE_TYPE_INVALID","native_emitter_backend_config":{"type":"NATIVE_EMITTER_TYPE_LOOP","unroll_factor":2}}
+<99 loop_broadcast_slice_fusion{1} @0>
+ positions:
+  loop_broadcast_slice_fusion {1}
+  bitcast.70.0
+  get-tuple-element.5
+ uses:
+  gemm_fusion_dot.2, operand 0
+  bitcast.70.0, operand 0
+ from instruction: %loop_broadcast_slice_fusion = (bf16[1,8,4,4096,128]{4,3,2,1,0}, bf16[4096,4096]{1,0}, bf16[1,8,4,128,4096]{4,3,2,1,0}) fusion(%get-tuple-element.3), kind=kInput, calls=%fused_broadcast_slice, metadata={op_name="jit(gqa_layer)/jit(main)/broadcast_in_dim" source_file="<stdin>" source_line=37}, backend_config={"operation_queue_id":"0","force_earliest_schedule":false,"reification_cost":[],"device_type":"DEVICE_TYPE_INVALID","native_emitter_backend_config":{"type":"NATIVE_EMITTER_TYPE_LOOP","unroll_factor":2}}
+<100 loop_broadcast_slice_fusion{2} @0>
+ positions:
+  loop_broadcast_slice_fusion {2}
+  bitcast.69.0
+  get-tuple-element.6
+ uses:
+  gemm_fusion_dot.2, operand 1
+  bitcast.69.0, operand 0
+ from instruction: %loop_broadcast_slice_fusion = (bf16[1,8,4,4096,128]{4,3,2,1,0}, bf16[4096,4096]{1,0}, bf16[1,8,4,128,4096]{4,3,2,1,0}) fusion(%get-tuple-element.3), kind=kInput, calls=%fused_broadcast_slice, metadata={op_name="jit(gqa_layer)/jit(main)/broadcast_in_dim" source_file="<stdin>" source_line=37}, backend_config={"operation_queue_id":"0","force_earliest_schedule":false,"reification_cost":[],"device_type":"DEVICE_TYPE_INVALID","native_emitter_backend_config":{"type":"NATIVE_EMITTER_TYPE_LOOP","unroll_factor":2}}
+<101 gemm_fusion_dot.2 @0>
+ positions:
+  gemm_fusion_dot.2
+ uses:
+  triton_softmax.3, operand 0
+ from instruction: %gemm_fusion_dot.2 = bf16[32,4096,4096]{2,1,0} fusion(%bitcast.70.0, %bitcast.69.0), kind=kCustom, calls=%gemm_fusion_dot.2_computation, metadata={op_name="jit(gqa_layer)/jit(main)/dot_general" source_file="<stdin>" source_line=46}, backend_config={"operation_queue_id":"0","fusion_backend_config":{"kind":"__triton_nested_gemm_fusion","block_level_fusion_config":{"num_warps":"2","output_tiles":[{"sizes":["1","64","128"]}],"num_ctas":1,"num_stages":4,"is_tma_allowed":false,"is_warp_specialization_allowed":false,"waves_per_eu":0}},"force_earliest_schedule":false,"reification_cost":[],"device_type":"DEVICE_TYPE_INVALID"}
+<102 triton_softmax.3 @0>
+ positions:
+  triton_softmax.3
+ uses:
+  custom-call.2, operand 0
+ from instruction: %triton_softmax.3 = bf16[32,4096,4096]{2,1,0} fusion(%gemm_fusion_dot.2), kind=kCustom, calls=%triton_softmax_computation.3, metadata={op_name="jit(gqa_layer)/jit(main)/div" source_file="<stdin>" source_line=51}, backend_config={"operation_queue_id":"0","fusion_backend_config":{"kind":"__triton","block_level_fusion_config":{"num_warps":"8","output_tiles":[{"sizes":["4","1","4096"]}],"num_ctas":1,"num_stages":1,"is_tma_allowed":false,"is_warp_specialization_allowed":false,"waves_per_eu":0}},"force_earliest_schedule":false,"reification_cost":[],"device_type":"DEVICE_TYPE_INVALID"}
+<103 custom-call.2{} @0>
+ positions:
+  custom-call.2 {}
+ uses:
+  get-tuple-element.2.0, operand 0 {}
+ from instruction: %custom-call.2 = (bf16[32,4096,128]{2,1,0}, s8[4194304]{0}) custom-call(%triton_softmax.3, %bitcast.73.0), custom_call_target="__cublas$lt$matmul", metadata={op_name="jit(gqa_layer)/jit(main)/dot_general" source_file="<stdin>" source_line=53}, backend_config={"operation_queue_id":"0","gemm_backend_config":{"selected_algorithm":"1","alpha_real":1,"beta":0,"dot_dimension_numbers":{"lhs_contracting_dimensions":["2"],"rhs_contracting_dimensions":["1"],"lhs_batch_dimensions":["0"],"rhs_batch_dimensions":["0"]},"alpha_imag":0,"precision_config":{"operand_precision":["DEFAULT","DEFAULT"],"algorithm":"ALG_UNSET"},"epilogue":"DEFAULT","lhs_stride":"16777216","rhs_stride":"524288","grad_x":false,"grad_y":false,"damax_output":false,"autotune_workspace_size":"4194304","scale_mode":0},"force_earliest_schedule":false,"reification_cost":[],"device_type":"DEVICE_TYPE_INVALID"}
+<104 custom-call.2{0} @0>
+ positions:
+  custom-call.2 {0}
+  get-tuple-element.2.0
+ uses:
+  wrapped_transpose, operand 0
+ from instruction: %custom-call.2 = (bf16[32,4096,128]{2,1,0}, s8[4194304]{0}) custom-call(%triton_softmax.3, %bitcast.73.0), custom_call_target="__cublas$lt$matmul", metadata={op_name="jit(gqa_layer)/jit(main)/dot_general" source_file="<stdin>" source_line=53}, backend_config={"operation_queue_id":"0","gemm_backend_config":{"selected_algorithm":"1","alpha_real":1,"beta":0,"dot_dimension_numbers":{"lhs_contracting_dimensions":["2"],"rhs_contracting_dimensions":["1"],"lhs_batch_dimensions":["0"],"rhs_batch_dimensions":["0"]},"alpha_imag":0,"precision_config":{"operand_precision":["DEFAULT","DEFAULT"],"algorithm":"ALG_UNSET"},"epilogue":"DEFAULT","lhs_stride":"16777216","rhs_stride":"524288","grad_x":false,"grad_y":false,"damax_output":false,"autotune_workspace_size":"4194304","scale_mode":0},"force_earliest_schedule":false,"reification_cost":[],"device_type":"DEVICE_TYPE_INVALID"}
+<105 custom-call.2{1} @0>
+ positions:
+  custom-call.2 {1}
+ uses:
+ from instruction: %custom-call.2 = (bf16[32,4096,128]{2,1,0}, s8[4194304]{0}) custom-call(%triton_softmax.3, %bitcast.73.0), custom_call_target="__cublas$lt$matmul", metadata={op_name="jit(gqa_layer)/jit(main)/dot_general" source_file="<stdin>" source_line=53}, backend_config={"operation_queue_id":"0","gemm_backend_config":{"selected_algorithm":"1","alpha_real":1,"beta":0,"dot_dimension_numbers":{"lhs_contracting_dimensions":["2"],"rhs_contracting_dimensions":["1"],"lhs_batch_dimensions":["0"],"rhs_batch_dimensions":["0"]},"alpha_imag":0,"precision_config":{"operand_precision":["DEFAULT","DEFAULT"],"algorithm":"ALG_UNSET"},"epilogue":"DEFAULT","lhs_stride":"16777216","rhs_stride":"524288","grad_x":false,"grad_y":false,"damax_output":false,"autotune_workspace_size":"4194304","scale_mode":0},"force_earliest_schedule":false,"reification_cost":[],"device_type":"DEVICE_TYPE_INVALID"}
+<106 wrapped_transpose @0>
+ positions:
+  wrapped_transpose
+  bitcast.72.0
+ uses:
+  bitcast.72.0, operand 0
+  custom-call.0, operand 0
+ from instruction: %wrapped_transpose = bf16[4096,32,128]{2,1,0} fusion(%get-tuple-element.2.0), kind=kInput, calls=%wrapped_transpose_computation, metadata={op_name="jit(gqa_layer)/jit(main)/transpose" source_file="<stdin>" source_line=54}, backend_config={"operation_queue_id":"0","force_earliest_schedule":false,"reification_cost":[],"device_type":"DEVICE_TYPE_INVALID","native_emitter_backend_config":{"type":"NATIVE_EMITTER_TYPE_LOOP","unroll_factor":4}}
+<107 Arg_4.5 @0>
+ positions:
+  Arg_4.5
+  bitcast.76.0
+ uses:
+  bitcast.76.0, operand 0
+  custom-call.0, operand 1
+ from instruction: %Arg_4.5 = bf16[32,128,4096]{2,1,0} parameter(4), metadata={op_name="wo"}
+<108 custom-call.0{} @0>
+ positions:
+  custom-call.0 {}
+ uses:
+  get-tuple-element.1.0, operand 0 {}
+ from instruction: %custom-call.0 = (bf16[4096,4096]{1,0}, s8[4194304]{0}) custom-call(%bitcast.72.0, %bitcast.76.0), custom_call_target="__cublas$lt$matmul", metadata={op_name="jit(gqa_layer)/jit(main)/dot_general" source_file="<stdin>" source_line=57}, backend_config={"operation_queue_id":"0","gemm_backend_config":{"selected_algorithm":"2","alpha_real":1,"beta":0,"dot_dimension_numbers":{"lhs_contracting_dimensions":["1"],"rhs_contracting_dimensions":["0"],"lhs_batch_dimensions":[],"rhs_batch_dimensions":[]},"alpha_imag":0,"precision_config":{"operand_precision":["DEFAULT","DEFAULT"],"algorithm":"ALG_UNSET"},"epilogue":"DEFAULT","lhs_stride":"16777216","rhs_stride":"16777216","grad_x":false,"grad_y":false,"damax_output":false,"autotune_workspace_size":"4194304","scale_mode":0},"force_earliest_schedule":false,"reification_cost":[],"device_type":"DEVICE_TYPE_INVALID"}
+<109 custom-call.0{0} @0>
+ positions:
+  custom-call.0 {0}
+  get-tuple-element.1.0
+ uses:
+  loop_convert_fusion, operand 0
+ from instruction: %custom-call.0 = (bf16[4096,4096]{1,0}, s8[4194304]{0}) custom-call(%bitcast.72.0, %bitcast.76.0), custom_call_target="__cublas$lt$matmul", metadata={op_name="jit(gqa_layer)/jit(main)/dot_general" source_file="<stdin>" source_line=57}, backend_config={"operation_queue_id":"0","gemm_backend_config":{"selected_algorithm":"2","alpha_real":1,"beta":0,"dot_dimension_numbers":{"lhs_contracting_dimensions":["1"],"rhs_contracting_dimensions":["0"],"lhs_batch_dimensions":[],"rhs_batch_dimensions":[]},"alpha_imag":0,"precision_config":{"operand_precision":["DEFAULT","DEFAULT"],"algorithm":"ALG_UNSET"},"epilogue":"DEFAULT","lhs_stride":"16777216","rhs_stride":"16777216","grad_x":false,"grad_y":false,"damax_output":false,"autotune_workspace_size":"4194304","scale_mode":0},"force_earliest_schedule":false,"reification_cost":[],"device_type":"DEVICE_TYPE_INVALID"}
+<110 custom-call.0{1} @0>
+ positions:
+  custom-call.0 {1}
+ uses:
+ from instruction: %custom-call.0 = (bf16[4096,4096]{1,0}, s8[4194304]{0}) custom-call(%bitcast.72.0, %bitcast.76.0), custom_call_target="__cublas$lt$matmul", metadata={op_name="jit(gqa_layer)/jit(main)/dot_general" source_file="<stdin>" source_line=57}, backend_config={"operation_queue_id":"0","gemm_backend_config":{"selected_algorithm":"2","alpha_real":1,"beta":0,"dot_dimension_numbers":{"lhs_contracting_dimensions":["1"],"rhs_contracting_dimensions":["0"],"lhs_batch_dimensions":[],"rhs_batch_dimensions":[]},"alpha_imag":0,"precision_config":{"operand_precision":["DEFAULT","DEFAULT"],"algorithm":"ALG_UNSET"},"epilogue":"DEFAULT","lhs_stride":"16777216","rhs_stride":"16777216","grad_x":false,"grad_y":false,"damax_output":false,"autotune_workspace_size":"4194304","scale_mode":0},"force_earliest_schedule":false,"reification_cost":[],"device_type":"DEVICE_TYPE_INVALID"}
+<111 loop_convert_fusion @0>
+ positions:
+  loop_convert_fusion
+ uses:
+ from instruction: %loop_convert_fusion = bf16[1,4096,4096]{2,1,0} fusion(%get-tuple-element.1.0, %Arg_5.6), kind=kLoop, calls=%fused_convert

@@ -1,0 +1,130 @@
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "input_concatenate_fusion"
+    thunk_id: 1
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "fusion.20"
+    thunk_id: 2
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "custom-call.1"
+    thunk_id: 3
+  }
+  thunk_kind: "kCublasLtMatmul"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "command_buffer_4"
+  }
+  thunk_kind: "kCommandBuffer"
+}
+thunk_metadata {
+  thunk_info {
+  }
+  thunk_kind: "kSequential"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "loop_slice_fusion.1"
+    thunk_id: 4
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "loop_broadcast_fusion"
+    thunk_id: 5
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "loop_slice_fusion"
+    thunk_id: 6
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "gemm_fusion_dot.2"
+    thunk_id: 7
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "loop_broadcast_fusion.1"
+    thunk_id: 8
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "wrapped_iota"
+    thunk_id: 9
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "wrapped_iota.1"
+    thunk_id: 10
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "triton_softmax.3"
+    thunk_id: 11
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "input_transpose_fusion"
+    thunk_id: 12
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "wrapped_broadcast"
+    thunk_id: 13
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "custom-call.2"
+    thunk_id: 14
+  }
+  thunk_kind: "kCublasLtMatmul"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "wrapped_transpose"
+    thunk_id: 15
+  }
+  thunk_kind: "kKernel"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "custom-call.0"
+    thunk_id: 16
+  }
+  thunk_kind: "kCublasLtMatmul"
+}
+thunk_metadata {
+  thunk_info {
+    profile_annotation: "loop_convert_fusion"
+    thunk_id: 17
+  }
+  thunk_kind: "kKernel"
+}

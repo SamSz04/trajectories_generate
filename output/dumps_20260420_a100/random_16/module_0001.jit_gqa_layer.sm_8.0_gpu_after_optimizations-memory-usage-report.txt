@@ -1,0 +1,80 @@
+Memory Space: default (color=0)
+Total bytes: 2298487606 (2.14GiB)
+  cumulative_size;       size;       offset; used_by_n_values; shapes_list
+  ------------------------------------------------------------
+    1.00GiB( 48%);    1.00GiB;   1073741824;                2; bf16[32,4096,4096], bf16[4096,4096]
+    2.00GiB( 96%);    1.00GiB;            0;                4; bf16[32,4096,128], bf16[32,4096,4096], bf16[4096,4096], bf16[4096,6144]
+    2.05GiB( 98%);   48.00MiB;     50331648;                1; bf16[4096,6144]
+    2.08GiB(100%);   32.00MiB;   1107296256;                1; bf16[1,8,4,128,4096]
+    2.08GiB(100%);    4.00MiB;    100663296;                1; s8[4194304]
+    2.09GiB(100%);    4.00MiB;     33554432;                2; 2×s8[4194304]
+    2.09GiB(100%);        24B;   2147484416;                1; (bf16[1,8,4,4096,128], bf16[4096,4096], bf16[1,8,4,128,4096])
+    2.09GiB(100%);        16B;   2147484160;                1; (bf16[4096,6144], s8[4194304])
+    2.09GiB(100%);        16B;   2147483904;                1; (bf16[32,4096,128], s8[4194304])
+    2.09GiB(100%);        16B;   2147483648;                1; (bf16[4096,4096], s8[4194304])
+
+  cumulative_size;       size;       offset; used_by_n_values; shapes_list
+  ------------------------------------------------------------
+   32.00MiB(100%);   32.00MiB;            0;                4; bf16[1,4096,4096], bf16[1,8,4,4096,128], bf16[4096,32,128], bf16[4096,4096]
+
+  cumulative_size;       size;       offset; used_by_n_values; shapes_list
+  ------------------------------------------------------------
+   32.00MiB(100%);   32.00MiB;            0;                1; bf16[1,4096,4096]
+
+  cumulative_size;       size;       offset; used_by_n_values; shapes_list
+  ------------------------------------------------------------
+   32.00MiB(100%);   32.00MiB;            0;                1; bf16[4096,32,128]
+
+  cumulative_size;       size;       offset; used_by_n_values; shapes_list
+  ------------------------------------------------------------
+   32.00MiB(100%);   32.00MiB;            0;                1; bf16[32,128,4096]
+
+  cumulative_size;       size;       offset; used_by_n_values; shapes_list
+  ------------------------------------------------------------
+    8.00MiB(100%);    8.00MiB;            0;                1; bf16[4096,8,128]
+
+  cumulative_size;       size;       offset; used_by_n_values; shapes_list
+  ------------------------------------------------------------
+    8.00MiB(100%);    8.00MiB;            0;                1; bf16[4096,8,128]
+
+  cumulative_size;       size;       offset; used_by_n_values; shapes_list
+  ------------------------------------------------------------
+     8.0KiB(100%);     8.0KiB;            0;                1; bf16[4096]
+
+  cumulative_size;       size;       offset; used_by_n_values; shapes_list
+  ------------------------------------------------------------
+         4B(100%);         4B;            0;                1; f32[]
+
+  cumulative_size;       size;       offset; used_by_n_values; shapes_list
+  ------------------------------------------------------------
+         4B(100%);         4B;            0;                1; f32[]
+
+  cumulative_size;       size;       offset; used_by_n_values; shapes_list
+  ------------------------------------------------------------
+         4B(100%);         4B;            0;                1; f32[]
+
+  cumulative_size;       size;       offset; used_by_n_values; shapes_list
+  ------------------------------------------------------------
+         4B(100%);         4B;            0;                1; f32[]
+
+  cumulative_size;       size;       offset; used_by_n_values; shapes_list
+  ------------------------------------------------------------
+         4B(100%);         4B;            0;                1; f32[]
+
+  cumulative_size;       size;       offset; used_by_n_values; shapes_list
+  ------------------------------------------------------------
+         4B(100%);         4B;            0;                1; f32[]
+
+  cumulative_size;       size;       offset; used_by_n_values; shapes_list
+  ------------------------------------------------------------
+         2B(100%);         2B;            0;                1; bf16[]
+
+  cumulative_size;       size;       offset; used_by_n_values; shapes_list
+  ------------------------------------------------------------
+         2B(100%);         2B;            0;                1; bf16[]
+
+  cumulative_size;       size;       offset; used_by_n_values; shapes_list
+  ------------------------------------------------------------
+         2B(100%);         2B;            0;                1; bf16[]
+
+

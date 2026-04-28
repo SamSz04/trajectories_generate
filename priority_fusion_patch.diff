@@ -1,0 +1,207 @@
+--- a/xla/backends/gpu/transforms/priority_fusion.cc
++++ b/xla/backends/gpu/transforms/priority_fusion.cc
+@@ -18,6 +18,8 @@
+ #include <cstdint>
+ #include <functional>
+ #include <iterator>
++#include <fstream>
++#include <cmath>
+ #include <map>
+ #include <memory>
+ #include <optional>
+@@ -79,6 +81,92 @@
+ namespace gpu {
+
+ namespace {
++
++// ===== BEGIN Decision Transformer trajectory generation patch =====
++// Env vars:
++//   DT_FUSION_STRATEGY  - strategy name (omit for XLA default)
++//   DT_FUSION_SEED      - integer seed for random/perturbed
++//   DT_FUSION_SIGMA     - noise sigma for perturbed strategy (float)
++//   DT_FUSION_PLAN      - path to JSON ordering file (for json_plan)
++
++// Read env var once (thread-safe via static init).
++static const char* dt_strategy_ = std::getenv("DT_FUSION_STRATEGY");
++static const int64_t dt_seed_ = []() -> int64_t {
++  const char* s = std::getenv("DT_FUSION_SEED");
++  return s ? std::stoll(s) : 0;
++}();
++static const double dt_sigma_ = []() -> double {
++  const char* s = std::getenv("DT_FUSION_SIGMA");
++  return s ? std::stod(s) : 0.5;
++}();
++
++// Deterministic hash -> Gaussian via Box-Muller (seeded by name + seed).
++static double HashToGaussian(const std::string& name, int64_t seed) {
++  // FNV-1a 64-bit hash
++  uint64_t h = 14695981039346656037ULL;
++  for (char c : name) {
++    h ^= static_cast<uint64_t>(c);
++    h *= 1099511628211ULL;
++  }
++  // Mix in seed
++  h ^= static_cast<uint64_t>(seed) * 6364136223846793005ULL;
++  h *= 1099511628211ULL;
++
++  // Map to (0, 1) uniform
++  double u1 = (static_cast<double>(h & 0xFFFFFFFF) + 1.0) / 4294967298.0;
++
++  // Second hash for second uniform
++  uint64_t h2 = h;
++  h2 ^= h2 >> 33;
++  h2 *= 0xff51afd7ed558ccdULL;
++  h2 ^= h2 >> 33;
++  double u2 = (static_cast<double>(h2 & 0xFFFFFFFF) + 1.0) / 4294967298.0;
++
++  // Box-Muller
++  return std::sqrt(-2.0 * std::log(u1)) * std::cos(2.0 * M_PI * u2);
++}
++
++// Load JSON plan file: {"producer_ordering": ["op1", "op2", ...]}
++// Returns map: producer_name -> position (0 = first = highest priority).
++using PlanOrdering = absl::flat_hash_map<std::string, int>;
++
++static PlanOrdering LoadJsonPlan(const char* path) {
++  PlanOrdering ordering;
++  if (!path) return ordering;
++
++  std::ifstream ifs(path);
++  if (!ifs.good()) {
++    LOG(WARNING) << "DT: Could not open plan file: " << path;
++    return ordering;
++  }
++
++  // Minimal JSON parser: find "producer_ordering" array of strings.
++  std::string content((std::istreambuf_iterator<char>(ifs)),
++                       std::istreambuf_iterator<char>());
++
++  size_t pos = content.find("\"producer_ordering\"");
++  if (pos == std::string::npos) {
++    LOG(WARNING) << "DT: No producer_ordering in plan file";
++    return ordering;
++  }
++  // Find opening bracket
++  pos = content.find('[', pos);
++  if (pos == std::string::npos) return ordering;
++
++  int index = 0;
++  size_t end = content.find(']', pos);
++  size_t search_pos = pos;
++  while (search_pos < end) {
++    size_t q1 = content.find('"', search_pos + 1);
++    if (q1 == std::string::npos || q1 >= end) break;
++    size_t q2 = content.find('"', q1 + 1);
++    if (q2 == std::string::npos || q2 >= end) break;
++    std::string name = content.substr(q1 + 1, q2 - q1 - 1);
++    ordering[name] = index++;
++    search_pos = q2;
++  }
++
++  LOG(INFO) << "DT: Loaded plan with " << ordering.size()
++            << " producers from " << path;
++  return ordering;
++}
++
++static const PlanOrdering& GetPlanOrdering() {
++  static const PlanOrdering ordering = LoadJsonPlan(
++      std::getenv("DT_FUSION_PLAN"));
++  return ordering;
++}
++// ===== END Decision Transformer trajectory generation patch =====
++
+
+ // Bitcasts are fusible if they don't change the bit width.
+ bool IsFusibleBitcast(const HloInstruction& instr) {
+@@ -553,6 +641,8 @@
+   Priority CalculateProducerPriority(HloInstruction* producer) {
+     // First cleanup any potentially remaining preferred consumer. We will
+     // recompute it here.
++    // ===== DT patch: strategy override inserted after legality checks =====
++
+     {
+       absl::MutexLock lock(preferred_consumer_mutex_);
+       preferred_consumer_.erase(producer);
+@@ -597,6 +687,72 @@
+       return -absl::InfiniteDuration();
+     }
+
++    // ===== BEGIN DT strategy override =====
++    if (dt_strategy_ != nullptr) {
++      // Always compute cost model for logging (dual reward signal).
++      // This ensures us_fused/us_unfused is in the dump for ALL strategies.
++      GpuPerformanceModel::RunTimes dt_run_times =
++          gpu_performance_model_.EstimateRunTimes(
++              producer, &cost_analysis_,
++              /*fused_consumers=*/absl::MakeConstSpan(producer->users()));
++
++      if (fusion_process_dump_) {
++        absl::MutexLock lock(fusion_process_dump_mutex_);
++        auto* step = fusion_process_dump_->add_fusion_steps()
++                         ->mutable_update_priority();
++        step->set_producer_name(producer->name());
++        for (auto* consumer : producer->users()) {
++          step->add_consumer_names(std::string(consumer->name()));
++        }
++        step->set_us_fused(
++            absl::ToDoubleMicroseconds(dt_run_times.time_fused));
++        step->set_us_unfused(
++            absl::ToDoubleMicroseconds(dt_run_times.time_unfused));
++      }
++
++      std::string strategy(dt_strategy_);
++
++      if (strategy == "random") {
++        // Deterministic hash-based random priority
++        uint64_t h = std::hash<std::string>{}(
++            producer->name() + std::to_string(dt_seed_));
++        return absl::Microseconds(h % 1000000);
++      }
++
++      if (strategy == "perturbed") {
++        // Cost model + Gaussian noise
++        absl::Duration base = dt_run_times.time_unfused -
++                              dt_run_times.time_fused;
++        double noise = HashToGaussian(producer->name(), dt_seed_) * dt_sigma_;
++        double base_us = absl::ToDoubleMicroseconds(base);
++        return absl::Microseconds(base_us + noise * std::abs(base_us));
++      }
++
++      if (strategy == "fanout") {
++        return absl::Microseconds(producer->user_count() * 10000);
++      }
++
++      if (strategy == "tensor_bytes") {
++        return absl::Microseconds(
++            ShapeUtil::ByteSizeOf(producer->shape()));
++      }
++
++      if (strategy == "flop_count") {
++        return absl::Microseconds(
++            cost_analysis_.flop_count(*producer));
++      }
++
++      if (strategy == "reverse_topo") {
++        return absl::Microseconds(1000000 - producer->unique_id());
++      }
++
++      if (strategy == "json_plan") {
++        const auto& plan = GetPlanOrdering();
++        auto it = plan.find(producer->name());
++        if (it != plan.end()) {
++          // Higher position number = earlier in ordering = higher priority
++          return absl::Microseconds(
++              static_cast<int64_t>(plan.size()) - it->second);
++        }
++        return absl::Microseconds(0);  // not in plan: lowest priority
++      }
++
++      // Unknown strategy: fall through to default
++      LOG(WARNING) << "DT: Unknown strategy '" << strategy
++                   << "', using default";
++    }
++    // ===== END DT strategy override =====
++
+     auto removed_consumers_runtime_it =
+         operands_to_removed_consumers_runtimes_.find(producer);
+     bool is_incremental_update = removed_consumers_runtime_it !=

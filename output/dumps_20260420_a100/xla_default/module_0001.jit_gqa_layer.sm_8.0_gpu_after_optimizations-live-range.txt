@@ -1,0 +1,82 @@
+HloLiveRange (max 28):
+  InstructionSequence:
+    0:Arg_5.6
+    1:Arg_4.5
+    2:bitcast.76.0
+    3:Arg_3.4
+    4:Arg_2.3
+    5:Arg_1.2
+    6:Arg_0.1
+    7:fusion.22
+    8:input_concatenate_fusion
+    9:custom-call.1
+    10:get-tuple-element.3
+    11:input_transpose_fusion
+    12:loop_broadcast_slice_fusion
+    13:get-tuple-element.5
+    14:get-tuple-element.4
+    15:bitcast.70.0
+    16:bitcast.69.0
+    17:wrapped_broadcast
+    18:bitcast.73.0
+    19:gemm_fusion_dot.2
+    20:triton_softmax.3
+    21:custom-call.2
+    22:get-tuple-element.2.0
+    23:wrapped_transpose
+    24:bitcast.72.0
+    25:custom-call.0
+    26:get-tuple-element.1.0
+    27:loop_convert_fusion
+  BufferLiveRange:
+    Arg_5.6{}:0-28
+    Arg_0.1{}:0-28
+    fusion.22{}:7-9
+    Arg_3.4{}:0-28
+    Arg_2.3{}:0-28
+    Arg_1.2{}:0-28
+    input_concatenate_fusion{}:8-9
+    custom-call.1{}:9-10
+    custom-call.1{0}:9-12
+    custom-call.1{1}:9-9
+    loop_broadcast_slice_fusion{}:12-14
+    loop_broadcast_slice_fusion{0}:12-19
+    loop_broadcast_slice_fusion{1}:12-19
+    gemm_fusion_dot.2{}:19-20
+    triton_softmax.3{}:20-21
+    input_transpose_fusion{}:11-17
+    wrapped_broadcast{}:17-21
+    custom-call.2{}:21-22
+    custom-call.2{0}:21-23
+    custom-call.2{1}:21-21
+    wrapped_transpose{}:23-25
+    Arg_4.5{}:0-28
+    custom-call.0{}:25-26
+    custom-call.0{0}:25-27
+    custom-call.0{1}:25-25
+    loop_convert_fusion{}:27-28
+  Live ranges at 21 (peak):
+    triton_softmax.3{}: 1073741824 bytes (cumulative: 1073741824 bytes)
+    Arg_1.2{}: 33554432 bytes (cumulative: 1107296256 bytes)
+    Arg_4.5{}: 33554432 bytes (cumulative: 1140850688 bytes)
+    Arg_5.6{}: 33554432 bytes (cumulative: 1174405120 bytes)
+    custom-call.2{0}: 33554432 bytes (cumulative: 1207959552 bytes)
+    wrapped_broadcast{}: 33554432 bytes (cumulative: 1241513984 bytes)
+    Arg_2.3{}: 8388608 bytes (cumulative: 1249902592 bytes)
+    Arg_3.4{}: 8388608 bytes (cumulative: 1258291200 bytes)
+    custom-call.2{1}: 4194304 bytes (cumulative: 1262485504 bytes)
+    Arg_0.1{}: 8192 bytes (cumulative: 1262493696 bytes)
+    custom-call.2{}: 16 bytes (cumulative: 1262493712 bytes)
+  Stack trace breakdown for peak usage: 1 262 493 712 bytes
+    main.113 (100.0%, total: 1 262 493 712 bytes, current: 0 bytes, remaining: 1 262 493 712 bytes)
+      ├── jit(gqa_layer)/jit(main)/div (85.0%, total: 1 073 741 824 bytes, current: 1 073 741 824 bytes, remaining: 188 751 888 bytes)
+      ├── jit(gqa_layer)/jit(main)/broadcast_in_dim (2.7%, total: 33 554 432 bytes, current: 33 554 432 bytes, remaining: 155 197 456 bytes)
+      ├── jit(gqa_layer)/jit(main)/dot_general{0} (2.7%, total: 33 554 432 bytes, current: 33 554 432 bytes, remaining: 121 643 024 bytes)
+      ├── wo (2.7%, total: 33 554 432 bytes, current: 33 554 432 bytes, remaining: 88 088 592 bytes)
+      ├── wq (2.7%, total: 33 554 432 bytes, current: 33 554 432 bytes, remaining: 54 534 160 bytes)
+      ├── x (2.7%, total: 33 554 432 bytes, current: 33 554 432 bytes, remaining: 20 979 728 bytes)
+      ├── wk (0.7%, total: 8 388 608 bytes, current: 8 388 608 bytes, remaining: 12 591 120 bytes)
+      ├── wv (0.7%, total: 8 388 608 bytes, current: 8 388 608 bytes, remaining: 4 202 512 bytes)
+      ├── jit(gqa_layer)/jit(main)/dot_general{1} (0.3%, total: 4 194 304 bytes, current: 4 194 304 bytes, remaining: 8 208 bytes)
+      ├── rms_weight (0.0%, total: 8 192 bytes, current: 8 192 bytes, remaining: 16 bytes)
+      └── jit(gqa_layer)/jit(main)/dot_general (0.0%, total: 16 bytes, current: 16 bytes, remaining: 0 bytes)
