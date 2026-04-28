@@ -1,0 +1,39 @@
+{
+  "producer_ordering": [
+    "fusion.19",
+    "select.2.0",
+    "convert.38.0",
+    "exponential.0.0",
+    "triton_softmax.4",
+    "convert.39.0",
+    "broadcast.22.0",
+    "add.112.0",
+    "iota.3.0",
+    "iota.2.0",
+    "broadcast.51.0",
+    "broadcast.49.0",
+    "fusion.16",
+    "transpose.15.0",
+    "slice.7.0",
+    "convert.41.0",
+    "fusion.23",
+    "slice.8.0",
+    "fusion.20",
+    "fusion.12",
+    "triton_softmax.5",
+    "fusion.11",
+    "multiply.11.0",
+    "convert.44.0",
+    "fusion.15",
+    "fusion.21",
+    "broadcast.23.0",
+    "compare.0.0",
+    "fusion.18",
+    "fusion.10"
+  ],
+  "metadata": {
+    "type": "sa_final",
+    "rank": 7,
+    "objective": 6545.444844600001
+  }
+}

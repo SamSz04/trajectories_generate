@@ -1,0 +1,32 @@
+000: kCommandBuffer  [source       | next=008 (1)] 
+    001: kKernel [source       | next=002 (1)] kernel=triton_softmax_5, profile_annotation=triton_softmax.5, launch dimensions=blocks: {4096, 1, 1}, threads/block: {128, 1, 1}, cluster_dim=nullopt
+    002: kKernel [prev=001 (1) | next=003 (1)] kernel=loop_convert_fusion_1, profile_annotation=loop_convert_fusion.1, launch dimensions=blocks: {32768, 1, 1}, threads/block: {128, 1, 1}, cluster_dim=nullopt
+    003: kKernel [prev=002 (1) | next=004 (1)] kernel=wrapped_convert_1, profile_annotation=wrapped_convert.1, launch dimensions=blocks: {32, 1, 1}, threads/block: {128, 1, 1}, cluster_dim=nullopt
+    004: kKernel [prev=003 (1) | next=005 (1)] kernel=wrapped_broadcast_1, profile_annotation=wrapped_broadcast.1, launch dimensions=blocks: {32768, 1, 1}, threads/block: {128, 1, 1}, cluster_dim=nullopt
+    005: kKernel [prev=004 (1) | next=006 (1)] kernel=wrapped_multiply, profile_annotation=wrapped_multiply, launch dimensions=blocks: {32768, 1, 1}, threads/block: {128, 1, 1}, cluster_dim=nullopt
+    006: kKernel [prev=005 (1) | next=007 (1)] kernel=wrapped_convert_2, profile_annotation=wrapped_convert.2, launch dimensions=blocks: {32768, 1, 1}, threads/block: {128, 1, 1}, cluster_dim=nullopt
+    007: kKernel [prev=006 (1) | sink        ] kernel=input_concatenate_fusion, profile_annotation=input_concatenate_fusion, launch dimensions=blocks: {32768, 1, 1}, threads/block: {128, 1, 1}, cluster_dim=nullopt
+008: kCublasLtMatmul [prev=000 (1) | next=000 (1)] CublasLtCmd
+000: kCommandBuffer  [prev=008 (1) | next=024 (1)] 
+    009: kKernel [source       | next=010 (1)] kernel=loop_slice_fusion_1, profile_annotation=loop_slice_fusion.1, launch dimensions=blocks: {8192, 1, 1}, threads/block: {128, 1, 1}, cluster_dim=nullopt
+    010: kKernel [prev=009 (1) | next=011 (1)] kernel=loop_broadcast_fusion, profile_annotation=loop_broadcast_fusion, launch dimensions=blocks: {32768, 1, 1}, threads/block: {128, 1, 1}, cluster_dim=nullopt
+    011: kKernel [prev=010 (1) | next=012 (1)] kernel=loop_slice_fusion, profile_annotation=loop_slice_fusion, launch dimensions=blocks: {32768, 1, 1}, threads/block: {128, 1, 1}, cluster_dim=nullopt
+    012: kKernel [prev=011 (1) | next=013 (1)] kernel=gemm_fusion_dot_2, profile_annotation=gemm_fusion_dot.2, launch dimensions=blocks: {65536, 1, 1}, threads/block: {64, 1, 1}, cluster_dim=nullopt
+    013: kKernel [prev=012 (1) | next=018 (5)] kernel=loop_broadcast_fusion_1, profile_annotation=loop_broadcast_fusion.1, launch dimensions=blocks: {1048576, 1, 1}, threads/block: {128, 1, 1}, cluster_dim=nullopt
+    014: kKernel [source       | next=016 (2)] kernel=wrapped_iota, profile_annotation=wrapped_iota, launch dimensions=blocks: {32768, 1, 1}, threads/block: {128, 1, 1}, cluster_dim=nullopt
+    015: kKernel [source       | next=016 (1)] kernel=wrapped_iota_1, profile_annotation=wrapped_iota.1, launch dimensions=blocks: {32768, 1, 1}, threads/block: {128, 1, 1}, cluster_dim=nullopt
+    016: kKernel [prev=015 (1) | next=017 (1)] kernel=wrapped_compare, profile_annotation=wrapped_compare, launch dimensions=blocks: {32768, 1, 1}, threads/block: {128, 1, 1}, cluster_dim=nullopt
+    017: kKernel [prev=016 (1) | next=018 (1)] kernel=wrapped_broadcast, profile_annotation=wrapped_broadcast, launch dimensions=blocks: {1048576, 1, 1}, threads/block: {128, 1, 1}, cluster_dim=nullopt
+    018: kKernel [prev=017 (1) | next=019 (1)] kernel=wrapped_select, profile_annotation=wrapped_select, launch dimensions=blocks: {1048576, 1, 1}, threads/block: {128, 1, 1}, cluster_dim=nullopt
+    019: kKernel [prev=018 (1) | next=020 (1)] kernel=triton_softmax_4, profile_annotation=triton_softmax.4, launch dimensions=blocks: {131072, 1, 1}, threads/block: {128, 1, 1}, cluster_dim=nullopt
+    020: kKernel [prev=019 (1) | next=021 (1)] kernel=wrapped_exponential, profile_annotation=wrapped_exponential, launch dimensions=blocks: {1048576, 1, 1}, threads/block: {128, 1, 1}, cluster_dim=nullopt
+    021: kKernel [prev=020 (1) | next=022 (1)] kernel=triton_softmax_3, profile_annotation=triton_softmax.3, launch dimensions=blocks: {131072, 1, 1}, threads/block: {128, 1, 1}, cluster_dim=nullopt
+    022: kKernel [prev=021 (1) | next=023 (1)] kernel=input_transpose_fusion, profile_annotation=input_transpose_fusion, launch dimensions=blocks: {1024, 1, 1}, threads/block: {128, 1, 1}, cluster_dim=nullopt
+    023: kKernel [prev=022 (1) | sink        ] kernel=wrapped_broadcast_2, profile_annotation=wrapped_broadcast.2, launch dimensions=blocks: {32768, 1, 1}, threads/block: {128, 1, 1}, cluster_dim=nullopt
+024: kCublasLtMatmul [prev=000 (1) | next=025 (1)] CublasLtCmd
+025: kKernel         [prev=024 (1) | next=026 (1)] kernel=wrapped_transpose, profile_annotation=wrapped_transpose, launch dimensions=blocks: {32768, 1, 1}, threads/block: {128, 1, 1}, cluster_dim=nullopt
+026: kCublasLtMatmul [prev=025 (1) | next=027 (1)] CublasLtCmd
+027: kKernel         [prev=026 (1) | next=028 (1)] kernel=loop_convert_fusion, profile_annotation=loop_convert_fusion, launch dimensions=blocks: {32768, 1, 1}, threads/block: {128, 1, 1}, cluster_dim=nullopt
+028: kKernel         [prev=027 (1) | next=029 (1)] kernel=wrapped_convert, profile_annotation=wrapped_convert, launch dimensions=blocks: {32768, 1, 1}, threads/block: {128, 1, 1}, cluster_dim=nullopt
+029: kKernel         [prev=028 (1) | next=030 (1)] kernel=wrapped_add, profile_annotation=wrapped_add, launch dimensions=blocks: {32768, 1, 1}, threads/block: {128, 1, 1}, cluster_dim=nullopt
+030: kKernel         [prev=029 (1) | sink        ] kernel=wrapped_convert_3, profile_annotation=wrapped_convert.3, launch dimensions=blocks: {32768, 1, 1}, threads/block: {128, 1, 1}, cluster_dim=nullopt

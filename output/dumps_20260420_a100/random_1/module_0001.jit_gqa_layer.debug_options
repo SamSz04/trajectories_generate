@@ -1,0 +1,3 @@
+xla_dump_to: "output/dumps/random_1"
+xla_dump_hlo_pass_re: ".*priority.fusion.*"
+xla_dump_hlo_as_text: true

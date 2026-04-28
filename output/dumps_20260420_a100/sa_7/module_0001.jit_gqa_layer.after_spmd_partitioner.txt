@@ -1,0 +1,115 @@
+HloModule jit_gqa_layer, entry_computation_layout={(bf16[4096]{0}, bf16[4096,32,128]{2,1,0}, bf16[4096,8,128]{2,1,0}, bf16[4096,8,128]{2,1,0}, bf16[32,128,4096]{2,1,0}, /*index=5*/bf16[1,4096,4096]{2,1,0})->bf16[1,4096,4096]{2,1,0}}, allow_spmd_sharding_propagation_to_parameters={true,true,true,true,true,true}, allow_spmd_sharding_propagation_to_output={true}
+
+%region_0.25 (Arg_0.22: f32[], Arg_1.23: f32[]) -> f32[] {
+  %Arg_0.22 = f32[] parameter(0), metadata={op_name="jit(gqa_layer)/jit(main)/reduce_sum"}
+  %Arg_1.23 = f32[] parameter(1), metadata={op_name="jit(gqa_layer)/jit(main)/reduce_sum"}
+  ROOT %add.24 = f32[] add(%Arg_0.22, %Arg_1.23), metadata={op_name="jit(gqa_layer)/jit(main)/reduce_sum" source_file="<stdin>" source_line=27}
+}
+
+%region_1.84 (Arg_0.81: bf16[], Arg_1.82: bf16[]) -> bf16[] {
+  %Arg_0.81 = bf16[] parameter(0), metadata={op_name="jit(gqa_layer)/jit(main)/reduce_max"}
+  %Arg_1.82 = bf16[] parameter(1), metadata={op_name="jit(gqa_layer)/jit(main)/reduce_max"}
+  ROOT %maximum.83 = bf16[] maximum(%Arg_0.81, %Arg_1.82), metadata={op_name="jit(gqa_layer)/jit(main)/reduce_max" source_file="<stdin>" source_line=51}
+}
+
+%region_2.97 (Arg_0.94: f32[], Arg_1.95: f32[]) -> f32[] {
+  %Arg_0.94 = f32[] parameter(0), metadata={op_name="jit(gqa_layer)/jit(main)/reduce_sum"}
+  %Arg_1.95 = f32[] parameter(1), metadata={op_name="jit(gqa_layer)/jit(main)/reduce_sum"}
+  ROOT %add.96 = f32[] add(%Arg_0.94, %Arg_1.95), metadata={op_name="jit(gqa_layer)/jit(main)/reduce_sum" source_file="<stdin>" source_line=51}
+}
+
+ENTRY %main.113 (Arg_0.1: bf16[4096], Arg_1.2: bf16[4096,32,128], Arg_2.3: bf16[4096,8,128], Arg_3.4: bf16[4096,8,128], Arg_4.5: bf16[32,128,4096], Arg_5.6: bf16[1,4096,4096]) -> bf16[1,4096,4096] {
+  %Arg_5.6 = bf16[1,4096,4096]{2,1,0} parameter(5), metadata={op_name="x"}
+  %iota.0 = s32[4096]{0} iota(), iota_dimension=0, metadata={op_name="jit(gqa_layer)/jit(main)/jit(tril)/iota" source_file="<stdin>" source_line=49}
+  %broadcast.0 = s32[4096,4096]{1,0} broadcast(%iota.0), dimensions={0}, metadata={op_name="jit(gqa_layer)/jit(main)/jit(tril)/iota" source_file="<stdin>" source_line=49}
+  %iota.1 = s32[4096]{0} iota(), iota_dimension=0, metadata={op_name="jit(gqa_layer)/jit(main)/jit(tril)/iota" source_file="<stdin>" source_line=49}
+  %broadcast.1 = s32[4096,4096]{1,0} broadcast(%iota.1), dimensions={1}, metadata={op_name="jit(gqa_layer)/jit(main)/jit(tril)/iota" source_file="<stdin>" source_line=49}
+  %compare.0 = pred[4096,4096]{1,0} compare(%broadcast.0, %broadcast.1), direction=GE, metadata={op_name="jit(gqa_layer)/jit(main)/jit(tril)/ge" source_file="<stdin>" source_line=49}
+  %constant.9 = pred[] constant(true)
+  %broadcast.10 = pred[4096,4096]{1,0} broadcast(%constant.9), dimensions={}
+  %constant.0 = pred[] constant(false)
+  %broadcast.2 = pred[4096,4096]{1,0} broadcast(%constant.0), dimensions={}
+  %select.0 = pred[4096,4096]{1,0} select(%compare.0, %broadcast.10, %broadcast.2), metadata={op_name="jit(gqa_layer)/jit(main)/jit(tril)/select_n" source_file="<stdin>" source_line=49}
+  %broadcast.3 = pred[1,32,4096,4096]{3,2,1,0} broadcast(%select.0), dimensions={2,3}, metadata={op_name="jit(gqa_layer)/jit(main)/jit(_where)/broadcast_in_dim" source_file="<stdin>" source_line=50}
+  %multiply.20 = bf16[1,4096,4096]{2,1,0} multiply(%Arg_5.6, %Arg_5.6), metadata={op_name="jit(gqa_layer)/jit(main)/integer_pow" source_file="<stdin>" source_line=27}
+  %convert.21 = f32[1,4096,4096]{2,1,0} convert(%multiply.20), metadata={op_name="jit(gqa_layer)/jit(main)/convert_element_type" source_file="<stdin>" source_line=27}
+  %constant.19 = f32[] constant(0)
+  %reduce.26 = f32[1,4096]{1,0} reduce(%convert.21, %constant.19), dimensions={2}, to_apply=%region_0.25, metadata={op_name="jit(gqa_layer)/jit(main)/reduce_sum" source_file="<stdin>" source_line=27}
+  %reshape.27 = f32[1,4096,1]{2,1,0} reshape(%reduce.26), metadata={op_name="jit(gqa_layer)/jit(main)/broadcast_in_dim" source_file="<stdin>" source_line=27}
+  %constant.15 = f32[] constant(4096)
+  %broadcast.16 = f32[1,4096,1]{2,1,0} broadcast(%constant.15), dimensions={}
+  %divide.28 = f32[1,4096,1]{2,1,0} divide(%reshape.27, %broadcast.16), metadata={op_name="jit(gqa_layer)/jit(main)/div" source_file="<stdin>" source_line=27}
+  %convert.29 = bf16[1,4096,1]{2,1,0} convert(%divide.28), metadata={op_name="jit(gqa_layer)/jit(main)/convert_element_type" source_file="<stdin>" source_line=27}
+  %constant.13 = bf16[] constant(1.001e-05)
+  %broadcast.14 = bf16[1,4096,1]{2,1,0} broadcast(%constant.13), dimensions={}
+  %add.30 = bf16[1,4096,1]{2,1,0} add(%convert.29, %broadcast.14), metadata={op_name="jit(gqa_layer)/jit(main)/add" source_file="<stdin>" source_line=28}
+  %rsqrt.31 = bf16[1,4096,1]{2,1,0} rsqrt(%add.30), metadata={op_name="jit(gqa_layer)/jit(main)/rsqrt" source_file="<stdin>" source_line=28}
+  %broadcast.32 = bf16[1,4096,1]{2,1,0} broadcast(%rsqrt.31), dimensions={0,1,2}, metadata={op_name="jit(gqa_layer)/jit(main)/mul" source_file="<stdin>" source_line=28}
+  %reshape.33 = bf16[1,4096]{1,0} reshape(%broadcast.32), metadata={op_name="jit(gqa_layer)/jit(main)/mul" source_file="<stdin>" source_line=28}
+  %broadcast.34 = bf16[1,4096,4096]{2,1,0} broadcast(%reshape.33), dimensions={0,1}, metadata={op_name="jit(gqa_layer)/jit(main)/mul" source_file="<stdin>" source_line=28}
+  %multiply.35 = bf16[1,4096,4096]{2,1,0} multiply(%Arg_5.6, %broadcast.34), metadata={op_name="jit(gqa_layer)/jit(main)/mul" source_file="<stdin>" source_line=28}
+  %Arg_0.1 = bf16[4096]{0} parameter(0), metadata={op_name="rms_weight"}
+  %reshape.36 = bf16[1,1,4096]{2,1,0} reshape(%Arg_0.1), metadata={op_name="jit(gqa_layer)/jit(main)/broadcast_in_dim" source_file="<stdin>" source_line=28}
+  %broadcast.37 = bf16[1,1,4096]{2,1,0} broadcast(%reshape.36), dimensions={0,1,2}, metadata={op_name="jit(gqa_layer)/jit(main)/mul" source_file="<stdin>" source_line=28}
+  %reshape.38 = bf16[1,4096]{1,0} reshape(%broadcast.37), metadata={op_name="jit(gqa_layer)/jit(main)/mul" source_file="<stdin>" source_line=28}
+  %broadcast.39 = bf16[1,4096,4096]{2,1,0} broadcast(%reshape.38), dimensions={0,2}, metadata={op_name="jit(gqa_layer)/jit(main)/mul" source_file="<stdin>" source_line=28}
+  %multiply.40 = bf16[1,4096,4096]{2,1,0} multiply(%multiply.35, %broadcast.39), metadata={op_name="jit(gqa_layer)/jit(main)/mul" source_file="<stdin>" source_line=28}
+  %Arg_1.2 = bf16[4096,32,128]{2,1,0} parameter(1), metadata={op_name="wq"}
+  %reshape.41 = bf16[4096,4096]{1,0} reshape(%Arg_1.2), metadata={op_name="jit(gqa_layer)/jit(main)/reshape" source_file="<stdin>" source_line=31}
+  %dot.42 = bf16[1,4096,4096]{2,1,0} dot(%multiply.40, %reshape.41), lhs_contracting_dims={2}, rhs_contracting_dims={0}, metadata={op_name="jit(gqa_layer)/jit(main)/dot_general" source_file="<stdin>" source_line=31}
+  %reshape.43 = bf16[1,4096,32,128]{3,2,1,0} reshape(%dot.42), metadata={op_name="jit(gqa_layer)/jit(main)/reshape" source_file="<stdin>" source_line=31}
+  %transpose.54 = bf16[1,32,4096,128]{3,1,2,0} transpose(%reshape.43), dimensions={0,2,1,3}, metadata={op_name="jit(gqa_layer)/jit(main)/transpose" source_file="<stdin>" source_line=40}
+  %reshape.57 = bf16[32,4096,128]{2,1,0} reshape(%transpose.54), metadata={op_name="jit(gqa_layer)/jit(main)/squeeze" source_file="<stdin>" source_line=46}
+  %Arg_2.3 = bf16[4096,8,128]{2,1,0} parameter(2), metadata={op_name="wk"}
+  %reshape.44 = bf16[4096,1024]{1,0} reshape(%Arg_2.3), metadata={op_name="jit(gqa_layer)/jit(main)/reshape" source_file="<stdin>" source_line=32}
+  %dot.45 = bf16[1,4096,1024]{2,1,0} dot(%multiply.40, %reshape.44), lhs_contracting_dims={2}, rhs_contracting_dims={0}, metadata={op_name="jit(gqa_layer)/jit(main)/dot_general" source_file="<stdin>" source_line=32}
+  %reshape.46 = bf16[1,4096,8,128]{3,2,1,0} reshape(%dot.45), metadata={op_name="jit(gqa_layer)/jit(main)/reshape" source_file="<stdin>" source_line=32}
+  %broadcast.50 = bf16[1,4096,8,4,128]{4,3,2,1,0} broadcast(%reshape.46), dimensions={0,1,2,4}, metadata={op_name="jit(gqa_layer)/jit(main)/broadcast_in_dim" source_file="<stdin>" source_line=36}
+  %reshape.51 = bf16[1,4096,32,128]{3,2,1,0} reshape(%broadcast.50), metadata={op_name="jit(gqa_layer)/jit(main)/reshape" source_file="<stdin>" source_line=36}
+  %transpose.56 = bf16[1,32,128,4096]{2,1,3,0} transpose(%reshape.51), dimensions={0,2,3,1}, metadata={op_name="jit(gqa_layer)/jit(main)/transpose" source_file="<stdin>" source_line=46}
+  %dot.58 = bf16[32,4096,1,4096]{3,2,1,0} dot(%reshape.57, %transpose.56), lhs_batch_dims={0}, lhs_contracting_dims={2}, rhs_batch_dims={1}, rhs_contracting_dims={2}, metadata={op_name="jit(gqa_layer)/jit(main)/dot_general" source_file="<stdin>" source_line=46}
+  %reshape.59 = bf16[1,32,4096,4096]{3,2,1,0} reshape(%dot.58), metadata={op_name="jit(gqa_layer)/jit(main)/transpose" source_file="<stdin>" source_line=46}
+  %constant.11 = bf16[] constant(0.08838)
+  %broadcast.12 = bf16[1,32,4096,4096]{3,2,1,0} broadcast(%constant.11), dimensions={}
+  %multiply.60 = bf16[1,32,4096,4096]{3,2,1,0} multiply(%reshape.59, %broadcast.12), metadata={op_name="jit(gqa_layer)/jit(main)/mul" source_file="<stdin>" source_line=46}
+  %constant.18 = f32[] constant(-1e+09)
+  %convert.0 = bf16[] convert(%constant.18), metadata={op_name="jit(gqa_layer)/jit(main)/jit(_where)/convert_element_type" source_file="<stdin>" source_line=50}
+  %broadcast.4 = bf16[1,32,4096,4096]{3,2,1,0} broadcast(%convert.0), dimensions={}, metadata={op_name="jit(gqa_layer)/jit(main)/jit(_where)/broadcast_in_dim" source_file="<stdin>" source_line=50}
+  %select.1 = bf16[1,32,4096,4096]{3,2,1,0} select(%broadcast.3, %multiply.60, %broadcast.4), metadata={op_name="jit(gqa_layer)/jit(main)/jit(_where)/select_n" source_file="<stdin>" source_line=50}
+  %constant.17 = bf16[] constant(-inf)
+  %reduce.85 = bf16[1,32,4096]{2,1,0} reduce(%select.1, %constant.17), dimensions={3}, to_apply=%region_1.84, metadata={op_name="jit(gqa_layer)/jit(main)/reduce_max" source_file="<stdin>" source_line=51}
+  %constant.7 = bf16[] constant(-inf)
+  %broadcast.8 = bf16[1,32,4096]{2,1,0} broadcast(%constant.7), dimensions={}
+  %maximum.86 = bf16[1,32,4096]{2,1,0} maximum(%reduce.85, %broadcast.8), metadata={op_name="jit(gqa_layer)/jit(main)/max" source_file="<stdin>" source_line=51}
+  %reshape.87 = bf16[1,32,4096,1]{3,2,1,0} reshape(%maximum.86), metadata={op_name="jit(gqa_layer)/jit(main)/broadcast_in_dim" source_file="<stdin>" source_line=51}
+  %broadcast.88 = bf16[1,32,4096,1]{3,2,1,0} broadcast(%reshape.87), dimensions={0,1,2,3}, metadata={op_name="jit(gqa_layer)/jit(main)/sub" source_file="<stdin>" source_line=51}
+  %reshape.89 = bf16[1,32,4096]{2,1,0} reshape(%broadcast.88), metadata={op_name="jit(gqa_layer)/jit(main)/sub" source_file="<stdin>" source_line=51}
+  %broadcast.90 = bf16[1,32,4096,4096]{3,2,1,0} broadcast(%reshape.89), dimensions={0,1,2}, metadata={op_name="jit(gqa_layer)/jit(main)/sub" source_file="<stdin>" source_line=51}
+  %subtract.91 = bf16[1,32,4096,4096]{3,2,1,0} subtract(%select.1, %broadcast.90), metadata={op_name="jit(gqa_layer)/jit(main)/sub" source_file="<stdin>" source_line=51}
+  %exponential.92 = bf16[1,32,4096,4096]{3,2,1,0} exponential(%subtract.91), metadata={op_name="jit(gqa_layer)/jit(main)/exp" source_file="<stdin>" source_line=51}
+  %convert.93 = f32[1,32,4096,4096]{3,2,1,0} convert(%exponential.92), metadata={op_name="jit(gqa_layer)/jit(main)/convert_element_type" source_file="<stdin>" source_line=51}
+  %reduce.98 = f32[1,32,4096]{2,1,0} reduce(%convert.93, %constant.19), dimensions={3}, to_apply=%region_2.97, metadata={op_name="jit(gqa_layer)/jit(main)/reduce_sum" source_file="<stdin>" source_line=51}
+  %reshape.99 = f32[1,32,4096,1]{3,2,1,0} reshape(%reduce.98), metadata={op_name="jit(gqa_layer)/jit(main)/broadcast_in_dim" source_file="<stdin>" source_line=51}
+  %convert.100 = bf16[1,32,4096,1]{3,2,1,0} convert(%reshape.99), metadata={op_name="jit(gqa_layer)/jit(main)/convert_element_type" source_file="<stdin>" source_line=51}
+  %broadcast.101 = bf16[1,32,4096,1]{3,2,1,0} broadcast(%convert.100), dimensions={0,1,2,3}, metadata={op_name="jit(gqa_layer)/jit(main)/div" source_file="<stdin>" source_line=51}
+  %reshape.102 = bf16[1,32,4096]{2,1,0} reshape(%broadcast.101), metadata={op_name="jit(gqa_layer)/jit(main)/div" source_file="<stdin>" source_line=51}
+  %broadcast.103 = bf16[1,32,4096,4096]{3,2,1,0} broadcast(%reshape.102), dimensions={0,1,2}, metadata={op_name="jit(gqa_layer)/jit(main)/div" source_file="<stdin>" source_line=51}
+  %divide.104 = bf16[1,32,4096,4096]{3,2,1,0} divide(%exponential.92, %broadcast.103), metadata={op_name="jit(gqa_layer)/jit(main)/div" source_file="<stdin>" source_line=51}
+  %reshape.105 = bf16[32,4096,4096]{2,1,0} reshape(%divide.104), metadata={op_name="jit(gqa_layer)/jit(main)/squeeze" source_file="<stdin>" source_line=53}
+  %Arg_3.4 = bf16[4096,8,128]{2,1,0} parameter(3), metadata={op_name="wv"}
+  %reshape.47 = bf16[4096,1024]{1,0} reshape(%Arg_3.4), metadata={op_name="jit(gqa_layer)/jit(main)/reshape" source_file="<stdin>" source_line=33}
+  %dot.48 = bf16[1,4096,1024]{2,1,0} dot(%multiply.40, %reshape.47), lhs_contracting_dims={2}, rhs_contracting_dims={0}, metadata={op_name="jit(gqa_layer)/jit(main)/dot_general" source_file="<stdin>" source_line=33}
+  %reshape.49 = bf16[1,4096,8,128]{3,2,1,0} reshape(%dot.48), metadata={op_name="jit(gqa_layer)/jit(main)/reshape" source_file="<stdin>" source_line=33}
+  %broadcast.52 = bf16[1,4096,8,4,128]{4,3,2,1,0} broadcast(%reshape.49), dimensions={0,1,2,4}, metadata={op_name="jit(gqa_layer)/jit(main)/broadcast_in_dim" source_file="<stdin>" source_line=37}
+  %reshape.53 = bf16[1,4096,32,128]{3,2,1,0} reshape(%broadcast.52), metadata={op_name="jit(gqa_layer)/jit(main)/reshape" source_file="<stdin>" source_line=37}
+  %transpose.55 = bf16[1,32,4096,128]{3,1,2,0} transpose(%reshape.53), dimensions={0,2,1,3}, metadata={op_name="jit(gqa_layer)/jit(main)/transpose" source_file="<stdin>" source_line=42}
+  %dot.106 = bf16[32,4096,1,128]{3,2,1,0} dot(%reshape.105, %transpose.55), lhs_batch_dims={0}, lhs_contracting_dims={2}, rhs_batch_dims={1}, rhs_contracting_dims={2}, metadata={op_name="jit(gqa_layer)/jit(main)/dot_general" source_file="<stdin>" source_line=53}
+  %reshape.107 = bf16[1,32,4096,128]{3,2,1,0} reshape(%dot.106), metadata={op_name="jit(gqa_layer)/jit(main)/transpose" source_file="<stdin>" source_line=53}
+  %transpose.108 = bf16[1,4096,32,128]{3,1,2,0} transpose(%reshape.107), dimensions={0,2,1,3}, metadata={op_name="jit(gqa_layer)/jit(main)/transpose" source_file="<stdin>" source_line=54}
+  %reshape.109 = bf16[1,4096,4096]{2,1,0} reshape(%transpose.108), metadata={op_name="jit(gqa_layer)/jit(main)/reshape" source_file="<stdin>" source_line=54}
+  %Arg_4.5 = bf16[32,128,4096]{2,1,0} parameter(4), metadata={op_name="wo"}
+  %reshape.110 = bf16[4096,4096]{1,0} reshape(%Arg_4.5), metadata={op_name="jit(gqa_layer)/jit(main)/reshape" source_file="<stdin>" source_line=57}
+  %dot.111 = bf16[1,4096,4096]{2,1,0} dot(%reshape.109, %reshape.110), lhs_contracting_dims={2}, rhs_contracting_dims={0}, metadata={op_name="jit(gqa_layer)/jit(main)/dot_general" source_file="<stdin>" source_line=57}
+  ROOT %add.112 = bf16[1,4096,4096]{2,1,0} add(%Arg_5.6, %dot.111), metadata={op_name="jit(gqa_layer)/jit(main)/add" source_file="<stdin>" source_line=60}
+}
+

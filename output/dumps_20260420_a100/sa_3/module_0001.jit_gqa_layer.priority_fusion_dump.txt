@@ -1,0 +1,866 @@
+fusion_steps {
+  producer_ineligible {
+    producer_name: "triton_softmax.5"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "iota.2.0"
+    consumer_names: "compare.0.0"
+    us_fused: 55.068
+    us_unfused: 142.370499
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "slice.7.0"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "multiply.11.0"
+    consumer_names: "convert.43.0"
+    us_fused: 109.136497
+    us_unfused: 196.438751
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "compare.0.0"
+    consumer_names: "broadcast.22.0"
+    us_fused: 3112.02344
+    us_unfused: 588.986267
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "convert.43.0"
+    reason: "the consumer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "convert.38.0"
+    consumer_names: "add.112.0"
+    us_fused: 109.136497
+    us_unfused: 196.438751
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "broadcast.33.0"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "transpose.19.0"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "slice.8.0"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "triton_softmax.3"
+    reason: "the consumer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "iota.3.0"
+    consumer_names: "compare.0.0"
+    us_fused: 55.068
+    us_unfused: 142.370499
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.22.0"
+    consumer_names: "select.2.0"
+    us_fused: 2220.95
+    us_unfused: 2912.37061
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "add.112.0"
+    consumer_names: "convert.40.0"
+    us_fused: 109.136497
+    us_unfused: 196.438751
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "convert.41.0"
+    consumer_names: "multiply.11.0"
+    us_fused: 109.136497
+    us_unfused: 196.438751
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.49.0"
+    consumer_names: "convert.42.0"
+    us_fused: 45.364
+    us_unfused: 89.5155
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "slice.6.0"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "broadcast.31.0"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "transpose.15.0"
+    consumer_names: "broadcast.33.0"
+    us_fused: 201.653503
+    us_unfused: 46.2305
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "custom-call.1"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "convert.39.0"
+    consumer_names: "add.112.0"
+    us_fused: 109.136497
+    us_unfused: 196.438751
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "custom-call.2"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "concatenate.4.0"
+    reason: "the consumer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.51.0"
+    consumer_names: "multiply.11.0"
+    us_fused: 89.599
+    us_unfused: 176.901505
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.23.0"
+    consumer_names: "select.2.0"
+    us_fused: 1765.70398
+    us_unfused: 3147.54492
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "convert.44.0"
+    consumer_names: "broadcast.51.0"
+    us_fused: 45.364
+    us_unfused: 47.335
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "custom-call.0"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.2"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "triton_softmax.4"
+    consumer_names: "exponential.0.0"
+    us_fused: 1406.63
+    us_unfused: 2788.47119
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "exponential.0.0"
+    consumer_names: "triton_softmax.3"
+    us_fused: 1406.63098
+    us_unfused: 2788.47217
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "select.2.0"
+    consumer_names: "triton_softmax.4"
+    us_fused: 2442.26074
+    us_unfused: 3824.10205
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.10"
+    producer_name: "bitcast.75.0"
+    consumer_name: "convert.39.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.10"
+    consumer_names: "add.112.0"
+    us_fused: 109.136497
+    us_unfused: 196.438751
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.11"
+    producer_name: "bitcast.68.0"
+    consumer_name: "convert.41.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.11"
+    consumer_names: "multiply.11.0"
+    us_fused: 109.136497
+    us_unfused: 196.438751
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "triton_softmax.5"
+    consumer_names: "fusion.11"
+    us_fused: 66.631
+    us_unfused: 110.782249
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.12"
+    producer_name: "bitcast.35.0"
+    consumer_name: "transpose.15.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.12"
+    consumer_names: "broadcast.33.0"
+    us_fused: 201.653503
+    us_unfused: 46.2305
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "slice.8.0"
+    consumer_names: "fusion.12"
+    us_fused: 11.788
+    us_unfused: 23.576
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.13"
+    producer_name: "bitcast.26.0"
+    consumer_name: "broadcast.31.0"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.13"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "slice.7.0"
+    consumer_names: "fusion.13"
+    us_fused: 44.1515
+    us_unfused: 46.2305
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.14"
+    producer_name: "bitcast.17.0"
+    consumer_name: "slice.6.0"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.15"
+    producer_name: "bitcast.17.0"
+    consumer_name: "slice.7.0"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.16"
+    producer_name: "bitcast.17.0"
+    consumer_name: "slice.8.0"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.14"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.15"
+    consumer_names: "fusion.13"
+    us_fused: 44.1515
+    us_unfused: 46.2305
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.16"
+    consumer_names: "fusion.12"
+    us_fused: 11.788
+    us_unfused: 23.576
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.17"
+    producer_name: "bitcast.4.0"
+    consumer_name: "concatenate.4.0"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.17"
+    reason: "the consumer is not fusible"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.17"
+    producer_name: "bitcast.3.0"
+    consumer_name: "fusion.17"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.17"
+    reason: "the consumer is not fusible"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.17"
+    producer_name: "bitcast.2.0"
+    consumer_name: "fusion.17"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.17"
+    reason: "the consumer is not fusible"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.18"
+    producer_name: "compare.0.0"
+    consumer_name: "broadcast.22.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "iota.3.0"
+    consumer_names: "fusion.18"
+    us_fused: 1731.18274
+    us_unfused: 3156.1748
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.18"
+    consumer_names: "select.2.0"
+    us_fused: 4842.20605
+    us_unfused: 5533.62695
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "iota.2.0"
+    consumer_names: "fusion.18"
+    us_fused: 1731.18274
+    us_unfused: 3156.1748
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.13"
+    producer_name: "fusion.15"
+    consumer_name: "fusion.13"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.13"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.19"
+    producer_name: "triton_softmax.4"
+    consumer_name: "exponential.0.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "select.2.0"
+    consumer_names: "fusion.19"
+    us_fused: 2446.39258
+    us_unfused: 3828.2334
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.19"
+    consumer_names: "triton_softmax.3"
+    us_fused: 1427.28845
+    us_unfused: 2809.12939
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.20"
+    producer_name: "fusion.11"
+    consumer_name: "multiply.11.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.51.0"
+    consumer_names: "fusion.20"
+    us_fused: 68.1527481
+    us_unfused: 155.455246
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.20"
+    consumer_names: "convert.43.0"
+    us_fused: 87.69
+    us_unfused: 174.992493
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "triton_softmax.5"
+    consumer_names: "fusion.20"
+    us_fused: 109.911247
+    us_unfused: 154.062744
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.21"
+    producer_name: "fusion.20"
+    consumer_name: "convert.43.0"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.21"
+    reason: "the consumer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.51.0"
+    consumer_names: "fusion.21"
+    us_fused: 46.7062492
+    us_unfused: 134.008743
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "triton_softmax.5"
+    consumer_names: "fusion.21"
+    us_fused: 88.465
+    us_unfused: 132.616257
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.22"
+    producer_name: "fusion.18"
+    consumer_name: "select.2.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.23.0"
+    consumer_names: "fusion.22"
+    us_fused: 4186.30664
+    us_unfused: 5568.14795
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "iota.2.0"
+    consumer_names: "fusion.22"
+    us_fused: 3461.36548
+    us_unfused: 4886.35742
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "iota.3.0"
+    consumer_names: "fusion.22"
+    us_fused: 3461.36548
+    us_unfused: 4886.35742
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.2"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.22"
+    consumer_names: "fusion.19"
+    us_fused: 2792.63574
+    us_unfused: 6248.83643
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.23"
+    producer_name: "convert.44.0"
+    consumer_name: "broadcast.51.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.23"
+    consumer_names: "fusion.21"
+    us_fused: 45.7517509
+    us_unfused: 133.054
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.22"
+    producer_name: "iota.2.0"
+    consumer_name: "fusion.22"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.2"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.23.0"
+    consumer_names: "fusion.22"
+    us_fused: 2805.46606
+    us_unfused: 4187.30713
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "iota.3.0"
+    consumer_names: "fusion.22"
+    us_fused: 2080.52466
+    us_unfused: 3505.51685
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.22"
+    consumer_names: "fusion.19"
+    us_fused: 2447.42554
+    us_unfused: 4867.99561
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.21"
+    producer_name: "fusion.23"
+    consumer_name: "fusion.21"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.21"
+    reason: "the consumer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "triton_softmax.5"
+    consumer_names: "fusion.21"
+    us_fused: 45.6207504
+    us_unfused: 90.678
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.22"
+    producer_name: "iota.3.0"
+    consumer_name: "fusion.22"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.2"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "broadcast.23.0"
+    consumer_names: "fusion.22"
+    us_fused: 1424.62524
+    us_unfused: 2806.46631
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.22"
+    consumer_names: "fusion.19"
+    us_fused: 2102.21533
+    us_unfused: 3487.15479
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.12"
+    producer_name: "fusion.16"
+    consumer_name: "fusion.12"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.12"
+    consumer_names: "broadcast.33.0"
+    us_fused: 712.996277
+    us_unfused: 46.2305
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.24"
+    producer_name: "convert.38.0"
+    consumer_name: "add.112.0"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.24"
+    consumer_names: "convert.40.0"
+    us_fused: 87.69
+    us_unfused: 174.992493
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.10"
+    consumer_names: "fusion.24"
+    us_fused: 87.69
+    us_unfused: 174.992493
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.21"
+    producer_name: "triton_softmax.5"
+    consumer_name: "fusion.21"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.21"
+    reason: "the consumer is not fusible"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.25"
+    producer_name: "broadcast.49.0"
+    consumer_name: "convert.42.0"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.25"
+    reason: "No users to fuse"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.26"
+    producer_name: "fusion.12"
+    consumer_name: "broadcast.33.0"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.26"
+    reason: "not fusing because there are only bitcast users"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.24"
+    producer_name: "fusion.10"
+    consumer_name: "fusion.24"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.24"
+    consumer_names: "convert.40.0"
+    us_fused: 66.2437515
+    us_unfused: 153.546
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.22"
+    producer_name: "broadcast.23.0"
+    consumer_name: "fusion.22"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.2"
+    reason: "the producer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.22"
+    consumer_names: "fusion.19"
+    us_fused: 1411.79675
+    us_unfused: 2831.25537
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "triton_softmax.3"
+    producer_name: "fusion.19"
+    consumer_name: "triton_softmax.3"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "triton_softmax.3"
+    reason: "the consumer is not fusible"
+  }
+}
+fusion_steps {
+  update_priority {
+    producer_name: "fusion.22"
+    consumer_names: "triton_softmax.3"
+    us_fused: 1432.45496
+    us_unfused: 2851.91382
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "fusion.27"
+    producer_name: "fusion.24"
+    consumer_name: "convert.40.0"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "fusion.27"
+    reason: "No users to fuse"
+  }
+}
+fusion_steps {
+  fusion {
+    fusion_name: "triton_softmax.3"
+    producer_name: "fusion.22"
+    consumer_name: "triton_softmax.3"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "triton_softmax.3"
+    reason: "the consumer is not fusible"
+  }
+}
+fusion_steps {
+  producer_ineligible {
+    producer_name: "gemm_fusion_dot.2"
+    reason: "the producer is not fusible"
+  }
+}
+gpu_device_info {
+  threads_per_block_limit: 1024
+  threads_per_warp: 32
+  shared_memory_per_block: 49152
+  shared_memory_per_core: 167936
+  threads_per_core_limit: 2048
+  core_count: 108
+  fpus_per_core: 64
+  block_dim_limit_x: 2147483647
+  block_dim_limit_y: 65535
+  block_dim_limit_z: 65535
+  memory_bandwidth: 1555200000000
+  l2_cache_size: 41943040
+  clock_rate_ghz: 1.41
+  device_memory_size: 42298834944
+  shared_memory_per_block_optin: 166912
+  cuda_compute_capability {
+    major: 8
+    feature_extension: NONE
+  }
+  registers_per_core_limit: 65536
+  registers_per_block_limit: 65536
+  driver_version: "12.2.0"
+  kernel_mode_driver_version: "535.216.1"
+  runtime_version: "12.9.0"
+  compile_time_toolkit_version: "12.9.0"
+  dnn_version: "9.8.0"
+  cub_version: "3.2.0"
+  device_vendor: "NVIDIA Corporation"
+  platform_version: "Compute Capability 8.0"
+  pci_bus_id: "<undefined>"
+  name: "NVIDIA A100-SXM4-40GB"
+  model_str: "sm_8.0 with 42298834944B RAM, 108 cores, 1410000KHz clock, 1215000KHz mem clock, 41943040B L2$"
+  numa_node: -1
+  thread_dim_limit_x: 1024
+  thread_dim_limit_y: 1024
+  thread_dim_limit_z: 64
+  device_address_bits: 64
+  pcie_bandwidth: 34359738368
+  ecc_enabled: true
+}
+hlo_module_before_fusion: "HloModule jit_gqa_layer, entry_computation_layout={(bf16[4096]{0}, bf16[4096,32,128]{2,1,0}, bf16[4096,8,128]{2,1,0}, bf16[4096,8,128]{2,1,0}, bf16[32,128,4096]{2,1,0}, /*index=5*/bf16[1,4096,4096]{2,1,0})->bf16[1,4096,4096]{2,1,0}}, allow_spmd_sharding_propagation_to_parameters={true,true,true,true,true,true}, allow_spmd_sharding_propagation_to_output={true}\n\ngemm_fusion_dot.2_computation {\n  parameter_0.1 = bf16[32,128,4096]{2,1,0} parameter(0)\n  transpose.17 = bf16[32,4096,128]{2,1,0} transpose(parameter_0.1), dimensions={0,2,1}\n  parameter_1.1 = bf16[32,128,4096]{2,1,0} parameter(1)\n  dot.9 = bf16[32,4096,4096]{2,1,0} dot(transpose.17, parameter_1.1), lhs_batch_dims={0}, lhs_contracting_dims={2}, rhs_batch_dims={0}, rhs_contracting_dims={1}, backend_config={\"sizes\":[\"16\"]}\n  convert.16 = f32[32,4096,4096]{2,1,0} convert(dot.9)\n  constant.3 = bf16[] constant(0.08838)\n  broadcast.36 = bf16[32,4096,4096]{2,1,0} broadcast(constant.3), dimensions={}\n  convert.17 = f32[32,4096,4096]{2,1,0} convert(broadcast.36)\n  multiply.4 = f32[32,4096,4096]{2,1,0} multiply(convert.16, convert.17)\n  ROOT convert.18 = bf16[32,4096,4096]{2,1,0} convert(multiply.4)\n}\n\nregion_0.25.clone {\n  Arg_0.0 = f32[] parameter(0)\n  Arg_1.0 = f32[] parameter(1)\n  ROOT add.1.0 = f32[] add(Arg_0.0, Arg_1.0)\n}\n\ntriton_softmax_computation.3 {\n  parameter_0.7 = bf16[32,4096,4096]{2,1,0} parameter(0)\n  convert.19 = f32[32,4096,4096]{2,1,0} convert(parameter_0.7)\n  constant.12 = f32[] constant(0)\n  reduce.6 = f32[32,4096]{1,0} reduce(convert.19, constant.12), dimensions={2}, to_apply=region_0.25.clone\n  convert.10 = bf16[32,4096]{1,0} convert(reduce.6)\n  broadcast.44 = bf16[32,4096,4096]{2,1,0} broadcast(convert.10), dimensions={0,1}\n  convert.20 = f32[32,4096,4096]{2,1,0} convert(broadcast.44)\n  divide.2 = f32[32,4096,4096]{2,1,0} divide(convert.19, convert.20)\n  ROOT convert.22 = bf16[32,4096,4096]{2,1,0} convert(divide.2)\n}\n\nregion_1.84 {\n  Arg_0.81 = bf16[] parameter(0)\n  Arg_1.82 = bf16[] parameter(1)\n  ROOT maximum.83.0 = bf16[] maximum(Arg_0.81, Arg_1.82)\n}\n\ntriton_softmax_computation.4 {\n  parameter_0.8 = bf16[32,4096,4096]{2,1,0} parameter(0)\n  convert.23 = f32[32,4096,4096]{2,1,0} convert(parameter_0.8)\n  constant.14 = bf16[] constant(-inf)\n  reduce.7 = bf16[32,4096]{1,0} reduce(parameter_0.8, constant.14), dimensions={2}, to_apply=region_1.84\n  broadcast.45 = bf16[32,4096,4096]{2,1,0} broadcast(reduce.7), dimensions={0,1}\n  convert.24 = f32[32,4096,4096]{2,1,0} convert(broadcast.45)\n  subtract.2 = f32[32,4096,4096]{2,1,0} subtract(convert.23, convert.24)\n  ROOT convert.25 = bf16[32,4096,4096]{2,1,0} convert(subtract.2)\n}\n\nregion_0.25 {\n  Arg_0.22 = f32[] parameter(0)\n  Arg_1.23 = f32[] parameter(1)\n  ROOT add.24.0 = f32[] add(Arg_0.22, Arg_1.23)\n}\n\ntriton_softmax_computation.5 {\n  parameter_0.9 = bf16[1,4096,4096]{2,1,0} parameter(0)\n  convert.35 = f32[1,4096,4096]{2,1,0} convert(parameter_0.9)\n  multiply.8 = f32[1,4096,4096]{2,1,0} multiply(convert.35, convert.35)\n  bitcast.91 = f32[4096,4096]{1,0} bitcast(multiply.8)\n  constant.16 = f32[] constant(0)\n  reduce.8 = f32[4096]{0} reduce(bitcast.91, constant.16), dimensions={1}, to_apply=region_0.25\n  bitcast.92 = f32[1,4096]{1,0} bitcast(reduce.8)\n  constant.20 = f32[] constant(0.000244140625)\n  broadcast.46 = f32[1,4096]{1,0} broadcast(constant.20), dimensions={}\n  multiply.9 = f32[1,4096]{1,0} multiply(bitcast.92, broadcast.46)\n  constant.21 = bf16[] constant(1.001e-05)\n  broadcast.47 = bf16[1,4096]{1,0} broadcast(constant.21), dimensions={}\n  convert.31 = f32[1,4096]{1,0} convert(broadcast.47)\n  add.3 = f32[1,4096]{1,0} add(multiply.9, convert.31)\n  rsqrt.2 = f32[1,4096]{1,0} rsqrt(add.3)\n  convert.34 = bf16[1,4096]{1,0} convert(rsqrt.2)\n  bitcast.93 = bf16[4096]{0} bitcast(convert.34)\n  broadcast.48 = bf16[1,4096,4096]{2,1,0} broadcast(bitcast.93), dimensions={1}\n  convert.36 = f32[1,4096,4096]{2,1,0} convert(broadcast.48)\n  multiply.10 = f32[1,4096,4096]{2,1,0} multiply(convert.35, convert.36)\n  ROOT convert.37 = bf16[1,4096,4096]{2,1,0} convert(multiply.10)\n}\n\nENTRY main.113 {\n  Arg_5.6 = bf16[1,4096,4096]{2,1,0} parameter(5)\n  convert.38.0 = f32[1,4096,4096]{2,1,0} convert(Arg_5.6)\n  iota.2.0 = s32[4096,4096]{1,0} iota(), iota_dimension=0\n  iota.3.0 = s32[4096,4096]{1,0} iota(), iota_dimension=1\n  compare.0.0 = pred[4096,4096]{1,0} compare(iota.2.0, iota.3.0), direction=GE\n  broadcast.22.0 = pred[32,4096,4096]{2,1,0} broadcast(compare.0.0), dimensions={1,2}\n  triton_softmax.5 = bf16[1,4096,4096]{2,1,0} fusion(Arg_5.6), kind=kCustom, calls=triton_softmax_computation.5, backend_config={\"operation_queue_id\":\"0\",\"fusion_backend_config\":{\"kind\":\"__triton\",\"block_level_fusion_config\":{\"num_warps\":\"4\",\"output_tiles\":[{\"sizes\":[\"1\",\"1\",\"4096\"]}],\"num_ctas\":1,\"num_stages\":1,\"is_tma_allowed\":false,\"is_warp_specialization_allowed\":false,\"waves_per_eu\":0}},\"force_earliest_schedule\":false,\"reification_cost\":[],\"device_type\":\"DEVICE_TYPE_INVALID\"}\n  bitcast.68.0 = bf16[4096,4096]{1,0} bitcast(triton_softmax.5)\n  convert.41.0 = f32[4096,4096]{1,0} convert(bitcast.68.0)\n  Arg_0.1 = bf16[4096]{0} parameter(0)\n  convert.44.0 = f32[4096]{0} convert(Arg_0.1)\n  broadcast.51.0 = f32[4096,4096]{1,0} broadcast(convert.44.0), dimensions={1}\n  multiply.11.0 = f32[4096,4096]{1,0} multiply(convert.41.0, broadcast.51.0)\n  convert.43.0 = bf16[4096,4096]{1,0} convert(multiply.11.0)\n  Arg_1.2 = bf16[4096,32,128]{2,1,0} parameter(1)\n  bitcast.2.0 = bf16[4096,4096]{1,0} bitcast(Arg_1.2)\n  Arg_2.3 = bf16[4096,8,128]{2,1,0} parameter(2)\n  bitcast.3.0 = bf16[4096,1024]{1,0} bitcast(Arg_2.3)\n  Arg_3.4 = bf16[4096,8,128]{2,1,0} parameter(3)\n  bitcast.4.0 = bf16[4096,1024]{1,0} bitcast(Arg_3.4)\n  concatenate.4.0 = bf16[4096,6144]{1,0} concatenate(bitcast.2.0, bitcast.3.0, bitcast.4.0), dimensions={1}\n  custom-call.1 = (bf16[4096,6144]{0,1}, s8[4194304]{0}) custom-call(convert.43.0, concatenate.4.0), custom_call_target=\"__cublas$lt$matmul\", backend_config={\"operation_queue_id\":\"0\",\"gemm_backend_config\":{\"selected_algorithm\":\"2\",\"alpha_real\":1,\"beta\":0,\"dot_dimension_numbers\":{\"lhs_contracting_dimensions\":[\"1\"],\"rhs_contracting_dimensions\":[\"0\"],\"lhs_batch_dimensions\":[],\"rhs_batch_dimensions\":[]},\"alpha_imag\":0,\"precision_config\":{\"operand_precision\":[\"DEFAULT\",\"DEFAULT\"],\"algorithm\":\"ALG_UNSET\"},\"epilogue\":\"DEFAULT\",\"lhs_stride\":\"16777216\",\"rhs_stride\":\"25165824\",\"grad_x\":false,\"grad_y\":false,\"damax_output\":false,\"autotune_workspace_size\":\"4194304\",\"scale_mode\":0},\"force_earliest_schedule\":false,\"reification_cost\":[],\"device_type\":\"DEVICE_TYPE_INVALID\"}\n  get-tuple-element.3 = bf16[4096,6144]{0,1} get-tuple-element(custom-call.1), index=0\n  bitcast.17.0 = bf16[6144,4096]{1,0} bitcast(get-tuple-element.3)\n  slice.6.0 = bf16[4096,4096]{1,0} slice(bitcast.17.0), slice={[0:4096], [0:4096]}\n  bitcast.70.0 = bf16[32,128,4096]{2,1,0} bitcast(slice.6.0)\n  slice.7.0 = bf16[1024,4096]{1,0} slice(bitcast.17.0), slice={[4096:5120], [0:4096]}\n  bitcast.26.0 = bf16[8,128,4096]{2,1,0} bitcast(slice.7.0)\n  broadcast.31.0 = bf16[1,8,4,128,4096]{4,3,2,1,0} broadcast(bitcast.26.0), dimensions={1,3,4}\n  bitcast.69.0 = bf16[32,128,4096]{2,1,0} bitcast(broadcast.31.0)\n  gemm_fusion_dot.2 = bf16[32,4096,4096]{2,1,0} fusion(bitcast.70.0, bitcast.69.0), kind=kCustom, calls=gemm_fusion_dot.2_computation, backend_config={\"operation_queue_id\":\"0\",\"fusion_backend_config\":{\"kind\":\"__triton_nested_gemm_fusion\",\"block_level_fusion_config\":{\"num_warps\":\"2\",\"output_tiles\":[{\"sizes\":[\"1\",\"64\",\"128\"]}],\"num_ctas\":1,\"num_stages\":4,\"is_tma_allowed\":false,\"is_warp_specialization_allowed\":false,\"waves_per_eu\":0}},\"force_earliest_schedule\":false,\"reification_cost\":[],\"device_type\":\"DEVICE_TYPE_INVALID\"}\n  constant.2.0 = bf16[] constant(-9.982e+08)\n  broadcast.23.0 = bf16[32,4096,4096]{2,1,0} broadcast(constant.2.0), dimensions={}\n  select.2.0 = bf16[32,4096,4096]{2,1,0} select(broadcast.22.0, gemm_fusion_dot.2, broadcast.23.0)\n  triton_softmax.4 = bf16[32,4096,4096]{2,1,0} fusion(select.2.0), kind=kCustom, calls=triton_softmax_computation.4, backend_config={\"operation_queue_id\":\"0\",\"fusion_backend_config\":{\"kind\":\"__triton\",\"block_level_fusion_config\":{\"num_warps\":\"4\",\"output_tiles\":[{\"sizes\":[\"1\",\"1\",\"4096\"]}],\"num_ctas\":1,\"num_stages\":1,\"is_tma_allowed\":false,\"is_warp_specialization_allowed\":false,\"waves_per_eu\":0}},\"force_earliest_schedule\":false,\"reification_cost\":[],\"device_type\":\"DEVICE_TYPE_INVALID\"}\n  exponential.0.0 = bf16[32,4096,4096]{2,1,0} exponential(triton_softmax.4)\n  triton_softmax.3 = bf16[32,4096,4096]{2,1,0} fusion(exponential.0.0), kind=kCustom, calls=triton_softmax_computation.3, backend_config={\"operation_queue_id\":\"0\",\"fusion_backend_config\":{\"kind\":\"__triton\",\"block_level_fusion_config\":{\"num_warps\":\"4\",\"output_tiles\":[{\"sizes\":[\"1\",\"1\",\"4096\"]}],\"num_ctas\":1,\"num_stages\":1,\"is_tma_allowed\":false,\"is_warp_specialization_allowed\":false,\"waves_per_eu\":0}},\"force_earliest_schedule\":false,\"reification_cost\":[],\"device_type\":\"DEVICE_TYPE_INVALID\"}\n  slice.8.0 = bf16[1024,4096]{1,0} slice(bitcast.17.0), slice={[5120:6144], [0:4096]}\n  bitcast.35.0 = bf16[8,128,4096]{2,1,0} bitcast(slice.8.0)\n  transpose.15.0 = bf16[8,4096,128]{2,1,0} transpose(bitcast.35.0), dimensions={0,2,1}\n  broadcast.33.0 = bf16[1,8,4,4096,128]{4,3,2,1,0} broadcast(transpose.15.0), dimensions={1,3,4}\n  bitcast.73.0 = bf16[32,4096,128]{2,1,0} bitcast(broadcast.33.0)\n  custom-call.2 = (bf16[32,4096,128]{2,1,0}, s8[4194304]{0}) custom-call(triton_softmax.3, bitcast.73.0), custom_call_target=\"__cublas$lt$matmul\", backend_config={\"operation_queue_id\":\"0\",\"gemm_backend_config\":{\"selected_algorithm\":\"1\",\"alpha_real\":1,\"beta\":0,\"dot_dimension_numbers\":{\"lhs_contracting_dimensions\":[\"2\"],\"rhs_contracting_dimensions\":[\"1\"],\"lhs_batch_dimensions\":[\"0\"],\"rhs_batch_dimensions\":[\"0\"]},\"alpha_imag\":0,\"precision_config\":{\"operand_precision\":[\"DEFAULT\",\"DEFAULT\"],\"algorithm\":\"ALG_UNSET\"},\"epilogue\":\"DEFAULT\",\"lhs_stride\":\"16777216\",\"rhs_stride\":\"524288\",\"grad_x\":false,\"grad_y\":false,\"damax_output\":false,\"autotune_workspace_size\":\"4194304\",\"scale_mode\":0},\"force_earliest_schedule\":false,\"reification_cost\":[],\"device_type\":\"DEVICE_TYPE_INVALID\"}\n  get-tuple-element.2.0 = bf16[32,4096,128]{2,1,0} get-tuple-element(custom-call.2), index=0\n  transpose.19.0 = bf16[4096,32,128]{2,1,0} transpose(get-tuple-element.2.0), dimensions={1,0,2}\n  bitcast.72.0 = bf16[4096,4096]{1,0} bitcast(transpose.19.0)\n  Arg_4.5 = bf16[32,128,4096]{2,1,0} parameter(4)\n  bitcast.76.0 = bf16[4096,4096]{1,0} bitcast(Arg_4.5)\n  custom-call.0 = (bf16[4096,4096]{1,0}, s8[4194304]{0}) custom-call(bitcast.72.0, bitcast.76.0), custom_call_target=\"__cublas$lt$matmul\", backend_config={\"operation_queue_id\":\"0\",\"gemm_backend_config\":{\"selected_algorithm\":\"2\",\"alpha_real\":1,\"beta\":0,\"dot_dimension_numbers\":{\"lhs_contracting_dimensions\":[\"1\"],\"rhs_contracting_dimensions\":[\"0\"],\"lhs_batch_dimensions\":[],\"rhs_batch_dimensions\":[]},\"alpha_imag\":0,\"precision_config\":{\"operand_precision\":[\"DEFAULT\",\"DEFAULT\"],\"algorithm\":\"ALG_UNSET\"},\"epilogue\":\"DEFAULT\",\"lhs_stride\":\"16777216\",\"rhs_stride\":\"16777216\",\"grad_x\":false,\"grad_y\":false,\"damax_output\":false,\"autotune_workspace_size\":\"4194304\",\"scale_mode\":0},\"force_earliest_schedule\":false,\"reification_cost\":[],\"device_type\":\"DEVICE_TYPE_INVALID\"}\n  get-tuple-element.1.0 = bf16[4096,4096]{1,0} get-tuple-element(custom-call.0), index=0\n  bitcast.75.0 = bf16[1,4096,4096]{2,1,0} bitcast(get-tuple-element.1.0)\n  convert.39.0 = f32[1,4096,4096]{2,1,0} convert(bitcast.75.0)\n  add.112.0 = f32[1,4096,4096]{2,1,0} add(convert.38.0, convert.39.0)\n  ROOT convert.40.0 = bf16[1,4096,4096]{2,1,0} convert(add.112.0)\n  broadcast.49.0 = bf16[4096,4096]{1,0} broadcast(Arg_0.1), dimensions={1}\n  convert.42.0 = f32[4096,4096]{1,0} convert(broadcast.49.0)\n}\n\n"
