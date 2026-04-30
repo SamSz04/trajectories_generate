@@ -36,7 +36,7 @@ def build_initial_graph(hlo_path: str):
     """Parse HLO and build PyG graph with encoded features.
 
     Returns:
-        PyG Data object with x (num_nodes, 19), edge_index, node_names, etc.
+        PyG Data object with x (num_nodes, 27), edge_index, node_names, etc.
     """
     module = parse_hlo_file(hlo_path)
     data = build_graph(module)

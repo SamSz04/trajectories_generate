@@ -13,6 +13,8 @@ from torch.utils.data import Dataset, DataLoader
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(PROJECT_ROOT, "references", "GO_fusion"))
 
+from src.hlo_parser.feature_encoder import encode_features, FEATURE_DIM
+
 from src.hlo_parser.parser import parse_hlo_file
 from src.hlo_parser.graph_builder import build_graph
 from src.hlo_parser.feature_encoder import encode_features
@@ -36,6 +38,10 @@ def load_trajectories(
     data = torch.load(traj_path, weights_only=False)
     trajectories = data["trajectories"]
     graph_data = data["initial_graph"]
+
+    # Re-encode features if graph was saved with older feature dim
+    if graph_data.x.shape[1] != FEATURE_DIM and hasattr(graph_data, 'instructions'):
+        graph_data = encode_features(graph_data)
 
     # Remap any remaining -1 producer_ids (fusion.N nodes) to FUSION_TOKEN_ID
     for traj in trajectories:

@@ -35,7 +35,7 @@ class GraphEncoder(nn.Module):
         hidden_dim: int = 64,
         num_opcodes: int = 132,
         opcode_dim: int = 16,
-        num_cont_features: int = 19,
+        num_cont_features: int = 27,
         num_gnn_layers: int = 2,
     ):
         super().__init__()
