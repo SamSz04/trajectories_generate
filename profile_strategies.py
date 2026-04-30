@@ -107,7 +107,19 @@ def discover_modules(dump_base):
 
 
 def find_hlo_input(dump_base, module_path):
-    """Find the before_optimizations.txt HLO file for a module."""
+    """Find the HLO input file for a module.
+
+    Prefers original .hlo from ~/hlo_datasets/ (required for --with-dumps
+    to produce priority_fusion_dump.txt). Falls back to before_optimizations
+    from xla_default (works for nsys-only profiling).
+    """
+    # Prefer original HLO from hlo_datasets (produces correct fusion dumps)
+    model, module = module_path.split("/", 1)
+    hlo_datasets = os.path.join(os.path.expanduser("~"), "hlo_datasets", model, module)
+    hlo_glob = glob.glob(os.path.join(hlo_datasets, "*.hlo"))
+    if hlo_glob:
+        return hlo_glob[0]
+    # Fallback: before_optimizations from xla_default
     xla_dir = os.path.join(dump_base, module_path, "xla_default")
     pattern = os.path.join(xla_dir, "*before_optimizations*")
     matches = glob.glob(pattern)
@@ -322,7 +334,7 @@ def main():
         for module in modules:
             plan_key = module.replace("/", "__")
             plan_count += len(glob.glob(os.path.join(
-                args.plan_dir, plan_key, "plan_perturb_*.json")))
+                args.plan_dir, plan_key, "plan_*.json")))
 
     print(f"Strategies per module: {len(all_strategies)} env-var" +
           (f" + plans ({plan_count} total)" if plan_count else ""))
@@ -370,7 +382,7 @@ def main():
         if args.plan_dir:
             plan_key = module.replace("/", "__")
             for pf in sorted(glob.glob(os.path.join(
-                    args.plan_dir, plan_key, "plan_perturb_*.json"))):
+                    args.plan_dir, plan_key, "plan_*.json"))):
                 plan_name = os.path.splitext(os.path.basename(pf))[0]
                 module_strategies.append((
                     plan_name,
@@ -417,6 +429,16 @@ def main():
                 print(f" → {avg_us:.0f} us, {result['num_kernel_types']} kernels")
             else:
                 print(f" → FAILED")
+
+            # Clean up non-module_0001 dump files to save disk space.
+            # Keep only module_0001.* files; delete module_00NN.* for NN != 01.
+            if dump_dir and os.path.isdir(dump_dir):
+                for f in os.listdir(dump_dir):
+                    if f.startswith("module_") and not f.startswith("module_0001"):
+                        try:
+                            os.remove(os.path.join(dump_dir, f))
+                        except OSError:
+                            pass
 
     csvfile.close()
     total_time = time.time() - t_start

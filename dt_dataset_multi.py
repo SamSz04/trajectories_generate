@@ -27,6 +27,8 @@ from torch.utils.data import Dataset, DataLoader
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(PROJECT_ROOT, "references", "GO_fusion"))
 
+from src.hlo_parser.feature_encoder import encode_features, FEATURE_DIM
+
 
 def load_gpu_rewards(csv_path: str) -> Dict[Tuple[str, str], float]:
     """Load real GPU kernel times from profiling CSV.
@@ -78,6 +80,11 @@ def load_multi_module_data(
             continue
 
         graph = data["initial_graph"]
+
+        # Re-encode features if graph was saved with older feature dim
+        if graph.x.shape[1] != FEATURE_DIM and hasattr(graph, 'instructions'):
+            graph = encode_features(graph)
+
         num_nodes = graph.num_nodes
 
         module_id = len(modules)
