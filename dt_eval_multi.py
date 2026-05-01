@@ -50,7 +50,7 @@ from sa_orchestrator import write_plan_file
 class BeamState:
     """State of a single beam during beam search."""
     actions: List[int] = field(default_factory=list)
-    fused: set = field(default_factory=set)
+    fused_count: Dict[int, int] = field(default_factory=dict)
     log_prob: float = 0.0
     finished: bool = False
 
@@ -64,6 +64,7 @@ def greedy_generate(
     fusion_penalty: float = 0.0,
     max_consec_fusion: int = 0,
     temperature: float = 0.0,
+    repeat_penalty: float = 1.0,
 ) -> List[int]:
     """Greedy autoregressive generation with constrained decoding.
 
@@ -76,6 +77,7 @@ def greedy_generate(
         fusion_penalty: Subtract from fusion token logit (higher = fewer fusion.N).
         max_consec_fusion: Force real node after N consecutive fusion.N (0 = disabled).
         temperature: Sampling temperature (0 = greedy).
+        repeat_penalty: Logit penalty per prior selection (replaces -inf blocking).
 
     Returns:
         List of action IDs.
@@ -88,7 +90,7 @@ def greedy_generate(
     context_len = model.context_len
 
     actions = []
-    fused = set()
+    fused_count = {}  # node_id -> selection count (allows repeated selection)
     consec_fusion = 0
 
     all_rtg = []
@@ -102,7 +104,7 @@ def greedy_generate(
     with torch.no_grad():
         for step in range(max_steps):
             mask = torch.zeros(num_nodes, device=device)
-            for i in fused:
+            for i in fused_count:
                 mask[i] = 1.0
 
             all_rtg.append(target_rtg)
@@ -142,9 +144,10 @@ def greedy_generate(
                            attn_mask, node_embeds, node_mask)
             action_logits = logits[0, t_eff - 1]  # [num_actions]
 
-            # Mask already-fused nodes
-            for i in fused:
-                action_logits[i] = float("-inf")
+            # Penalize already-selected nodes (soft penalty instead of -inf)
+            if repeat_penalty > 0:
+                for i, cnt in fused_count.items():
+                    action_logits[i] -= repeat_penalty * cnt
             # Mask padding nodes
             action_logits[:num_nodes][node_mask[0][:num_nodes] == 0] = float("-inf")
 
@@ -172,9 +175,9 @@ def greedy_generate(
                 consec_fusion = 0
 
             if action < num_nodes:
-                fused.add(action)
+                fused_count[action] = fused_count.get(action, 0) + 1
 
-            if len(fused) >= num_real_nodes:
+            if len(fused_count) >= num_real_nodes:
                 break
 
     return actions
@@ -189,6 +192,7 @@ def beam_search_generate(
     max_steps: int = 300,
     fusion_penalty: float = 0.0,
     max_consec_fusion: int = 0,
+    repeat_penalty: float = 1.0,
 ) -> List[List[int]]:
     """Beam search over the pointer-network action head.
 
@@ -259,10 +263,11 @@ def beam_search_generate(
                 )
                 step_logits = logits[0, t - 1]  # [num_actions]
 
-                # Mask already-fused nodes
-                for i in beam.fused:
-                    if i < num_nodes:
-                        step_logits[i] = float("-inf")
+                # Penalize already-selected nodes (soft penalty instead of -inf)
+                if repeat_penalty > 0:
+                    for i, cnt in beam.fused_count.items():
+                        if i < num_nodes:
+                            step_logits[i] -= repeat_penalty * cnt
 
                 # Mask padding nodes
                 action_mask = torch.cat([
@@ -291,15 +296,15 @@ def beam_search_generate(
                 topk_lp, topk_ids = log_probs.topk(min(beam_width, (step_logits > float("-inf")).sum().item()))
 
                 for lp, aid in zip(topk_lp.tolist(), topk_ids.tolist()):
-                    new_fused = set(beam.fused)
+                    new_fused_count = dict(beam.fused_count)
                     if aid < num_nodes:
-                        new_fused.add(aid)
+                        new_fused_count[aid] = new_fused_count.get(aid, 0) + 1
 
-                    finished = len(new_fused) >= num_real_nodes
+                    finished = len(new_fused_count) >= num_real_nodes
 
                     candidates.append(BeamState(
                         actions=beam.actions + [aid],
-                        fused=new_fused,
+                        fused_count=new_fused_count,
                         log_prob=beam.log_prob + lp,
                         finished=finished,
                     ))
@@ -322,17 +327,16 @@ def actions_to_producer_names(
 ) -> List[str]:
     """Convert action IDs to producer name strings.
 
-    Regular node IDs map to node_names. The fusion token (>= num_real_nodes
-    or == max_nodes) maps to 'fusion.N' placeholder.
+    Only real-node actions are included. Fusion token actions (>= num_real_nodes
+    or == max_nodes) are stripped — they get priority 0 in XLA anyway since
+    the sequential names don't match XLA's dynamic fusion naming.
+    Real nodes may appear multiple times (for multi-consumer fusions).
     """
     names = []
-    fusion_count = 0
     for a in actions:
         if a < len(node_names):
             names.append(node_names[a])
-        else:
-            names.append(f"fusion.{fusion_count}")
-            fusion_count += 1
+        # else: skip fusion token actions entirely
     return names
 
 
@@ -463,6 +467,10 @@ def main():
                         help="Force real node after N consecutive fusion.N (0 = disabled)")
     parser.add_argument("--temperature", type=float, default=0.0,
                         help="Sampling temperature for greedy (0 = argmax)")
+    parser.add_argument("--repeat-penalty", type=float, default=1.0,
+                        help="Logit penalty per prior selection (replaces -inf blocking)")
+    parser.add_argument("--max-steps-factor", type=float, default=0.0,
+                        help="Compute max_steps = num_real_nodes * factor (0 = use --max-steps)")
     args = parser.parse_args()
 
     device = torch.device(args.device)
@@ -526,20 +534,28 @@ def main():
         mode_str = "greedy" if args.beam_width <= 1 else f"beam_{args.beam_width}"
         print(f"\n  {module_key} ({num_nodes_actual} nodes):")
 
+        # Compute per-module max_steps
+        if args.max_steps_factor > 0:
+            effective_max_steps = int(num_nodes_actual * args.max_steps_factor)
+        else:
+            effective_max_steps = args.max_steps
+
         if args.beam_width <= 1:
             actions = greedy_generate(
-                model, padded_ne, nm, args.target_rtg, args.max_steps,
+                model, padded_ne, nm, args.target_rtg, effective_max_steps,
                 fusion_penalty=args.fusion_penalty,
                 max_consec_fusion=args.max_consec_fusion,
                 temperature=args.temperature,
+                repeat_penalty=args.repeat_penalty,
             )
             all_orderings = [actions]
         else:
             all_orderings = beam_search_generate(
                 model, padded_ne, nm, args.target_rtg,
-                args.beam_width, args.max_steps,
+                args.beam_width, effective_max_steps,
                 fusion_penalty=args.fusion_penalty,
                 max_consec_fusion=args.max_consec_fusion,
+                repeat_penalty=args.repeat_penalty,
             )
 
         for beam_idx, actions in enumerate(all_orderings):
@@ -553,8 +569,7 @@ def main():
                     actions, node_names, num_nodes_actual,
                 )
             else:
-                ordering = [f"node_{a}" if a < num_nodes_actual else f"fusion.{a}"
-                            for a in actions]
+                ordering = [f"node_{a}" for a in actions if a < num_nodes_actual]
 
             # Save json_plan
             if args.beam_width <= 1:
