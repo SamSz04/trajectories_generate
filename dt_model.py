@@ -26,8 +26,13 @@ from src.model.graphsage import GraphSAGE
 class GraphEncoder(nn.Module):
     """Encode HLO graph nodes via opcode embedding + GraphSAGE.
 
-    Input: PyG Data with x [N, 19], opcode_ids [N], edge_index [2, E]
+    Input: PyG Data with x [N, 27], opcode_ids [N], edge_index [2, E]
     Output: node_embeddings [N, hidden_dim]
+
+    Args:
+        use_fused_feature: If True, accepts an extra per-node fused_mask
+            scalar feature (0.0=unfused, 1.0=fused), increasing GNN input
+            dim by 1. Used by Full and Hybrid graph modes.
     """
 
     def __init__(
@@ -37,18 +42,27 @@ class GraphEncoder(nn.Module):
         opcode_dim: int = 16,
         num_cont_features: int = 27,
         num_gnn_layers: int = 2,
+        use_fused_feature: bool = False,
     ):
         super().__init__()
+        self.use_fused_feature = use_fused_feature
         self.opcode_embed = nn.Embedding(num_opcodes, opcode_dim)
+        feat_dim = num_cont_features + opcode_dim + (1 if use_fused_feature else 0)
         self.gnn = GraphSAGE(
-            num_node_features=num_cont_features + opcode_dim,
+            num_node_features=feat_dim,
             hidden_dim=hidden_dim,
             num_layers=num_gnn_layers,
         )
 
-    def forward(self, data) -> torch.Tensor:
+    def forward(self, data, fused_mask=None) -> torch.Tensor:
         opcode_emb = self.opcode_embed(data.opcode_ids)  # [N, 16]
-        h = torch.cat([data.x, opcode_emb], dim=-1)  # [N, 35]
+        h = torch.cat([data.x, opcode_emb], dim=-1)  # [N, 43]
+        if self.use_fused_feature:
+            if fused_mask is not None:
+                fm = fused_mask.unsqueeze(-1) if fused_mask.dim() == 1 else fused_mask
+            else:
+                fm = torch.zeros(h.shape[0], 1, device=h.device)
+            h = torch.cat([h, fm], dim=-1)  # [N, 44]
         return self.gnn(h, data.edge_index)  # [N, hidden_dim]
 
 
@@ -107,17 +121,24 @@ class DecisionTransformer(nn.Module):
         max_timestep: int = 256,
         dropout: float = 0.1,
         gnn_hidden_dim: int = None,
+        graph_mode: str = "lite",
+        hybrid_interval: int = 5,
     ):
         super().__init__()
         self.num_nodes = num_nodes
         self.num_actions = num_nodes + 1  # +1 for fusion token
         self.embed_dim = embed_dim
         self.context_len = context_len
+        self.graph_mode = graph_mode
+        self.hybrid_interval = hybrid_interval
 
         # Graph encoder — may use a different hidden dim than transformer
         gnn_dim = gnn_hidden_dim or embed_dim
         self.gnn_dim = gnn_dim
-        self.graph_encoder = GraphEncoder(hidden_dim=gnn_dim)
+        use_fused = graph_mode in ("full", "hybrid")
+        self.graph_encoder = GraphEncoder(
+            hidden_dim=gnn_dim, use_fused_feature=use_fused,
+        )
 
         # Project GNN output to embed_dim if they differ
         if gnn_dim != embed_dim:
@@ -158,12 +179,18 @@ class DecisionTransformer(nn.Module):
             elif "bias" in name:
                 nn.init.zeros_(p)
 
-    def encode_graph(self, data) -> torch.Tensor:
-        """Encode the HLO graph. Call once and cache the result.
+    def encode_graph(self, data, fused_mask=None) -> torch.Tensor:
+        """Encode the HLO graph. For Lite mode, call once and cache.
+        For Full/Hybrid, call per-timestep with current fused_mask.
+
+        Args:
+            data: PyG Data or Batch object.
+            fused_mask: [N] float tensor (0=unfused, 1=fused). Only used
+                when graph_mode is 'full' or 'hybrid'.
 
         Returns: node_embeddings [N, embed_dim]
         """
-        ne = self.graph_encoder(data)
+        ne = self.graph_encoder(data, fused_mask=fused_mask)
         if self.node_proj is not None:
             ne = self.node_proj(ne)
         return ne
@@ -183,7 +210,7 @@ class DecisionTransformer(nn.Module):
 
         Args:
             fused_masks: [B, K, N] binary mask of already-fused nodes
-            node_embeds: [N, D] or [B, N, D] node embeddings
+            node_embeds: [N, D] or [B, N, D] or [B, K, N, D] node embeddings
             node_mask: [B, N] optional mask for valid nodes (multi-module)
 
         Returns: [B, K, 2*D] state vectors
@@ -194,27 +221,31 @@ class DecisionTransformer(nn.Module):
             avail = avail * node_mask.unsqueeze(1)
 
         # Attention-pooled summary of unfused nodes
-        # query: [1, D], keys: node_embeds [N, D] or [B, N, D]
         query = self.state_attn_query  # [1, D]
-        if node_embeds.dim() == 2:
-            # [1, D] @ [D, N] → [1, N] → expand to [B, K, N]
+
+        if node_embeds.dim() == 4:
+            # [B, K, N, D] — full/hybrid per-timestep embeddings
+            attn_scores = torch.einsum(
+                'd,bknd->bkn', query.squeeze(0), node_embeds,
+            )  # [B, K, N]
+            attn_scores = attn_scores.masked_fill(avail == 0, float('-inf'))
+            attn_weights = F.softmax(attn_scores, dim=-1).nan_to_num(0.0)
+            pool = torch.einsum('bkn,bknd->bkd', attn_weights, node_embeds)
+        elif node_embeds.dim() == 2:
+            # [N, D] — single-graph mode
             attn_scores = torch.matmul(query, node_embeds.T)  # [1, N]
             attn_scores = attn_scores.unsqueeze(0).expand(B, K, -1)  # [B, K, N]
-        else:
-            # [B, 1, D] @ [B, D, N] → [B, 1, N] → expand to [B, K, N]
-            attn_scores = torch.bmm(
-                query.expand(B, -1, -1), node_embeds.transpose(1, 2)
-            )  # [B, 1, N]
-            attn_scores = attn_scores.expand(-1, K, -1)  # [B, K, N]
-
-        # Mask fused/invalid nodes before softmax
-        attn_scores = attn_scores.masked_fill(avail == 0, float('-inf'))
-        attn_weights = F.softmax(attn_scores, dim=-1)  # [B, K, N]
-        attn_weights = attn_weights.nan_to_num(0.0)  # handle all-masked case
-
-        if node_embeds.dim() == 2:
+            attn_scores = attn_scores.masked_fill(avail == 0, float('-inf'))
+            attn_weights = F.softmax(attn_scores, dim=-1).nan_to_num(0.0)
             pool = torch.matmul(attn_weights, node_embeds)  # [B, K, D]
         else:
+            # [B, N, D] — multi-module lite mode
+            attn_scores = torch.bmm(
+                query.expand(B, -1, -1), node_embeds.transpose(1, 2),
+            )  # [B, 1, N]
+            attn_scores = attn_scores.expand(-1, K, -1)  # [B, K, N]
+            attn_scores = attn_scores.masked_fill(avail == 0, float('-inf'))
+            attn_weights = F.softmax(attn_scores, dim=-1).nan_to_num(0.0)
             pool = torch.einsum('bkn,bnd->bkd', attn_weights, node_embeds)
 
         # Project fused mask from N-dim binary → D-dim dense
@@ -229,21 +260,22 @@ class DecisionTransformer(nn.Module):
         actions: torch.Tensor,         # [B, K]
         timesteps: torch.Tensor,       # [B, K]
         attn_mask: torch.Tensor,       # [B, K]
-        node_embeds: torch.Tensor,     # [N, D] or [B, N, D]
+        node_embeds: torch.Tensor,     # [N, D] or [B, N, D] or [B, K, N, D]
         node_mask: torch.Tensor = None,  # [B, N] valid-node mask (multi-module)
     ) -> torch.Tensor:
         """Forward pass.
 
-        When node_embeds is 2D [N, D], operates in single-graph mode (original).
-        When node_embeds is 3D [B, N, D], operates in multi-module mode with
-        per-sample graphs. node_mask must be provided in this case.
+        node_embeds dimensionality:
+          2D [N, D]       — single-graph mode (original)
+          3D [B, N, D]    — multi-module Lite mode
+          4D [B, K, N, D] — multi-module Full/Hybrid mode (per-timestep)
 
         Returns: action_logits [B, K, num_actions]
         """
         B, K = returns_to_go.shape
         D = self.embed_dim
         device = returns_to_go.device
-        batched = node_embeds.dim() == 3
+        ndim = node_embeds.dim()
 
         # State vectors
         states = self._compute_states(fused_masks, node_embeds, node_mask)
@@ -255,15 +287,23 @@ class DecisionTransformer(nn.Module):
         r_tok = self.return_embed(returns_to_go.unsqueeze(-1)) + time_emb
         s_tok = self.state_embed(states) + time_emb
 
-        # Action embeddings
-        if batched:
+        # Action embeddings & all_action_embeds for pointer head
+        if ndim == 4:
+            # Per-timestep: [B, K, N+1, D]
+            fusion = self.fusion_token.view(1, 1, 1, -1).expand(B, K, 1, -1)
+            all_action_embeds = torch.cat([node_embeds, fusion], dim=2)
+            idx = actions.unsqueeze(-1).unsqueeze(-1).expand(B, K, 1, D)
+            a_emb = torch.gather(all_action_embeds, 2, idx).squeeze(2)  # [B, K, D]
+        elif ndim == 3:
+            # Batched lite: [B, N+1, D]
             fusion = self.fusion_token.unsqueeze(0).unsqueeze(0).expand(B, 1, -1)
-            all_action_embeds = torch.cat([node_embeds, fusion], dim=1)  # [B, N+1, D]
+            all_action_embeds = torch.cat([node_embeds, fusion], dim=1)
             a_emb = all_action_embeds[
-                torch.arange(B, device=device).unsqueeze(1), actions
+                torch.arange(B, device=device).unsqueeze(1), actions,
             ]  # [B, K, D]
         else:
-            all_action_embeds = self._get_all_action_embeds(node_embeds)  # [N+1, D]
+            # Single graph: [N+1, D]
+            all_action_embeds = self._get_all_action_embeds(node_embeds)
             a_emb = all_action_embeds[actions]  # [B, K, D]
 
         a_tok = self.action_embed(a_emb) + time_emb
@@ -292,7 +332,9 @@ class DecisionTransformer(nn.Module):
 
         # Pointer-network action head
         query = self.query_proj(state_out)  # [B, K, D]
-        if batched:
+        if ndim == 4:
+            logits = torch.einsum('bkd,bknd->bkn', query, all_action_embeds)
+        elif ndim == 3:
             logits = torch.einsum('bkd,bnd->bkn', query, all_action_embeds)
         else:
             logits = torch.matmul(query, all_action_embeds.T)  # [B, K, N+1]
@@ -320,6 +362,10 @@ class DecisionTransformer(nn.Module):
         temperature: float = 0.0,
     ) -> int:
         """Predict next action given history. For autoregressive inference.
+
+        For Full/Hybrid modes, the caller is responsible for re-encoding
+        the graph with the current fused state and passing updated node_embeds.
+        node_embeds should always be 2D [N, D] or 3D [1, N, D] here (not 4D).
 
         Returns: action index (0..num_actions-1)
         """

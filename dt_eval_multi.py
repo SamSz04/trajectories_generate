@@ -97,6 +97,7 @@ def greedy_generate(
     temperature: float = 0.0,
     repeat_penalty: float = 0.0,
     rtg_decay: str = "constant",
+    graph=None,
 ) -> List[int]:
     """Greedy autoregressive generation with constrained decoding.
 
@@ -111,6 +112,7 @@ def greedy_generate(
         temperature: Sampling temperature (0 = greedy).
         repeat_penalty: Logit penalty per prior selection (0 = -inf hard block).
         rtg_decay: RTG decay mode ('constant', 'linear', 'sqrt', 'cosine').
+        graph: PyG Data object (required for full/hybrid mode re-encoding).
 
     Returns:
         List of action IDs.
@@ -173,6 +175,22 @@ def greedy_generate(
                 t_eff = t
 
             attn_mask = torch.ones(1, t_eff, device=device)
+
+            # Re-encode graph for full/hybrid mode
+            if graph is not None and model.graph_mode != 'lite':
+                should_reencode = (
+                    model.graph_mode == 'full'
+                    or (model.graph_mode == 'hybrid' and step % model.hybrid_interval == 0)
+                )
+                if should_reencode:
+                    n = int(node_mask[0].sum().item())
+                    fm_vec = torch.zeros(n, device=device)
+                    for nid in fused_count:
+                        if nid < n:
+                            fm_vec[nid] = 1.0
+                    ne_raw = model.encode_graph(graph, fused_mask=fm_vec)
+                    node_embeds = F.pad(ne_raw, (0, 0, 0, num_nodes - n)).unsqueeze(0)
+
             logits = model(rtg_t, masks_t, actions_padded, timesteps_t,
                            attn_mask, node_embeds, node_mask)
             action_logits = logits[0, t_eff - 1]  # [num_actions]
@@ -231,6 +249,7 @@ def beam_search_generate(
     max_consec_fusion: int = 0,
     repeat_penalty: float = 0.0,
     rtg_decay: str = "constant",
+    graph=None,
 ) -> List[List[int]]:
     """Beam search over the pointer-network action head.
 
@@ -294,9 +313,26 @@ def beam_search_generate(
                     actions_padded = actions_t
 
                 attn_mask = torch.ones(1, t, device=device)
+
+                # Re-encode graph for full/hybrid mode
+                beam_node_embeds = node_embeds
+                if graph is not None and model.graph_mode != 'lite':
+                    should_reencode = (
+                        model.graph_mode == 'full'
+                        or (model.graph_mode == 'hybrid' and step % model.hybrid_interval == 0)
+                    )
+                    if should_reencode:
+                        n = int(node_mask[0].sum().item())
+                        fm_vec = torch.zeros(n, device=device)
+                        for nid in beam.fused_count:
+                            if nid < n:
+                                fm_vec[nid] = 1.0
+                        ne_raw = model.encode_graph(graph, fused_mask=fm_vec)
+                        beam_node_embeds = F.pad(ne_raw, (0, 0, 0, num_nodes - n)).unsqueeze(0)
+
                 logits = model(
                     rtg_t, masks_t, actions_padded, timesteps_t,
-                    attn_mask, node_embeds, node_mask,
+                    attn_mask, beam_node_embeds, node_mask,
                 )
                 step_logits = logits[0, t - 1]  # [num_actions]
 
@@ -541,15 +577,26 @@ def main():
     print("Loading checkpoint...")
     ckpt = torch.load(args.checkpoint, map_location=device, weights_only=False)
     ckpt_info = ckpt["info"]
+    ckpt_config = ckpt.get("model_config", {})
+
+    graph_mode = ckpt_config.get("graph_mode", "lite")
+    hybrid_interval = ckpt_config.get("hybrid_interval", 5)
 
     model = DecisionTransformer(
         num_nodes=ckpt_info["max_nodes"],
+        embed_dim=ckpt_config.get("embed_dim", 64),
+        num_heads=ckpt_config.get("num_heads", 4),
+        num_layers=ckpt_config.get("num_layers", 3),
+        d_ff=ckpt_config.get("d_ff", 128),
         context_len=ckpt_info.get("context_len", 20),
         max_timestep=ckpt_info.get("max_timestep", 256) + 16,
+        gnn_hidden_dim=ckpt_config.get("gnn_hidden_dim", None),
+        graph_mode=graph_mode,
+        hybrid_interval=hybrid_interval,
     ).to(device)
     model.load_state_dict(ckpt["model_state_dict"])
     print(f"  Loaded epoch {ckpt['epoch']}, val_loss={ckpt.get('val_loss', '?'):.4f}, "
-          f"val_acc={ckpt.get('val_acc', '?'):.4f}")
+          f"val_acc={ckpt.get('val_acc', '?'):.4f}, graph_mode={graph_mode}")
 
     # Accuracy evaluation
     if args.eval_accuracy:
@@ -576,8 +623,12 @@ def main():
         graph = m["graph"].to(device)
         node_names = getattr(graph, "node_names", None)
 
-        # Encode graph
-        ne = model.encode_graph(graph)
+        # Encode graph (for full/hybrid, initial encoding with zero fused_mask)
+        if model.graph_mode != 'lite':
+            fm_init = torch.zeros(graph.num_nodes, device=device)
+            ne = model.encode_graph(graph, fused_mask=fm_init)
+        else:
+            ne = model.encode_graph(graph)
         n = ne.shape[0]
         padded_ne = F.pad(ne, (0, 0, 0, max_nodes - n)).unsqueeze(0)  # [1, max_N, D]
         nm = torch.zeros(1, max_nodes, device=device)
@@ -600,6 +651,7 @@ def main():
                 temperature=args.temperature,
                 repeat_penalty=args.repeat_penalty,
                 rtg_decay=args.rtg_decay,
+                graph=graph,
             )
             all_orderings = [actions]
         else:
@@ -610,6 +662,7 @@ def main():
                 max_consec_fusion=args.max_consec_fusion,
                 repeat_penalty=args.repeat_penalty,
                 rtg_decay=args.rtg_decay,
+                graph=graph,
             )
 
         for beam_idx, actions in enumerate(all_orderings):

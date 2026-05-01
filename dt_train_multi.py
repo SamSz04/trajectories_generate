@@ -70,6 +70,80 @@ def encode_batch_graphs(model, module_graphs, module_ids, max_nodes, device):
     return node_embeds, node_mask
 
 
+def encode_batch_graphs_full(model, module_graphs, module_ids, fused_masks,
+                             max_nodes, device):
+    """Encode graphs per-timestep for Full/Hybrid mode.
+
+    For each timestep that needs encoding, builds a PyG Batch of all B
+    samples' graphs with their fused_masks appended as node features,
+    runs one GNN forward pass, then unbatches and pads.
+
+    Returns:
+        node_embeds: [B, K, max_nodes, D]
+        node_mask:   [B, max_nodes]
+    """
+    from torch_geometric.data import Batch, Data
+
+    B, K, N = fused_masks.shape
+    D = model.embed_dim
+
+    # Build node_mask (same across timesteps — determined by module)
+    mask_cache = {}
+    for mid in module_ids.unique():
+        mid_val = mid.item()
+        n = module_graphs[mid_val].num_nodes
+        mask = torch.zeros(max_nodes, device=device)
+        mask[:n] = 1.0
+        mask_cache[mid_val] = mask
+    node_mask = torch.stack([mask_cache[mid.item()] for mid in module_ids])
+
+    # Determine which timesteps need GNN encoding
+    graph_mode = model.graph_mode
+    if graph_mode == 'full':
+        encode_steps = list(range(K))
+    else:  # hybrid
+        encode_steps = list(range(0, K, model.hybrid_interval))
+
+    # Per-sample graph sizes (for unbatching)
+    sizes = [module_graphs[mid.item()].num_nodes for mid in module_ids]
+
+    # Encode at each required timestep
+    embeds_at_step = {}
+    for k in encode_steps:
+        graphs = []
+        for b in range(B):
+            mid = module_ids[b].item()
+            g = module_graphs[mid]
+            n = g.num_nodes
+            fm = fused_masks[b, k, :n]
+            graphs.append(Data(
+                x=g.x.to(device),
+                edge_index=g.edge_index.to(device),
+                opcode_ids=g.opcode_ids.to(device),
+                fused_mask=fm,
+            ))
+        batched = Batch.from_data_list(graphs)
+        ne = model.encode_graph(batched, fused_mask=batched.fused_mask)
+
+        # Unbatch and pad
+        split = torch.split(ne, sizes)
+        padded = torch.stack([
+            F.pad(s, (0, 0, 0, max_nodes - s.shape[0])) for s in split
+        ])  # [B, max_nodes, D]
+        embeds_at_step[k] = padded
+
+    # Fill all K timesteps (hybrid: carry last encoding forward)
+    all_embeds = []
+    last_embed = None
+    for k in range(K):
+        if k in embeds_at_step:
+            last_embed = embeds_at_step[k]
+        all_embeds.append(last_embed)
+
+    node_embeds = torch.stack(all_embeds, dim=1)  # [B, K, max_nodes, D]
+    return node_embeds, node_mask
+
+
 def train_epoch(model, loader, optimizer, module_graphs, max_nodes, device):
     model.train()
     total_loss = 0.0
@@ -88,9 +162,14 @@ def train_epoch(model, loader, optimizer, module_graphs, max_nodes, device):
         module_ids = batch["module_id"]
 
         # Encode graphs for this batch (with gradients)
-        node_embeds, node_mask = encode_batch_graphs(
-            model, module_graphs, module_ids, max_nodes, device,
-        )
+        if model.graph_mode == 'lite':
+            node_embeds, node_mask = encode_batch_graphs(
+                model, module_graphs, module_ids, max_nodes, device,
+            )
+        else:
+            node_embeds, node_mask = encode_batch_graphs_full(
+                model, module_graphs, module_ids, masks, max_nodes, device,
+            )
 
         logits = model(rtg, masks, actions, timesteps, attn_mask,
                        node_embeds, node_mask)
@@ -133,9 +212,14 @@ def eval_epoch(model, loader, module_graphs, max_nodes, device, modules_info):
         attn_mask = batch["attn_mask"].to(device)
         module_ids = batch["module_id"]
 
-        node_embeds, node_mask = encode_batch_graphs(
-            model, module_graphs, module_ids, max_nodes, device,
-        )
+        if model.graph_mode == 'lite':
+            node_embeds, node_mask = encode_batch_graphs(
+                model, module_graphs, module_ids, max_nodes, device,
+            )
+        else:
+            node_embeds, node_mask = encode_batch_graphs_full(
+                model, module_graphs, module_ids, masks, max_nodes, device,
+            )
 
         logits = model(rtg, masks, actions, timesteps, attn_mask,
                        node_embeds, node_mask)
@@ -201,6 +285,11 @@ def main():
                         help="GNN hidden dimension (default: 64, matches embed-dim)")
     parser.add_argument("--dropout", type=float, default=0.1,
                         help="Dropout rate (default: 0.1, try 0.3 for large models)")
+    parser.add_argument("--graph-mode", default="lite",
+                        choices=["lite", "full", "hybrid"],
+                        help="Graph encoding mode: lite (once), full (per-step), hybrid (every M steps)")
+    parser.add_argument("--hybrid-interval", type=int, default=5,
+                        help="Re-encode interval for hybrid mode (default: 5)")
     parser.add_argument("--checkpoint-dir", default="output/dt_multi_checkpoints")
     parser.add_argument("--resume", default=None,
                         help="Resume from checkpoint (path to .pt file, or 'auto' to resume from checkpoint-dir/best.pt)")
@@ -248,12 +337,16 @@ def main():
         max_timestep=max_timestep,
         gnn_hidden_dim=gnn_dim,
         dropout=args.dropout,
+        graph_mode=args.graph_mode,
+        hybrid_interval=args.hybrid_interval,
     ).to(device)
 
     total_params = sum(p.numel() for p in model.parameters())
     print(f"Model: {total_params:,} parameters")
     print(f"  embed_dim={args.embed_dim}, heads={args.num_heads}, "
           f"layers={args.num_layers}, d_ff={args.d_ff}, gnn_dim={gnn_dim}")
+    print(f"  graph_mode={args.graph_mode}"
+          + (f", hybrid_interval={args.hybrid_interval}" if args.graph_mode == "hybrid" else ""))
     print(f"  state_embed input: {max_nodes} + {model.embed_dim} = {max_nodes + model.embed_dim}")
     print(f"  max_timestep: {max_timestep}")
 
@@ -266,6 +359,8 @@ def main():
         "num_nodes": max_nodes,
         "context_len": args.context_len,
         "max_timestep": max_timestep,
+        "graph_mode": args.graph_mode,
+        "hybrid_interval": args.hybrid_interval,
     }
 
     # Optimizer
