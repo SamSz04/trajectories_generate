@@ -64,7 +64,7 @@ def greedy_generate(
     fusion_penalty: float = 0.0,
     max_consec_fusion: int = 0,
     temperature: float = 0.0,
-    repeat_penalty: float = 1.0,
+    repeat_penalty: float = 0.0,
 ) -> List[int]:
     """Greedy autoregressive generation with constrained decoding.
 
@@ -77,7 +77,7 @@ def greedy_generate(
         fusion_penalty: Subtract from fusion token logit (higher = fewer fusion.N).
         max_consec_fusion: Force real node after N consecutive fusion.N (0 = disabled).
         temperature: Sampling temperature (0 = greedy).
-        repeat_penalty: Logit penalty per prior selection (replaces -inf blocking).
+        repeat_penalty: Logit penalty per prior selection (0 = -inf hard block).
 
     Returns:
         List of action IDs.
@@ -144,10 +144,14 @@ def greedy_generate(
                            attn_mask, node_embeds, node_mask)
             action_logits = logits[0, t_eff - 1]  # [num_actions]
 
-            # Penalize already-selected nodes (soft penalty instead of -inf)
-            if repeat_penalty > 0:
-                for i, cnt in fused_count.items():
+            # Penalize already-selected nodes
+            # repeat_penalty=0 means -inf (hard block, matches training behavior)
+            # repeat_penalty>0 means soft penalty per selection count
+            for i, cnt in fused_count.items():
+                if repeat_penalty > 0:
                     action_logits[i] -= repeat_penalty * cnt
+                else:
+                    action_logits[i] = float("-inf")
             # Mask padding nodes
             action_logits[:num_nodes][node_mask[0][:num_nodes] == 0] = float("-inf")
 
@@ -192,7 +196,7 @@ def beam_search_generate(
     max_steps: int = 300,
     fusion_penalty: float = 0.0,
     max_consec_fusion: int = 0,
-    repeat_penalty: float = 1.0,
+    repeat_penalty: float = 0.0,
 ) -> List[List[int]]:
     """Beam search over the pointer-network action head.
 
@@ -263,11 +267,13 @@ def beam_search_generate(
                 )
                 step_logits = logits[0, t - 1]  # [num_actions]
 
-                # Penalize already-selected nodes (soft penalty instead of -inf)
-                if repeat_penalty > 0:
-                    for i, cnt in beam.fused_count.items():
-                        if i < num_nodes:
+                # Penalize already-selected nodes
+                for i, cnt in beam.fused_count.items():
+                    if i < num_nodes:
+                        if repeat_penalty > 0:
                             step_logits[i] -= repeat_penalty * cnt
+                        else:
+                            step_logits[i] = float("-inf")
 
                 # Mask padding nodes
                 action_mask = torch.cat([
@@ -324,19 +330,29 @@ def actions_to_producer_names(
     actions: List[int],
     node_names: List[str],
     num_nodes: int,
+    append_uncovered: bool = True,
 ) -> List[str]:
     """Convert action IDs to producer name strings.
 
-    Only real-node actions are included. Fusion token actions (>= num_real_nodes
-    or == max_nodes) are stripped — they get priority 0 in XLA anyway since
-    the sequential names don't match XLA's dynamic fusion naming.
-    Real nodes may appear multiple times (for multi-consumer fusions).
+    Fusion token actions are stripped. If append_uncovered=True, any real nodes
+    not selected by the model are appended at the end (in node_id order) to
+    ensure 100% coverage — uncovered nodes otherwise get priority 0 in XLA.
     """
     names = []
+    seen = set()
     for a in actions:
         if a < len(node_names):
-            names.append(node_names[a])
+            if a not in seen:
+                names.append(node_names[a])
+                seen.add(a)
         # else: skip fusion token actions entirely
+
+    # Append uncovered real nodes so XLA gets full coverage
+    if append_uncovered:
+        for i, name in enumerate(node_names):
+            if i not in seen:
+                names.append(name)
+
     return names
 
 
@@ -467,8 +483,8 @@ def main():
                         help="Force real node after N consecutive fusion.N (0 = disabled)")
     parser.add_argument("--temperature", type=float, default=0.0,
                         help="Sampling temperature for greedy (0 = argmax)")
-    parser.add_argument("--repeat-penalty", type=float, default=1.0,
-                        help="Logit penalty per prior selection (replaces -inf blocking)")
+    parser.add_argument("--repeat-penalty", type=float, default=0.0,
+                        help="Logit penalty per prior selection (0 = -inf hard block, matches training)")
     parser.add_argument("--max-steps-factor", type=float, default=0.0,
                         help="Compute max_steps = num_real_nodes * factor (0 = use --max-steps)")
     args = parser.parse_args()
