@@ -75,8 +75,11 @@ def train_epoch(model, loader, optimizer, module_graphs, max_nodes, device):
     total_loss = 0.0
     total_correct = 0
     total_count = 0
+    num_batches = len(loader)
 
-    for batch in loader:
+    for batch_idx, batch in enumerate(loader):
+        if batch_idx % 500 == 0:
+            print(f"    train batch {batch_idx}/{num_batches}", flush=True)
         rtg = batch["returns_to_go"].to(device)
         masks = batch["fused_masks"].to(device)
         actions = batch["actions"].to(device)
@@ -177,7 +180,7 @@ def main():
     parser.add_argument("--traj-dir", default="output/multi_trajectories")
     parser.add_argument("--gpu-csv", default="output/gpu_profiles_all.csv")
     parser.add_argument("--reward-mode", default="gpu_hybrid",
-                        choices=["gpu", "gpu_hybrid", "cost_model"])
+                        choices=["gpu", "gpu_hybrid", "gpu_progressive", "cost_model"])
     parser.add_argument("--holdout-arch", default=None,
                         help="Architecture prefix to hold out for LOO eval")
     parser.add_argument("--epochs", type=int, default=300)
@@ -199,6 +202,8 @@ def main():
     parser.add_argument("--dropout", type=float, default=0.1,
                         help="Dropout rate (default: 0.1, try 0.3 for large models)")
     parser.add_argument("--checkpoint-dir", default="output/dt_multi_checkpoints")
+    parser.add_argument("--resume", default=None,
+                        help="Resume from checkpoint (path to .pt file, or 'auto' to resume from checkpoint-dir/best.pt)")
     parser.add_argument("--device", default="cpu")
     args = parser.parse_args()
 
@@ -271,22 +276,50 @@ def main():
         optimizer, T_max=args.epochs,
     )
 
-    # Training loop
+    # Resume from checkpoint
+    start_epoch = 1
     best_val_acc = 0.0
     best_val_loss = float("inf")
     patience_counter = 0
+
+    if args.resume:
+        ckpt_path = args.resume
+        if ckpt_path == "auto":
+            ckpt_path = os.path.join(args.checkpoint_dir, "best.pt")
+        if os.path.exists(ckpt_path):
+            print(f"\nResuming from: {ckpt_path}")
+            ckpt = torch.load(ckpt_path, map_location=device, weights_only=False)
+            model.load_state_dict(ckpt["model_state_dict"])
+            if "optimizer_state_dict" in ckpt:
+                optimizer.load_state_dict(ckpt["optimizer_state_dict"])
+            if "scheduler_state_dict" in ckpt:
+                scheduler.load_state_dict(ckpt["scheduler_state_dict"])
+            if "best_val_acc" in ckpt:
+                best_val_acc = ckpt["best_val_acc"]
+                best_val_loss = ckpt.get("best_val_loss", float("inf"))
+                patience_counter = ckpt.get("patience_counter", 0)
+            elif "val_acc" in ckpt:
+                best_val_acc = ckpt["val_acc"]
+                best_val_loss = ckpt.get("val_loss", float("inf"))
+            start_epoch = ckpt.get("epoch", 0) + 1
+            print(f"  Resuming at epoch {start_epoch}, best_val_acc={best_val_acc:.4f}, "
+                  f"patience={patience_counter}/{args.patience}")
+        else:
+            print(f"\nWARNING: checkpoint not found: {ckpt_path}, training from scratch")
 
     print(f"\nTraining for {args.epochs} epochs (patience={args.patience})...")
     print(f"{'Epoch':>5} {'TrLoss':>8} {'TrAcc':>7} {'VlLoss':>8} "
           f"{'VlAcc':>7} {'LR':>10} {'Time':>6}")
     print("-" * 60)
 
-    for epoch in range(1, args.epochs + 1):
+    for epoch in range(start_epoch, args.epochs + 1):
         t0 = time.time()
+        print(f"  [epoch {epoch}] starting train...", flush=True)
 
         train_loss, train_acc = train_epoch(
             model, train_loader, optimizer, module_graphs, max_nodes, device,
         )
+        print(f"  [epoch {epoch}] train done, starting eval...", flush=True)
         val_loss, val_acc, per_module_acc = eval_epoch(
             model, val_loader, module_graphs, max_nodes, device, modules,
         )
@@ -312,6 +345,10 @@ def main():
                 "epoch": epoch,
                 "model_state_dict": model.state_dict(),
                 "optimizer_state_dict": optimizer.state_dict(),
+                "scheduler_state_dict": scheduler.state_dict(),
+                "best_val_acc": best_val_acc,
+                "best_val_loss": best_val_loss,
+                "patience_counter": patience_counter,
                 "train_loss": train_loss,
                 "val_loss": val_loss,
                 "info": info,
@@ -326,6 +363,11 @@ def main():
             torch.save({
                 "epoch": epoch,
                 "model_state_dict": model.state_dict(),
+                "optimizer_state_dict": optimizer.state_dict(),
+                "scheduler_state_dict": scheduler.state_dict(),
+                "best_val_acc": best_val_acc,
+                "best_val_loss": best_val_loss,
+                "patience_counter": patience_counter,
                 "val_loss": val_loss,
                 "val_acc": val_acc,
                 "per_module_acc": per_module_acc,

@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import sys
 from dataclasses import dataclass, field
@@ -55,6 +56,36 @@ class BeamState:
     finished: bool = False
 
 
+def compute_rtg_decay(target_rtg: float, step: int, max_steps: int,
+                      decay_mode: str = "constant") -> float:
+    """Compute decayed RTG value at a given step.
+
+    Args:
+        target_rtg: Initial RTG value.
+        step: Current step index.
+        max_steps: Total maximum steps.
+        decay_mode: One of 'constant', 'linear', 'sqrt', 'cosine'.
+
+    Returns:
+        Decayed RTG value (clamped to >= 0).
+    """
+    if decay_mode == "constant" or max_steps <= 1:
+        return target_rtg
+
+    progress = min(step / max_steps, 1.0)
+
+    if decay_mode == "linear":
+        decay = 1.0 - progress
+    elif decay_mode == "sqrt":
+        decay = math.sqrt(1.0 - progress)
+    elif decay_mode == "cosine":
+        decay = math.cos(math.pi / 2 * progress)
+    else:
+        decay = 1.0
+
+    return max(0.0, target_rtg * decay)
+
+
 def greedy_generate(
     model: DecisionTransformer,
     node_embeds: torch.Tensor,
@@ -65,6 +96,7 @@ def greedy_generate(
     max_consec_fusion: int = 0,
     temperature: float = 0.0,
     repeat_penalty: float = 0.0,
+    rtg_decay: str = "constant",
 ) -> List[int]:
     """Greedy autoregressive generation with constrained decoding.
 
@@ -78,6 +110,7 @@ def greedy_generate(
         max_consec_fusion: Force real node after N consecutive fusion.N (0 = disabled).
         temperature: Sampling temperature (0 = greedy).
         repeat_penalty: Logit penalty per prior selection (0 = -inf hard block).
+        rtg_decay: RTG decay mode ('constant', 'linear', 'sqrt', 'cosine').
 
     Returns:
         List of action IDs.
@@ -107,7 +140,7 @@ def greedy_generate(
             for i in fused_count:
                 mask[i] = 1.0
 
-            all_rtg.append(target_rtg)
+            all_rtg.append(compute_rtg_decay(target_rtg, step, max_steps, rtg_decay))
             all_masks.append(mask)
             all_timesteps.append(min(step, max_timestep))
 
@@ -197,6 +230,7 @@ def beam_search_generate(
     fusion_penalty: float = 0.0,
     max_consec_fusion: int = 0,
     repeat_penalty: float = 0.0,
+    rtg_decay: str = "constant",
 ) -> List[List[int]]:
     """Beam search over the pointer-network action head.
 
@@ -222,13 +256,12 @@ def beam_search_generate(
 
                 # Build history tensors for this beam
                 t = step + 1
-                rtg_val = max(0.0, target_rtg - target_rtg * step / max_steps)
 
                 rtg_list = []
                 mask_list = []
                 fused_so_far = set()
                 for s in range(t):
-                    rtg_s = max(0.0, target_rtg - target_rtg * s / max_steps)
+                    rtg_s = compute_rtg_decay(target_rtg, s, max_steps, rtg_decay)
                     rtg_list.append(rtg_s)
                     m = torch.zeros(num_nodes, device=device)
                     for i in fused_so_far:
@@ -462,7 +495,7 @@ def main():
     parser.add_argument("--gpu-csv", default="output/gpu_profiles_all.csv",
                         help="GPU profiling CSV")
     parser.add_argument("--reward-mode", default="gpu_hybrid",
-                        choices=["gpu", "gpu_hybrid", "cost_model"],
+                        choices=["gpu", "gpu_hybrid", "gpu_progressive", "cost_model"],
                         help="Reward mode (must match training)")
     parser.add_argument("--output-dir", default="output/dt_plans",
                         help="Output directory for json_plan files")
@@ -487,6 +520,9 @@ def main():
                         help="Logit penalty per prior selection (0 = -inf hard block, matches training)")
     parser.add_argument("--max-steps-factor", type=float, default=0.0,
                         help="Compute max_steps = num_real_nodes * factor (0 = use --max-steps)")
+    parser.add_argument("--rtg-decay", default="constant",
+                        choices=["constant", "linear", "sqrt", "cosine"],
+                        help="RTG decay schedule at inference (default: constant)")
     args = parser.parse_args()
 
     device = torch.device(args.device)
@@ -526,7 +562,7 @@ def main():
 
     # Generate orderings for each module
     print(f"\n=== Generating Orderings (beam_width={args.beam_width}, "
-          f"target_rtg={args.target_rtg}) ===")
+          f"target_rtg={args.target_rtg}, rtg_decay={args.rtg_decay}) ===")
 
     module_graphs = [m["graph"] for m in modules]
     results = {}
@@ -563,6 +599,7 @@ def main():
                 max_consec_fusion=args.max_consec_fusion,
                 temperature=args.temperature,
                 repeat_penalty=args.repeat_penalty,
+                rtg_decay=args.rtg_decay,
             )
             all_orderings = [actions]
         else:
@@ -572,6 +609,7 @@ def main():
                 fusion_penalty=args.fusion_penalty,
                 max_consec_fusion=args.max_consec_fusion,
                 repeat_penalty=args.repeat_penalty,
+                rtg_decay=args.rtg_decay,
             )
 
         for beam_idx, actions in enumerate(all_orderings):

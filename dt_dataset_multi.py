@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import csv
 import glob
+import math
 import os
 import random
 import sys
@@ -107,8 +108,8 @@ def load_multi_module_data(
                 if strat_us and strat_us > 0:
                     gpu_speedup = xla_default_us / strat_us
 
-            # Filter trajectories without GPU reward in gpu mode
-            if reward_mode in ("gpu", "gpu_hybrid") and gpu_speedup is None:
+            # Filter trajectories without GPU reward in gpu modes
+            if reward_mode in ("gpu", "gpu_hybrid", "gpu_progressive") and gpu_speedup is None:
                 continue
 
             # Remap fusion token: -1 → num_nodes (module-specific)
@@ -157,6 +158,9 @@ class MultiModuleFusionDTDataset(Dataset):
       - "gpu_hybrid": Per-step cost-model shape scaled to GPU speedup.
         R_t = (cost_rtg_t / cost_rtg_0) * gpu_speedup. Combines per-step
         credit assignment from cost model with real GPU terminal reward.
+      - "gpu_progressive": GPU-anchored progressive decay. Uses cost-model
+        shape where signal exists (allows negative rewards); falls back to
+        sqrt decay for degenerate modules (all-zero cost-model priorities).
       - "cost_model": Per-step cost-model RTG only (no GPU data needed).
     """
 
@@ -183,13 +187,16 @@ class MultiModuleFusionDTDataset(Dataset):
                 continue
 
             # Compute RTG
-            # Per-step cost-model rewards (used by cost_model and gpu_hybrid)
-            rewards = [max(0.0, s["us_unfused"] - s["us_fused"]) for s in steps]
+            # Per-step cost-model rewards (allow negatives for gpu_progressive)
+            if reward_mode == "gpu_progressive":
+                rewards_raw = [s["us_unfused"] - s["us_fused"] for s in steps]
+            else:
+                rewards_raw = [max(0.0, s["us_unfused"] - s["us_fused"]) for s in steps]
             cost_rtg = [0.0] * T
-            cost_rtg[T - 1] = rewards[T - 1]
+            cost_rtg[T - 1] = rewards_raw[T - 1]
             for t in range(T - 2, -1, -1):
-                cost_rtg[t] = rewards[t] + cost_rtg[t + 1]
-            cost_r0 = cost_rtg[0] if cost_rtg[0] > 0 else 1.0
+                cost_rtg[t] = rewards_raw[t] + cost_rtg[t + 1]
+            cost_r0 = cost_rtg[0] if cost_rtg[0] != 0 else 1.0
 
             if reward_mode == "gpu" and traj["reward_gpu"] is not None:
                 # Flat GPU speedup, normalized by max observed
@@ -200,6 +207,19 @@ class MultiModuleFusionDTDataset(Dataset):
                 # R_t = (cost_rtg_t / cost_r0) × gpu_speedup / max_gpu_reward
                 gpu_r = traj["reward_gpu"] / max_gpu_reward
                 rtg = [(cr / cost_r0) * gpu_r for cr in cost_rtg]
+            elif reward_mode == "gpu_progressive" and traj["reward_gpu"] is not None:
+                # Progressive: cost-model shape if signal exists,
+                # synthetic sqrt decay for degenerate modules
+                gpu_r = traj["reward_gpu"] / max_gpu_reward
+                abs_cost_r0 = abs(cost_r0)
+                if abs_cost_r0 > 1.0:  # meaningful cost-model signal
+                    # Normalize by abs to keep RTG in [0, gpu_r] range
+                    # (cost_rtg monotonically decreases, so cost_rtg[0] is largest)
+                    rtg = [(cr / abs_cost_r0) * gpu_r for cr in cost_rtg]
+                else:
+                    # Degenerate: synthetic sqrt decay
+                    rtg = [gpu_r * math.sqrt(max(0.0, 1.0 - t / max(T - 1, 1)))
+                           for t in range(T)]
             else:
                 # Pure cost-model RTG, normalized by max_cost_r0
                 if max_cost_r0 > 0:
@@ -311,7 +331,7 @@ def create_multi_dataloaders(
         val_trajs = [trajectories[i] for i in indices[n_train:]]
 
     # Normalization from training data only
-    if reward_mode in ("gpu", "gpu_hybrid"):
+    if reward_mode in ("gpu", "gpu_hybrid", "gpu_progressive"):
         gpu_rewards = [t["reward_gpu"] for t in train_trajs
                        if t["reward_gpu"] is not None]
         max_gpu_reward = max(gpu_rewards) if gpu_rewards else 1.0
