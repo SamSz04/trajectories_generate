@@ -138,11 +138,15 @@ def parse_nsys_kernsum(nsys_rep_path):
     Returns (total_kernel_time_ns, num_kernel_types, num_instances).
     """
     try:
-        result = subprocess.run(
-            ["nsys", "stats", "--report", "gpukernsum",
-             "--format", "csv", nsys_rep_path],
-            capture_output=True, text=True, timeout=60
-        )
+        # Try new nsys report name first (2024.x+), fall back to old name
+        for report_name in ["cuda_gpu_kern_sum", "gpukernsum"]:
+            result = subprocess.run(
+                ["nsys", "stats", "--report", report_name,
+                 "--format", "csv", nsys_rep_path],
+                capture_output=True, text=True, timeout=60
+            )
+            if "could not be found" not in result.stderr:
+                break
         output = result.stdout
 
         total_time_ns = 0
