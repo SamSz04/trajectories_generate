@@ -249,6 +249,37 @@ def has_dump_in_dir(strat_dir):
     return False
 
 
+def cleanup_strat_dir(strat_dir):
+    """Remove non-essential files from a strategy directory.
+
+    Keeps only: *priority_fusion_dump*, *before_priority-fusion*, xla_output.log,
+                profile.nsys-rep
+    Deletes: *.ll, *.ptx, *.pbtxt, *after_priority*, *after_spmd*, etc.
+    """
+    if not os.path.isdir(strat_dir):
+        return 0
+    keep_patterns = (
+        "priority_fusion_dump",
+        "before_priority-fusion",
+        "xla_output.log",
+        "profile.nsys-rep",
+        "profile.sqlite",
+    )
+    removed = 0
+    for f in os.listdir(strat_dir):
+        fpath = os.path.join(strat_dir, f)
+        if not os.path.isfile(fpath):
+            continue
+        if any(p in f for p in keep_patterns):
+            continue
+        try:
+            os.remove(fpath)
+            removed += 1
+        except OSError:
+            pass
+    return removed
+
+
 def symlink_dump(strat_dir):
     """Create standard symlink for module-prefixed dump file."""
     target = os.path.join(strat_dir, "priority_fusion_dump.txt")
@@ -295,6 +326,7 @@ def run_dump_only(xla_tool, hlo_path, strat_dir, env_vars, timeout=600):
         return False
 
     symlink_dump(strat_dir)
+    cleanup_strat_dir(strat_dir)
     return has_dump_in_dir(strat_dir)
 
 
@@ -354,6 +386,7 @@ def run_dump_nsys(xla_tool, hlo_path, strat_dir, env_vars,
 
     wall_s = time.time() - t0
     symlink_dump(strat_dir)
+    cleanup_strat_dir(strat_dir)
 
     nsys_rep = nsys_output + ".nsys-rep"
     if os.path.isfile(nsys_rep):
@@ -551,6 +584,10 @@ def main():
              "Splits modules (not strategies) so per-module profiling is "
              "consistent. E.g., --module-shard 0/3 for first of 3 GPUs")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument(
+        "--cleanup-existing", action="store_true",
+        help="Clean up non-essential files (.ll, .ptx, .pbtxt, after-*) "
+             "from existing dump dirs, then exit")
     parser.add_argument("--log-file", default=None)
     args = parser.parse_args()
 
@@ -586,6 +623,23 @@ def main():
     # Set CUDA_VISIBLE_DEVICES for this process and all children
     if args.gpu_id is not None:
         os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu_id)
+
+    # Cleanup mode: remove non-essential files from existing dumps
+    if args.cleanup_existing:
+        print("Cleaning up non-essential files from existing dumps...")
+        total_removed = 0
+        for model, module, hlo_path in modules:
+            dump_dir = os.path.join(args.dump_base, model, module)
+            if not os.path.isdir(dump_dir):
+                continue
+            for strat in os.listdir(dump_dir):
+                strat_path = os.path.join(dump_dir, strat)
+                if os.path.isdir(strat_path):
+                    n = cleanup_strat_dir(strat_path)
+                    total_removed += n
+            print("  %s/%s: cleaned" % (model, module))
+        print("Removed %d files total" % total_removed)
+        return
 
     # Generate 140 env-var strategies
     strategies = generate_strategies()
