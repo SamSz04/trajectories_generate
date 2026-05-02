@@ -574,6 +574,8 @@ def main():
         "--nsys-iterations", type=int, default=10,
         help="XLA iterations per nsys run (default: 10)")
     parser.add_argument("--only-model", default=None)
+    parser.add_argument("--exclude-model", default=None,
+                        help="Exclude this model from processing")
     parser.add_argument("--only-module", default=None)
     parser.add_argument(
         "--gpu-id", type=int, default=None,
@@ -601,6 +603,9 @@ def main():
     if args.only_model:
         modules = [(m, mod, p) for m, mod, p in modules
                    if m == args.only_model]
+    if args.exclude_model:
+        modules = [(m, mod, p) for m, mod, p in modules
+                   if m != args.exclude_model]
     if args.only_module:
         modules = [(m, mod, p) for m, mod, p in modules
                    if mod == args.only_module]
