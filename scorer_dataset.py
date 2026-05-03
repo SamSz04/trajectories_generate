@@ -386,7 +386,15 @@ def scorer_collate_fn(batch: List[dict]) -> dict:
             cluster_mask[i, :nc] = True
 
         context[i] = s['context']
-        target_idx[i] = s['target_idx']
+
+        # Adjust target_idx: cluster candidates shift from n_orig to max_orig
+        raw_idx = s['target_idx']
+        if raw_idx >= no:
+            # Target is a cluster candidate — remap to padded offset
+            target_idx[i] = max_orig + (raw_idx - no)
+        else:
+            target_idx[i] = raw_idx
+
         weight[i] = s['weight']
         is_fusion[i] = s['is_fusion_selected']
 
