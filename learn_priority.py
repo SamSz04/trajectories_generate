@@ -172,10 +172,40 @@ class PriorityDataset(Dataset):
         neg_samples_per_step: int = 4,
         top_quantile: float = 0.25,
         min_reward: float = 0.0,
+        gpu_csv: Optional[str] = None,
     ):
         self.pairs: List[Tuple[torch.Tensor, torch.Tensor, float]] = []
+        # Load GPU rewards from CSV if available
+        self.gpu_rewards: Dict[str, Dict[str, float]] = {}
+        if gpu_csv:
+            self._load_gpu_csv(gpu_csv)
         self._load(Path(data_dir), split, neg_samples_per_step,
                    top_quantile, min_reward)
+
+    def _load_gpu_csv(self, csv_path: str):
+        """Load GPU kernel times from merged CSV for reward computation."""
+        import csv
+        xla_times = {}  # module → xla_default time
+        strat_times = {}  # (module, strategy) → time
+
+        with open(csv_path) as f:
+            for row in csv.DictReader(f):
+                module = row['module']
+                strategy = row['strategy']
+                us = float(row['avg_kernel_per_iter_us'])
+                if us <= 0:
+                    continue
+                if strategy == 'xla_default':
+                    xla_times[module] = us
+                strat_times[(module, strategy)] = us
+
+        # Compute rewards: xla_us / strategy_us
+        for (module, strategy), us in strat_times.items():
+            xla_us = xla_times.get(module)
+            if xla_us and us > 0:
+                reward = xla_us / us
+                self.gpu_rewards.setdefault(
+                    module.replace('/', '__'), {})[strategy] = reward
 
     def _load(
         self,
@@ -199,13 +229,24 @@ class PriorityDataset(Dataset):
             name_to_idx = {n: i for i, n in enumerate(graph.node_names)}
 
             # Filter to top-quantile trajectories
+            # Try to get rewards from GPU CSV or from trajectory data
+            module_rewards = self.gpu_rewards.get(pt_file.stem, {})
+            for t in trajectories:
+                if t.get('reward_gpu') is None:
+                    strat = t.get('strategy', '')
+                    r = module_rewards.get(strat)
+                    if r is not None:
+                        t['reward_gpu'] = r
+
             rewards = [t.get('reward_gpu') for t in trajectories
                        if t.get('reward_gpu') is not None]
             if rewards:
                 rewards_sorted = sorted(rewards, reverse=True)
                 cutoff = rewards_sorted[max(0, int(len(rewards_sorted) * top_quantile) - 1)]
+                has_rewards = True
             else:
                 cutoff = min_reward
+                has_rewards = False
 
             # Split trajectories 80/20
             n = len(trajectories)
@@ -218,14 +259,18 @@ class PriorityDataset(Dataset):
             # Get cluster features
             for traj in trajs:
                 reward = traj.get('reward_gpu')
-                if reward is None:
-                    continue
-                if reward < cutoff and reward < min_reward:
-                    continue
 
-                # Advantage weight
-                advantage = 1.0 - 1.0 / reward if reward > 0 else 0.0
-                weight = min(max(math.exp(3.0 * advantage), 0.1), 5.0)
+                # When rewards available: filter and weight
+                if has_rewards:
+                    if reward is None:
+                        continue
+                    if reward < cutoff:
+                        continue
+                    advantage = 1.0 - 1.0 / reward if reward > 0 else 0.0
+                    weight = min(max(math.exp(3.0 * advantage), 0.1), 5.0)
+                else:
+                    # No rewards: use all trajectories with equal weight
+                    weight = 1.0
 
                 clusters = traj.get('clusters', {})
                 steps = traj.get('steps', [])
@@ -660,6 +705,8 @@ def main():
                          help="Negative samples per step")
     p_train.add_argument("--top-quantile", type=float, default=0.25,
                          help="Keep top fraction of trajectories by reward")
+    p_train.add_argument("--gpu-csv", default=None,
+                         help="GPU profiles CSV for reward computation")
     p_train.add_argument("--device", default="cpu")
     p_train.add_argument("--output", default="output/learned_weights.json")
 
@@ -678,11 +725,13 @@ def main():
             args.data_dir, split='train',
             neg_samples_per_step=args.neg_samples,
             top_quantile=args.top_quantile,
+            gpu_csv=args.gpu_csv,
         )
         val_ds = PriorityDataset(
             args.data_dir, split='val',
             neg_samples_per_step=args.neg_samples,
             top_quantile=1.0,  # val uses all trajectories
+            gpu_csv=args.gpu_csv,
         )
         print(f"Train pairs: {len(train_ds)}")
         print(f"Val pairs:   {len(val_ds)}")
