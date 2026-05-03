@@ -17,12 +17,16 @@
 | Raw dumps (`multi_dumps/`) | **MISSING** | Were on 11 dead A100-40GB nodes, never backed up |
 | Patched XLA binary | `~/rivermind-data/xla/bazel-bin/xla/tools/run_hlo_module` | Built May 2, working |
 
-### 1.2 GPU Server
+### 1.2 GPU Servers (3 GPUs across 2 servers)
 
-- **SSH**: `sshpass -p 'x01fkp87' ssh -p 30126 root@sh1-ssh.gpuhome.cc`
-- **GPU**: A100-SXM4-**80GB** (old nodes were A100-SXM4-40GB)
-- **CPU**: 28 vCPU
-- **Python**: `/opt/conda/bin/python3` (3.11, torch 2.6.0+cu124)
+| Server | SSH | GPU | Disk (data) | Free |
+|---|---|---|---|---|
+| **sh1** (existing) | `sshpass -p 'x01fkp87' ssh -p 30126 root@sh1-ssh.gpuhome.cc` | 1×A100-SXM4-**80GB** | 393GB | 151GB |
+| **js01** (new) | `sshpass -p 'jwnqthgj' ssh -p 50029 root@js01-ssh.gpuhome.cc` | 2×A100-SXM4-**40GB** | 393GB | 221GB |
+
+- **Python** (both): `/opt/conda/bin/python3` (3.11, torch 2.6.0+cu124)
+- **XLA binary** (both): `~/rivermind-data/xla/bazel-bin/xla/tools/run_hlo_module`
+- **HLO datasets** (both): `~/hlo_datasets/` (6 models, 44 modules)
 
 ### 1.3 Why Regeneration Is Needed
 
@@ -186,38 +190,63 @@ These have zero entries in the CSV and need all 145 strategies run with nsys pro
 
 ## 5. Execution Plan
 
-### 5.1 Key Constraint
+### 5.1 Key Constraints
 
 - **Dump-only runs**: can parallelize freely (no timing sensitivity)
-- **Dump+nsys runs**: must run serially or near-serially (GPU contention corrupts kernel time measurements)
+- **Dump+nsys runs**: must run serially **per GPU** (GPU contention corrupts kernel time measurements)
 - **SA runs**: each trajectory does ~50 internal XLA iterations via `sa_orchestrator.py`
+- **3 GPUs available**: 1 on sh1 (80GB) + 2 on js01 (40GB each)
 
-### 5.2 Two-Phase Approach
+### 5.2 Phase 1 Status: COMPLETE
 
-#### Phase 1: Dump-only (strategies already in CSV)
+- **3,639 dump files** generated on sh1 (1.6 hours, 2 failures)
+- All 29 CSV-covered modules have their dump-only strategies generated
 
-- **What**: 3,560 runs across 29 modules (no nsys profiling)
-- **Parallelism**: 16 concurrent jobs (28 vCPU, plenty of headroom)
-- **How**: `run_hlo_module` with `XLA_FLAGS` for dump, no nsys wrapper
-- **Est. time**: ~3-4 hours
+### 5.3 Excluded Modules (7 total)
 
-#### Phase 2: Dump+nsys (strategies NOT in CSV)
+| Module | Reason | Both servers |
+|---|---|---|
+| DeepSeek/DeepSeekV3Model_computation | 0 GPU kernels in nsys (33 attempts, all empty) | HLO moved to /tmp |
+| DeepSeek/deepseek_ffn_layer | 0 GPU kernels in nsys (20 attempts, all failed) | HLO moved to /tmp |
+| DeepSeek/deepseek_mla_layer | 3.6GB per dump, 520GB needed for all 145 — exceeds disk | HLO moved to /tmp |
+| Llama/Llama3Transformer_computation | 0 GPU kernels in nsys (4 CSV entries, all 0 kernels, 18 min/run wasted) | HLO moved to /tmp (May 3) |
+| Mamba/Mamba2Model_computation | 0 GPU kernels in nsys (CSV confirmed: all entries show 0 kernels) | HLO moved to /tmp (May 3) |
+| PaliGemma/PaliGemmaModel_computation | 0 GPU kernels expected (model-level FFI pattern) | HLO moved to /tmp (May 3) |
+| SigLIP/SigLIPModel_computation | 0 GPU kernels expected (model-level FFI pattern) | HLO moved to /tmp (May 3) |
 
-- **What**: 2,600 runs across 44 modules
-- **Parallelism**: 1-2 concurrent jobs (need accurate GPU timing)
-- **How**: `nsys profile` wrapping `run_hlo_module` with `XLA_FLAGS` for dump
-- **Est. time**: ~15-18 hours serial
+**Root cause**: All `*Model_computation` and `*Transformer_computation` modules use custom calls with `xla_ffi_python_gpu_callback` which is not registered in the standalone XLA binary. They compile but produce 0 GPU kernels. Layer-level modules and `whole_computation` modules are unaffected. Active module count reduced from 44 to **37**.
 
-#### Phase 3: SA trajectories
+### 5.4 Revised Execution (May 3)
 
-- **What**: 44 modules × 5 SA trajectories via sa_orchestrator.py
-- **Parallelism**: Serial (SA search + nsys profiling of results)
-- **How**: sa_orchestrator.py produces dumps, then nsys profiles each final ordering
-- **Est. time**: ~4-6 hours
+Original 3-shard plan failed due to: (a) js01 disk full from massive DeepSeek/Griffin dumps, (b) 0-kernel DeepSeek modules wasting hours, (c) Griffin removed from js01 (161GB). Revised to model-aware assignment:
 
-#### Total: ~22-28 hours (fits in ~1 day)
+| GPU | Server | Task | Modules | Phase 2 (nsys) | Log |
+|---|---|---|---|---|---|
+| A100-80GB | sh1 | `--only-model Griffin-2B-BF16-L6` | 6 Griffin | 280 runs | `phase_all_griffin.log` |
+| A100-40GB #0 | js01 | `--module-shard 1/3` (36 modules) | 12 mixed | 696 runs | `phase_all_shard1.log` |
+| A100-40GB #1 | js01 | `--module-shard 2/3` (36 modules) | 12 mixed | 847 runs | `phase_all_shard2.log` |
 
-### 5.3 Run Command Pattern
+**Note**: js01 module list excludes Griffin (6) + deepseek_ffn_layer + deepseek_mla_layer = 36 modules. Shard assignments differ from sh1's 41-module list. 11 modules fall into js01 shard 0 (not running) — handled in Phase 5.4b.
+
+#### Phase 5.4b: Gap-fill (after main runs complete)
+
+11 modules assigned to js01 shard 0 are not covered by any current run:
+1. DeepSeek/moe_unpermute, shared_block, whole_computation
+2. Llama/gqa_attention_dot, gqa_out_proj, mlp_up_proj
+3. Mamba/mamba_block
+4. PaliGemma/PaliGemmaModel_computation, vision_mlp
+5. SigLIP/patch_embed, vision_attention
+
+After main runs complete, run `--module-shard 0/3` on js01 (either GPU). Then sh1 mop-up without sharding.
+
+### 5.5 Post-Completion: Merge CSVs
+
+Each shard appends to its local `gpu_profiles_merged.csv`. After all shards complete:
+1. SCP CSVs from js01 to sh1
+2. Merge (deduplicate) into single `gpu_profiles_merged.csv`
+3. SCP all dumps from js01 to sh1 (consolidation)
+
+### 5.6 Run Command Pattern
 
 **Dump-only:**
 ```bash
@@ -232,7 +261,7 @@ nsys profile --stats=true --output=$STRAT_DIR/profile \
   run_hlo_module --platform=CUDA --reference_platform='' $HLO_INPUT
 ```
 
-### 5.4 Implementation
+### 5.7 Implementation
 
 `generate_dumps_from_manifest.py` (rewritten) handles all three phases:
 
@@ -256,7 +285,7 @@ python3 generate_dumps_from_manifest.py --phase dump-nsys
 python3 generate_dumps_from_manifest.py --phase sa --sa-trajectories 5
 ```
 
-### 5.5 Output
+### 5.8 Output
 
 - 6,380 dump directories under `output/multi_dumps/<Model>/<module>/<strategy>/`
 - Each contains: `priority_fusion_dump.txt`, `*before_priority-fusion*.txt`, `xla_output.log`
