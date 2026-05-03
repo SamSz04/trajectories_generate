@@ -150,7 +150,7 @@ def generate_all(
 
         # Save as json_plan
         plan = {"producer_ordering": ordering}
-        plan_path = output_dir_p / f"{module_key}_scorer.json"
+        plan_path = output_dir_p / f"{module_key}_dt_scorer.json"
         plan_path.write_text(json.dumps(plan, indent=2))
 
         results.append({
