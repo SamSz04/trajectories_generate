@@ -7,7 +7,7 @@ clusters, producing a shared embedding space. A ScoreHead maps
 
 Architecture:
     CandidateEncoder:
-      Original nodes:  MLP(node_features[27] + opcode_embed[16]) -> [64]
+      Original nodes:  MLP(node_features[19] + opcode_embed[16]) -> [64]
       Fusion clusters: MLP(cluster_features[34]) -> [64]
       Two separate MLPs, same output dim.
 
@@ -36,7 +36,7 @@ from cluster_features import CLUSTER_FEATURE_DIM
 # Constants
 # ======================================================================
 
-ORIGINAL_FEATURE_DIM = 27    # data.x continuous features
+ORIGINAL_FEATURE_DIM = 19    # data.x continuous features (19 in current .pt files)
 NUM_OPCODES = 132            # HLO opcode vocabulary size
 OPCODE_EMBED_DIM = 16        # opcode embedding dimension
 CANDIDATE_EMBED_DIM = 64     # shared output dim for both encoders

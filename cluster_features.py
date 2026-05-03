@@ -57,14 +57,15 @@ from dump_parser import (
 # Constants — feature layout
 # ======================================================================
 
-# Indices into data.x (27-dim continuous features from feature_encoder.py)
+# Indices into data.x (19 or 27-dim continuous features from feature_encoder.py)
+# The first 19 dims are always present; dims 19-26 may be absent in older .pt files
 _FEAT_ETYPE = slice(0, 6)       # one-hot element type (6 dims)
 _FEAT_RANK = 6                  # tensor rank
 _FEAT_ELEMENTS = 11             # log2(total elements)
 _FEAT_BYTES = 12                # log2(total bytes)
 _FEAT_IS_GEMM = 17              # is custom-call GEMM
 _FEAT_IS_FUSABLE = 18           # is fusable
-_FEAT_TOPO_POS = 19             # normalized topo position (0-1)
+_FEAT_TOPO_POS = 19             # normalized topo position (0-1), may not exist
 
 # Cluster feature vector layout (34 dims total):
 #   [0]      log2(cluster_size)
@@ -361,11 +362,19 @@ def compute_cluster_features(
     feat[21] = root_opcode / 132.0
 
     # --- [22] topo_span ---
-    topo = member_x[:, _FEAT_TOPO_POS]
-    feat[22] = (topo.max() - topo.min()).item()
+    feat_dim = data.x.shape[1]
+    if feat_dim > _FEAT_TOPO_POS:
+        topo = member_x[:, _FEAT_TOPO_POS]
+        feat[22] = (topo.max() - topo.min()).item()
+        feat[23] = topo.mean().item()
+    else:
+        # topo_pos not in features — use normalized index as proxy
+        indices = torch.tensor(member_indices, dtype=torch.float32)
+        indices /= max(data.num_nodes, 1)
+        feat[22] = (indices.max() - indices.min()).item()
+        feat[23] = indices.mean().item()
 
-    # --- [23] mean_topo_pos ---
-    feat[23] = topo.mean().item()
+    # --- [23] mean_topo_pos (handled above) ---
 
     # --- [24:30] element_type histogram (normalized) ---
     etype_hist = member_x[:, _FEAT_ETYPE].sum(dim=0)  # [6]
@@ -594,7 +603,7 @@ def process_module(
     save_data = {
         'module_key': module_key,
         'graph': graph,
-        'original_feature_dim': 27,
+        'original_feature_dim': graph.x.shape[1],
         'cluster_feature_dim': CLUSTER_FEATURE_DIM,
         'enriched_trajectories': enriched_trajectories,
         'stats': stats,
@@ -694,6 +703,8 @@ def _print_stats(stats: dict):
     """Print formatted module statistics."""
     print(f"\n  --- Module Stats ---")
     print(f"  Trajectories: {stats['n_trajectories']}")
+    if stats['n_trajectories'] == 0:
+        return
     print(f"  Total fused steps: {stats['n_total_steps']}")
     n_o, n_f = stats['n_original_selected'], stats['n_fusion_selected']
     print(f"  Selections: {n_o} original, {n_f} fusion.N "
