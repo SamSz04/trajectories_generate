@@ -35,6 +35,7 @@ from graph_contractor import (
     contract_graph,
 )
 from precompute_graphs import _dict_to_metadata
+from reward_builder import RewardConfig, compute_normalization_stats, build_returns
 
 # ---------------------------------------------------------------------------
 # GPU reward loading (reused from dt_dataset_multi.py)
@@ -196,12 +197,19 @@ class DynamicFusionDTDataset(Dataset):
         include_approximate: bool = True,
         include_unresolved: bool = False,
         precomputed_dir: Optional[str] = None,
+        reward_config: Optional[RewardConfig] = None,
+        norm_stats: Optional[Dict[str, dict]] = None,
     ):
         self.context_len = context_len
         self.reward_mode = reward_mode
         self.max_gpu_reward = max(max_gpu_reward, 1e-6)
         self.include_approximate = include_approximate
         self.include_unresolved = include_unresolved
+
+        # Dual-channel return config
+        self.reward_config = reward_config
+        self.norm_stats = norm_stats or {}
+        self.return_dim = reward_config.return_dim if reward_config else 1
 
         # Load pre-computed graphs if available
         self._precomputed: Dict[str, dict] = {}  # filename -> {graphs, metadatas, traj_map}
@@ -212,8 +220,8 @@ class DynamicFusionDTDataset(Dataset):
         self.windows: List[Tuple[int, int, int]] = []
         self.module_data = module_data_list
 
-        # Pre-compute per-trajectory RTGs
-        self._rtg_cache: Dict[Tuple[int, int], List[float]] = {}
+        # Pre-compute per-trajectory returns
+        self._return_cache: Dict[Tuple[int, int], List[List[float]]] = {}
 
         for mi, mdata in enumerate(module_data_list):
             for ti, traj in enumerate(mdata["trajectories"]):
@@ -221,9 +229,9 @@ class DynamicFusionDTDataset(Dataset):
                 if T == 0:
                     continue
 
-                # Compute RTG for this trajectory
-                rtg = self._compute_rtg(traj, reward_mode)
-                self._rtg_cache[(mi, ti)] = rtg
+                # Compute returns for this trajectory
+                returns = self._compute_returns(traj, mdata["module_key"])
+                self._return_cache[(mi, ti)] = returns
 
                 # Create sliding windows
                 for start in range(T):
@@ -244,7 +252,7 @@ class DynamicFusionDTDataset(Dataset):
                 )
 
     def _compute_rtg(self, traj: dict, reward_mode: str) -> List[float]:
-        """Compute return-to-go for each step."""
+        """Compute return-to-go for each step (legacy single-channel)."""
         steps = traj["steps"]
         T = len(steps)
 
@@ -273,6 +281,22 @@ class DynamicFusionDTDataset(Dataset):
         else:
             # Fallback: flat reward = 1.0
             return [1.0] * T
+
+    def _compute_returns(self, traj: dict, module_key: str) -> List[List[float]]:
+        """Compute per-step return vectors using reward_builder.
+
+        If reward_config is set, uses dual-channel return conditioning.
+        Otherwise falls back to legacy _compute_rtg (single float per step).
+        """
+        if self.reward_config is not None:
+            returns, _fidelities = build_returns(
+                traj, module_key, self.norm_stats, self.reward_config,
+            )
+            return returns
+        else:
+            # Legacy path: wrap single float in list
+            rtg = self._compute_rtg(traj, self.reward_mode)
+            return [[v] for v in rtg]
 
     def _get_contracted_graph(
         self, mi: int, ti: int, step_pos: int,
@@ -336,13 +360,14 @@ class DynamicFusionDTDataset(Dataset):
         traj = mdata["trajectories"][ti]
         T = traj["n_steps"]
         K = self.context_len
-        rtg_list = self._rtg_cache[(mi, ti)]
+        rtg_list = self._return_cache[(mi, ti)]
+        return_dim = self.return_dim
 
         # Collect K steps starting from 'start'
         graphs: List[Data] = []
         metadatas: List[GraphStepMetadata] = []
         actions: List[int] = []
-        rtgs: List[float] = []
+        rtgs: List[List[float]] = []
         timesteps: List[int] = []
         attn_mask: List[int] = []
 
@@ -378,7 +403,7 @@ class DynamicFusionDTDataset(Dataset):
                 graphs.append(dummy)
                 metadatas.append(dummy_meta)
                 actions.append(-1)  # will be masked
-                rtgs.append(0.0)
+                rtgs.append([0.0] * return_dim)
                 timesteps.append(0)
                 attn_mask.append(0)
             else:
@@ -397,7 +422,7 @@ class DynamicFusionDTDataset(Dataset):
             "graphs": graphs,
             "metadatas": metadatas,
             "actions": torch.tensor(actions, dtype=torch.long),
-            "rtgs": torch.tensor(rtgs, dtype=torch.float32),
+            "rtgs": torch.tensor(rtgs, dtype=torch.float32),  # [K, return_dim]
             "timesteps": torch.tensor(timesteps, dtype=torch.long),
             "attn_mask": torch.tensor(attn_mask, dtype=torch.long),
             "module_key": mdata["module_key"],
@@ -436,9 +461,9 @@ def dynamic_collate_fn(batch: List[dict]) -> dict:
     # 2. Keep metadata outside Batch
     all_metadatas = [item["metadatas"] for item in batch]  # [B][K]
 
-    # 3. Stack actions, rtgs, timesteps, attn_mask → [B, K]
+    # 3. Stack actions, rtgs, timesteps, attn_mask
     actions = torch.stack([item["actions"] for item in batch])
-    rtgs = torch.stack([item["rtgs"] for item in batch])
+    rtgs = torch.stack([item["rtgs"] for item in batch])  # [B, K, return_dim]
     timesteps = torch.stack([item["timesteps"] for item in batch])
     attn_mask = torch.stack([item["attn_mask"] for item in batch])
 
@@ -462,7 +487,7 @@ def dynamic_collate_fn(batch: List[dict]) -> dict:
         "graph_sizes": graph_sizes_tensor,  # [B*K]
         "metadatas": all_metadatas,         # List[List[GraphStepMetadata]]
         "actions": actions,                 # [B, K]
-        "rtgs": rtgs,                       # [B, K]
+        "rtgs": rtgs,                       # [B, K, return_dim]
         "timesteps": timesteps,             # [B, K]
         "attn_mask": attn_mask,             # [B, K]
         "candidate_masks": candidate_masks, # [B, K, max_Vt]
@@ -493,6 +518,9 @@ def create_dynamic_dataloaders(
     num_workers: int = 0,
     precomputed_dir: Optional[str] = None,
     verbose: bool = True,
+    return_mode: Optional[str] = None,
+    norm_mode: str = "module_p95",
+    real_return_norm: str = "legacy_max",
 ) -> Tuple[DataLoader, DataLoader, Dict]:
     """Create train/val dataloaders with dynamic graph contraction.
 
@@ -562,6 +590,26 @@ def create_dynamic_dataloaders(
             if val_m["trajectories"]:
                 val_modules.append(val_m)
 
+    # Build reward config if return_mode specified
+    reward_config = None
+    norm_stats = {}
+    return_dim = 1
+
+    if return_mode is not None:
+        reward_config = RewardConfig(
+            return_mode=return_mode,
+            norm_mode=norm_mode,
+            real_return_norm=real_return_norm,
+            max_gpu_reward=max_gpu_reward,
+        )
+        return_dim = reward_config.return_dim
+
+        # Compute normalization stats from TRAIN split only
+        norm_stats = compute_normalization_stats(train_modules, norm_mode)
+        if verbose:
+            print(f"\nReturn mode: {return_mode}, return_dim: {return_dim}, "
+                  f"norm: {norm_mode}, real_norm: {real_return_norm}")
+
     train_ds = DynamicFusionDTDataset(
         train_modules,
         context_len=context_len,
@@ -570,6 +618,8 @@ def create_dynamic_dataloaders(
         include_approximate=include_approximate,
         include_unresolved=include_unresolved,
         precomputed_dir=precomputed_dir,
+        reward_config=reward_config,
+        norm_stats=norm_stats,
     )
     val_ds = DynamicFusionDTDataset(
         val_modules,
@@ -579,6 +629,8 @@ def create_dynamic_dataloaders(
         include_approximate=include_approximate,
         include_unresolved=include_unresolved,
         precomputed_dir=precomputed_dir,
+        reward_config=reward_config,
+        norm_stats=norm_stats,  # same stats (from train split)
     )
 
     train_loader = DataLoader(
@@ -603,6 +655,11 @@ def create_dynamic_dataloaders(
         "train_windows": len(train_ds),
         "val_windows": len(val_ds),
         "holdout_arch": holdout_arch,
+        "return_dim": return_dim,
+        "return_mode": return_mode,
+        "norm_mode": norm_mode,
+        "real_return_norm": real_return_norm,
+        "norm_stats": norm_stats,
     })
 
     if verbose:

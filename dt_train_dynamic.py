@@ -33,6 +33,7 @@ from dt_dataset_dynamic import (
     DynamicFusionDTDataset,
     dynamic_collate_fn,
 )
+from reward_builder import compute_advantage, advantage_weight
 
 
 # ======================================================================
@@ -47,6 +48,9 @@ def compute_loss(
     loss_mode: str = "ce",
     gpu_rewards: Optional[List[float]] = None,
     advantage_beta: float = 1.0,
+    advantage_wmin: float = 0.1,
+    advantage_wmax: float = 5.0,
+    top_quantile: float = 0.25,
 ) -> Tuple[torch.Tensor, Dict[str, float]]:
     """Compute training loss with optional trajectory weighting.
 
@@ -55,9 +59,12 @@ def compute_loss(
         actions: [B, K] target action indices
         attn_mask: [B, K] valid step mask (1 = valid)
         candidate_masks: [B, K, max_Vt] candidate masks
-        loss_mode: "ce", "advantage_weighted", "top_quantile", "awbc_filtered"
+        loss_mode: "ce", "advantage_weighted", "top_quantile", "hybrid_aw"
         gpu_rewards: [B] GPU reward per trajectory (used for weighting)
         advantage_beta: scaling factor for advantage weights
+        advantage_wmin: minimum advantage weight
+        advantage_wmax: maximum advantage weight
+        top_quantile: fraction of best trajectories to keep
 
     Returns:
         (loss, metrics_dict)
@@ -82,16 +89,61 @@ def compute_loss(
     if loss_mode == "ce":
         loss = ce_per_sample.mean()
     elif loss_mode == "advantage_weighted" and gpu_rewards is not None:
-        # Weight each trajectory's steps by exp(beta * advantage)
-        # advantage = gpu_reward - 1.0 (relative to XLA default)
+        # A_real = 1 - 1/R_real, w = clip(exp(beta * A_real), w_min, w_max)
         weights = torch.ones(B, K, device=device)
         for b in range(B):
             if gpu_rewards[b] is not None:
-                adv = gpu_rewards[b] - 1.0
-                w = min(max(math.exp(advantage_beta * adv), 0.1), 5.0)
+                A_real = compute_advantage(gpu_rewards[b])
+                w = advantage_weight(A_real, advantage_beta, advantage_wmin, advantage_wmax)
                 weights[b] = w
         flat_weights = weights[valid_mask]
         loss = (ce_per_sample * flat_weights).sum() / flat_weights.sum()
+    elif loss_mode == "top_quantile" and gpu_rewards is not None:
+        # Only train on top-Q% trajectories (by gpu_reward)
+        valid_rewards = [(b, gpu_rewards[b]) for b in range(B)
+                         if gpu_rewards[b] is not None]
+        if valid_rewards:
+            valid_rewards.sort(key=lambda x: -x[1])
+            n_keep = max(1, int(len(valid_rewards) * top_quantile))
+            keep_set = {b for b, _ in valid_rewards[:n_keep]}
+            tq_mask = torch.zeros(B, K, dtype=torch.bool, device=device)
+            for b in keep_set:
+                tq_mask[b] = True
+            combined = valid_mask & tq_mask
+            if combined.any():
+                flat_tq = ce_per_sample[combined[valid_mask]]
+                loss = flat_tq.mean()
+            else:
+                loss = ce_per_sample.mean()
+        else:
+            loss = ce_per_sample.mean()
+    elif loss_mode == "hybrid_aw" and gpu_rewards is not None:
+        # Top-quantile filtering + advantage weighting
+        valid_rewards = [(b, gpu_rewards[b]) for b in range(B)
+                         if gpu_rewards[b] is not None]
+        if valid_rewards:
+            valid_rewards.sort(key=lambda x: -x[1])
+            n_keep = max(1, int(len(valid_rewards) * top_quantile))
+            keep_set = {b for b, _ in valid_rewards[:n_keep]}
+        else:
+            keep_set = set(range(B))
+
+        weights = torch.zeros(B, K, device=device)
+        for b in range(B):
+            if b not in keep_set:
+                continue
+            if gpu_rewards[b] is not None:
+                A_real = compute_advantage(gpu_rewards[b])
+                w = advantage_weight(A_real, advantage_beta, advantage_wmin, advantage_wmax)
+            else:
+                w = 1.0
+            weights[b] = w
+
+        flat_weights = weights[valid_mask]
+        if flat_weights.sum() > 0:
+            loss = (ce_per_sample * flat_weights).sum() / flat_weights.sum()
+        else:
+            loss = ce_per_sample.mean()
     else:
         loss = ce_per_sample.mean()
 
@@ -132,6 +184,9 @@ def train_epoch(
     device: torch.device,
     loss_mode: str = "ce",
     advantage_beta: float = 1.0,
+    advantage_wmin: float = 0.1,
+    advantage_wmax: float = 5.0,
+    top_quantile: float = 0.25,
     grad_clip: float = 1.0,
 ) -> Dict[str, float]:
     """Train for one epoch."""
@@ -163,6 +218,9 @@ def train_epoch(
             loss_mode=loss_mode,
             gpu_rewards=gpu_rewards,
             advantage_beta=advantage_beta,
+            advantage_wmin=advantage_wmin,
+            advantage_wmax=advantage_wmax,
+            top_quantile=top_quantile,
         )
 
         optimizer.zero_grad()
@@ -296,6 +354,15 @@ def main():
     parser.add_argument("--precomputed-dir", default=None,
                         help="Directory with pre-computed contracted graphs")
 
+    # Return conditioning
+    parser.add_argument("--return-mode", default=None,
+                        choices=["flat_real", "cm_dense", "hybrid"],
+                        help="Dual-channel return mode (None = legacy reward_mode)")
+    parser.add_argument("--norm-mode", default="module_p95",
+                        choices=["module_p95", "module_zscore", "trajectory_l1"])
+    parser.add_argument("--real-return-norm", default="legacy_max",
+                        choices=["legacy_max", "raw", "clipped"])
+
     # Model
     parser.add_argument("--embed-dim", type=int, default=64)
     parser.add_argument("--num-heads", type=int, default=4)
@@ -306,8 +373,11 @@ def main():
 
     # Training
     parser.add_argument("--loss-mode", default="ce",
-                        choices=["ce", "advantage_weighted", "top_quantile", "awbc_filtered"])
+                        choices=["ce", "advantage_weighted", "top_quantile", "hybrid_aw"])
     parser.add_argument("--advantage-beta", type=float, default=1.0)
+    parser.add_argument("--advantage-wmin", type=float, default=0.1)
+    parser.add_argument("--advantage-wmax", type=float, default=5.0)
+    parser.add_argument("--top-quantile", type=float, default=0.25)
     parser.add_argument("--epochs", type=int, default=200)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--lr", type=float, default=3e-4)
@@ -332,6 +402,8 @@ def main():
     print(f"Device: {device}")
     print(f"Loss mode: {args.loss_mode}")
     print(f"Reward mode: {args.reward_mode}")
+    if args.return_mode:
+        print(f"Return mode: {args.return_mode} (norm={args.norm_mode}, real_norm={args.real_return_norm})")
 
     # Load data
     train_loader, val_loader, info = create_dynamic_dataloaders(
@@ -345,7 +417,12 @@ def main():
         skip_computation=args.skip_computation,
         max_trajectories_per_module=args.max_trajs_per_module,
         precomputed_dir=args.precomputed_dir,
+        return_mode=args.return_mode,
+        norm_mode=args.norm_mode,
+        real_return_norm=args.real_return_norm,
     )
+
+    return_dim = info.get("return_dim", 1)
 
     # Build model
     model = DynamicFusionDT(
@@ -356,6 +433,7 @@ def main():
         context_len=args.context_len,
         gnn_hidden_dim=args.gnn_hidden_dim,
         dropout=args.dropout,
+        return_dim=return_dim,
     ).to(device)
 
     print(f"\nModel: {model.count_parameters():,} parameters")
@@ -377,6 +455,9 @@ def main():
             model, train_loader, optimizer, device,
             loss_mode=args.loss_mode,
             advantage_beta=args.advantage_beta,
+            advantage_wmin=args.advantage_wmin,
+            advantage_wmax=args.advantage_wmax,
+            top_quantile=args.top_quantile,
             grad_clip=args.grad_clip,
         )
         val_metrics = eval_epoch(model, val_loader, device)
@@ -411,7 +492,13 @@ def main():
                 "val_metrics": val_metrics,
                 "train_metrics": train_metrics,
                 "args": vars(args),
-                "info": info,
+                "info": {k: v for k, v in info.items() if k != "norm_stats"},
+                "return_dim": return_dim,
+                "return_mode": args.return_mode,
+                "norm_mode": args.norm_mode,
+                "real_return_norm": args.real_return_norm,
+                "norm_stats": info.get("norm_stats", {}),
+                "max_gpu_reward": info.get("max_gpu_reward", 1.0),
             }
             torch.save(ckpt, os.path.join(args.checkpoint_dir, "best.pt"))
             print(f"  -> New best: {best_val_acc:.4f}")

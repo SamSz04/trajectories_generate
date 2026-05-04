@@ -76,6 +76,7 @@ def load_model(checkpoint_path: str, device: torch.device,
         context_len=context_len,
         gnn_hidden_dim=ckpt_args.get("gnn_hidden_dim"),
         dropout=0.0,
+        return_dim=ckpt.get("return_dim", 1),
     ).to(device)
 
     model.load_state_dict(ckpt["model_state_dict"])
@@ -407,6 +408,14 @@ class DtScorerState:
             [window_actions[:self.context_len]], dtype=torch.long, device=device)
         rtgs = torch.full(
             (1, self.context_len), self.target_rtg, device=device)
+        # Handle return_dim > 1
+        return_dim = getattr(self.model, 'return_dim', 1)
+        if return_dim > 1:
+            rtgs = rtgs.unsqueeze(-1).expand(-1, -1, return_dim).clone()
+            rtgs[:, :, 0] = self.target_rtg  # cm channel
+            rtgs[:, :, 1] = self.target_rtg  # real return channel
+        else:
+            rtgs = rtgs.unsqueeze(-1)  # [1, K, 1]
         timesteps = torch.arange(
             self.context_len, device=device).unsqueeze(0)
         attn_mask = torch.zeros(

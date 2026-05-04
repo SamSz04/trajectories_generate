@@ -148,6 +148,7 @@ class DynamicFusionDT(nn.Module):
         cluster_feature_dim: Cluster feature dimension.
         gnn_hidden_dim: GNN hidden dim (defaults to embed_dim).
         dropout: Dropout rate.
+        return_dim: Dimension of return input (1=single channel, 2=dual channel).
     """
 
     def __init__(
@@ -162,10 +163,12 @@ class DynamicFusionDT(nn.Module):
         cluster_feature_dim: int = 34,
         gnn_hidden_dim: int = None,
         dropout: float = 0.1,
+        return_dim: int = 1,
     ):
         super().__init__()
         self.embed_dim = embed_dim
         self.context_len = context_len
+        self.return_dim = return_dim
 
         # Graph encoder
         gnn_dim = gnn_hidden_dim or embed_dim
@@ -182,8 +185,12 @@ class DynamicFusionDT(nn.Module):
             self.node_proj = None
 
         # Token embeddings
-        # Return embedding: scalar → embed_dim
-        self.return_embed = nn.Linear(1, embed_dim)
+        # Return embedding: return_dim → embed_dim (MLP)
+        self.return_embed = nn.Sequential(
+            nn.Linear(return_dim, embed_dim),
+            nn.GELU(),
+            nn.Linear(embed_dim, embed_dim),
+        )
 
         # State embedding: attention-pooled node embeddings → embed_dim
         self.state_attn_query = nn.Parameter(torch.randn(1, embed_dim) * 0.02)
@@ -245,7 +252,7 @@ class DynamicFusionDT(nn.Module):
             pyg_batch: Batch of B*K PyG graphs
             graph_sizes: [B*K] number of nodes per graph
             actions: [B, K] action indices (into contracted graph)
-            rtgs: [B, K] return-to-go values
+            rtgs: [B, K] or [B, K, return_dim] return-to-go values
             timesteps: [B, K] timestep indices
             attn_mask: [B, K] valid step mask
             candidate_masks: [B, K, max_Vt] candidate masks
@@ -277,7 +284,9 @@ class DynamicFusionDT(nn.Module):
 
         # 3. Build token sequence: [R_t, s_t, a_{t-1}] for each timestep
         # R_t: return embedding
-        rtg_tokens = self.return_embed(rtgs.unsqueeze(-1))  # [B, K, D]
+        if rtgs.dim() == 2:
+            rtgs = rtgs.unsqueeze(-1)  # backward compat: [B,K] → [B,K,1]
+        rtg_tokens = self.return_embed(rtgs)  # [B, K, return_dim] → [B, K, D]
 
         # s_t: attention-pooled node embeddings
         query = self.state_attn_query  # [1, D]

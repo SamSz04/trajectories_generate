@@ -33,6 +33,7 @@ from graph_contractor import (
     contract_graph,
 )
 from dynamic_graph_types import GraphStepMetadata
+from reward_builder import RewardConfig, build_returns
 
 
 # ======================================================================
@@ -49,6 +50,8 @@ def teacher_forced_eval(
     max_trajectories_per_module: int = 0,
     skip_computation: bool = True,
     verbose: bool = True,
+    reward_config: Optional[RewardConfig] = None,
+    norm_stats: Optional[Dict[str, dict]] = None,
 ) -> Dict[str, object]:
     """Run teacher-forced evaluation over all enriched trajectories.
 
@@ -96,9 +99,18 @@ def teacher_forced_eval(
             if T == 0:
                 continue
 
-            # Compute RTG (flat GPU reward)
+            # Compute returns (matching training)
             gpu_reward = traj.get("reward_gpu")
-            rtg_val = gpu_reward if gpu_reward is not None else 1.0
+            if reward_config is not None and norm_stats is not None:
+                returns_list, _ = build_returns(
+                    traj, module_key, norm_stats, reward_config,
+                )
+                return_dim = reward_config.return_dim
+            else:
+                # Legacy: flat gpu_reward
+                rtg_val = gpu_reward if gpu_reward is not None else 1.0
+                returns_list = [[rtg_val]] * T
+                return_dim = 1
 
             # Slide window and evaluate
             for start in range(0, T, context_len):
@@ -120,7 +132,7 @@ def teacher_forced_eval(
                     actions_list.append(
                         metadata.selected_idx if metadata.selected_idx is not None else -1
                     )
-                    rtgs_list.append(rtg_val)
+                    rtgs_list.append(returns_list[start + k])
                     timesteps_list.append(start + k)
 
                 # Pad to context_len if needed
@@ -129,7 +141,7 @@ def teacher_forced_eval(
                     graphs.append(dummy)
                     metadatas.append(None)
                     actions_list.append(-1)
-                    rtgs_list.append(0.0)
+                    rtgs_list.append([0.0] * return_dim)
                     timesteps_list.append(0)
 
                 # Batch
@@ -255,8 +267,13 @@ def score_candidates(
     target_rtg: float,
     device: torch.device,
     context_len: int = 20,
+    target_cm_rtg: float = 5.0,
+    target_real_return: float = 1.5,
 ) -> torch.Tensor:
     """Score all candidates at a given step.
+
+    For free scoring (deployment), uses target RTG prompts.
+    Ground-truth RTG_cm_t requires future information and cannot be used here.
 
     Args:
         model: Trained DynamicFusionDT
@@ -265,9 +282,11 @@ def score_candidates(
         cluster_cache: Pre-computed cluster features
         history_states: Previous GraphStepStates
         history_actions: Previous action indices
-        target_rtg: Target return-to-go
+        target_rtg: Target return-to-go (for return_dim=1)
         device: Torch device
         context_len: Context window size
+        target_cm_rtg: Target cost-model RTG (for return_dim=2, channel 0)
+        target_real_return: Target real return (for return_dim=2, channel 1)
 
     Returns:
         scores: [num_candidates] tensor of scores
@@ -299,7 +318,17 @@ def score_candidates(
     pyg_batch = Batch.from_data_list(graphs).to(device)
     graph_sizes = torch.tensor([g.num_nodes for g in graphs], dtype=torch.long, device=device)
     actions = torch.tensor([window_actions[:context_len]], dtype=torch.long, device=device)
-    rtgs = torch.full((1, context_len), target_rtg, device=device)
+
+    # Build RTG tensor matching model's return_dim
+    return_dim = getattr(model, 'return_dim', 1)
+    if return_dim == 1:
+        rtgs = torch.full((1, context_len, 1), target_rtg, device=device)
+    else:
+        # Dual channel: [target_cm_rtg, target_real_return]
+        rtgs = torch.zeros(1, context_len, return_dim, device=device)
+        rtgs[:, :, 0] = target_cm_rtg
+        rtgs[:, :, 1] = target_real_return
+
     timesteps = torch.arange(context_len, device=device).unsqueeze(0)
     attn_mask = torch.zeros(1, context_len, dtype=torch.long, device=device)
     attn_mask[0, :K] = 1
@@ -403,6 +432,25 @@ def main():
     ckpt = torch.load(args.checkpoint, map_location=device, weights_only=False)
     ckpt_args = ckpt.get("args", {})
 
+    # Load return conditioning config from checkpoint
+    return_dim = ckpt.get("return_dim", 1)
+    return_mode = ckpt.get("return_mode", None)
+    norm_mode = ckpt.get("norm_mode", "module_p95")
+    real_return_norm = ckpt.get("real_return_norm", "legacy_max")
+    norm_stats = ckpt.get("norm_stats", {})
+    max_gpu_reward = ckpt.get("max_gpu_reward", 1.0)
+
+    reward_config = None
+    if return_mode is not None:
+        reward_config = RewardConfig(
+            return_mode=return_mode,
+            norm_mode=norm_mode,
+            real_return_norm=real_return_norm,
+            max_gpu_reward=max_gpu_reward,
+        )
+        print(f"Return mode: {return_mode}, return_dim: {return_dim}, "
+              f"norm: {norm_mode}, real_norm: {real_return_norm}")
+
     model = DynamicFusionDT(
         embed_dim=ckpt_args.get("embed_dim", 64),
         num_heads=ckpt_args.get("num_heads", 4),
@@ -411,6 +459,7 @@ def main():
         context_len=args.context_len,
         gnn_hidden_dim=ckpt_args.get("gnn_hidden_dim"),
         dropout=0.0,
+        return_dim=return_dim,
     ).to(device)
 
     model.load_state_dict(ckpt["model_state_dict"])
@@ -425,6 +474,8 @@ def main():
         device=device,
         max_trajectories_per_module=args.max_trajs_per_module,
         skip_computation=args.skip_computation,
+        reward_config=reward_config,
+        norm_stats=norm_stats,
     )
 
     if args.output:
