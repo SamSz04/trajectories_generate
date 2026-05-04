@@ -156,8 +156,13 @@ class DtScorerState:
         self.candidate_names: List[str] = []
 
         # History for autoregressive DT
+        # Invariant: len(history_states) == len(history_actions) at all times.
+        # current_state holds the state we're currently at (action not yet taken).
+        # When a FUSION_EVENT arrives, the action at current_state is recorded
+        # into history, then current_state advances to the new state.
         self.history_states: List[GraphStepState] = []
         self.history_actions: List[int] = []
+        self.current_state: Optional[GraphStepState] = None
         self.step_count: int = 0
 
         # Statistics
@@ -172,6 +177,7 @@ class DtScorerState:
         self.candidate_names = []
         self.history_states = []
         self.history_actions = []
+        self.current_state = None
         self.step_count = 0
         self.total_score_time = 0.0
         self.total_score_calls = 0
@@ -200,6 +206,9 @@ class DtScorerState:
             selected_name=None,
         )
 
+        # Save as current state (awaiting action from XLA)
+        self.current_state = state
+
         scores = self._score(state)
         priorities = self._scores_to_priorities(scores, self.candidate_names)
 
@@ -213,14 +222,17 @@ class DtScorerState:
         producer: str,
         consumer: str,
         step: int,
+        candidates: Optional[List[str]] = None,
     ) -> Dict[str, int]:
         """Handle FUSION_EVENT: update state and re-score.
 
         Args:
             fusion_name: Name of the new fused instruction (e.g., "fusion.39")
-            producer: Name of the producer absorbed into consumer
-            consumer: Name of the consumer (becomes the fused instruction)
+            producer: Name of the producer (may remain alive if multi-user)
+            consumer: Name of the consumer (absorbed, replaced by fusion_name)
             step: Fusion step number
+            candidates: Current candidate list from XLA (if provided,
+                used as ground truth for state fixup)
 
         Returns:
             priorities: Updated priorities for remaining candidates.
@@ -233,12 +245,7 @@ class DtScorerState:
         # Determine root consumer (trace through existing clusters)
         root_consumer = self._get_root_consumer(consumer)
 
-        # Remove producer and consumer from state
-        if producer in self.alive_original_nodes:
-            self.alive_original_nodes.discard(producer)
-        elif producer in self.active_clusters:
-            del self.active_clusters[producer]
-
+        # Remove consumer from state (always consumed)
         if consumer in self.alive_original_nodes:
             self.alive_original_nodes.discard(consumer)
         elif consumer in self.active_clusters:
@@ -260,29 +267,60 @@ class DtScorerState:
             self.g0, new_cluster, self.g0_name_to_idx,
         )
 
-        # Update candidate list: remove fused, add new
-        new_candidates = set(self.candidate_names)
-        new_candidates.discard(producer)
-        new_candidates.discard(consumer)
-        new_candidates.add(fusion_name)
-        self.candidate_names = sorted(new_candidates)
-
-        # Record history: the action taken was "select producer"
-        # Find the action index in the PREVIOUS state's contracted graph
-        if self.history_states:
-            prev_state = self.history_states[-1]
-            prev_names = (sorted(prev_state.alive_original_nodes) +
-                          sorted(prev_state.active_clusters.keys()))
-            prev_name_to_idx = {n: i for i, n in enumerate(prev_names)}
-            action_idx = prev_name_to_idx.get(producer, -1)
+        # Determine candidates: use XLA's list if provided, else approximate
+        if candidates is not None:
+            self.candidate_names = sorted(candidates)
         else:
-            # First fusion: action index in initial graph
+            new_candidates = set(self.candidate_names)
+            new_candidates.discard(consumer)
+            new_candidates.add(fusion_name)
+            # Keep producer if it has other users (we don't know, so keep it)
+            self.candidate_names = sorted(new_candidates)
+
+        # Fix up alive_original_nodes: recompute from cluster membership
+        # then ensure all g0-node candidates are alive
+        all_absorbed = set()
+        for cl in self.active_clusters.values():
+            all_absorbed.update(cl.members)
+        self.alive_original_nodes = self.all_node_names - all_absorbed
+
+        # Re-add any g0 nodes that are still candidates
+        # (producer with multiple users remains alive even if cloned)
+        for c in self.candidate_names:
+            if c in self.all_node_names and c not in self.alive_original_nodes:
+                self.alive_original_nodes.add(c)
+
+        # Record action taken at current_state → push to history
+        # The action was "select producer" at the previous state
+        if self.current_state is not None:
+            cs_names = (sorted(self.current_state.alive_original_nodes) +
+                        sorted(self.current_state.active_clusters.keys()))
+            cs_name_to_idx = {n: i for i, n in enumerate(cs_names)}
+            action_idx = cs_name_to_idx.get(producer, -1)
+            self.history_states.append(self.current_state)
+            self.history_actions.append(action_idx)
+        else:
+            # Should not happen (INIT should have set current_state)
             initial_names = sorted(self.all_node_names)
             initial_name_to_idx = {n: i for i, n in enumerate(initial_names)}
             action_idx = initial_name_to_idx.get(producer, -1)
-        self.history_actions.append(action_idx)
+            # Create a synthetic init state for history
+            init_state = GraphStepState(
+                module_key="live",
+                trajectory_idx=0,
+                step_idx=0,
+                step_position=0,
+                alive_original_nodes=frozenset(self.all_node_names),
+                active_clusters={},
+                candidate_names=sorted(
+                    set(self.candidate_names) | {producer, consumer}
+                    - {fusion_name}),
+                selected_name=producer,
+            )
+            self.history_states.append(init_state)
+            self.history_actions.append(action_idx)
 
-        # Build new GraphStepState
+        # Build new GraphStepState (this becomes the new current_state)
         state = GraphStepState(
             module_key="live",
             trajectory_idx=0,
@@ -294,29 +332,7 @@ class DtScorerState:
             selected_name=None,
         )
 
-        # Save previous state to history
-        # (The state BEFORE this fusion, which is the state we scored in)
-        if not self.history_states:
-            # First fusion: add the initial state to history
-            init_state = GraphStepState(
-                module_key="live",
-                trajectory_idx=0,
-                step_idx=0,
-                step_position=0,
-                alive_original_nodes=frozenset(
-                    self.alive_original_nodes | {producer} |
-                    ({consumer} if consumer not in self.active_clusters else set())),
-                active_clusters={},
-                candidate_names=sorted(
-                    set(self.candidate_names) | {producer, consumer}),
-                selected_name=producer,
-            )
-            self.history_states.append(init_state)
-        else:
-            # Update last history state's selected_name
-            pass
-
-        self.history_states.append(state)
+        self.current_state = state
         self.step_count = step + 1
 
         scores = self._score(state)
@@ -373,6 +389,20 @@ class DtScorerState:
         pyg_batch = Batch.from_data_list(graphs).to(device)
         graph_sizes = torch.tensor(
             [g.num_nodes for g in graphs], dtype=torch.long, device=device)
+
+        # Debug: verify batch and graph_sizes match
+        total_from_sizes = graph_sizes.sum().item()
+        total_from_batch = pyg_batch.num_nodes
+        if total_from_sizes != total_from_batch:
+            log.warning(
+                f"MISMATCH: graph_sizes sum={total_from_sizes}, "
+                f"batch num_nodes={total_from_batch}, "
+                f"individual sizes={[g.num_nodes for g in graphs]}, "
+                f"individual x shapes={[g.x.shape for g in graphs]}")
+            # Fix: use actual x shapes
+            graph_sizes = torch.tensor(
+                [g.x.shape[0] for g in graphs], dtype=torch.long, device=device)
+
         actions = torch.tensor(
             [window_actions[:self.context_len]], dtype=torch.long, device=device)
         rtgs = torch.full(
@@ -391,6 +421,12 @@ class DtScorerState:
             candidate_masks[0, k, :n] = g.candidate_mask.to(device)
 
         with torch.no_grad():
+            log.info(f"_score debug: K={K}, #graphs={len(graphs)}, "
+                     f"sizes={graph_sizes.tolist()}, "
+                     f"batch_nodes={pyg_batch.num_nodes}, "
+                     f"batch_x={pyg_batch.x.shape}, "
+                     f"max_vt={max_vt}, "
+                     f"actions={actions.tolist()}")
             logits = self.model(
                 pyg_batch, graph_sizes, actions, rtgs,
                 timesteps, attn_mask, candidate_masks,
@@ -556,8 +592,10 @@ class DtScorerServer:
             producer = msg["producer"]
             consumer = msg["consumer"]
             step = msg.get("step", self.state.step_count)
+            candidates = msg.get("candidates")  # Optional
             priorities = self.state.handle_fusion_event(
-                fusion_name, producer, consumer, step)
+                fusion_name, producer, consumer, step,
+                candidates=candidates)
             return {"type": "SCORES", "priorities": priorities}
 
         elif msg_type == "DONE":
