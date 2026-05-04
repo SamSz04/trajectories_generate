@@ -1,0 +1,394 @@
+--- a/xla/backends/gpu/transforms/priority_fusion.cc
++++ b/xla/backends/gpu/transforms/priority_fusion.cc
+@@
+ #include <fstream>
+ #include <cmath>
++#include <sys/socket.h>
++#include <sys/un.h>
++#include <unistd.h>
++#include <sstream>
+ #include <map>
+ #include <memory>
+@@
+
+ // ===== BEGIN Decision Transformer trajectory generation patch =====
+ // Env vars:
+ //   DT_FUSION_STRATEGY  - strategy name (omit for XLA default)
+ //   DT_FUSION_SEED      - integer seed for random/perturbed
+ //   DT_FUSION_SIGMA     - noise sigma for perturbed strategy (float)
+ //   DT_FUSION_PLAN      - path to JSON ordering file (for json_plan)
++//   DT_FUSION_SCORER    - Unix socket path for dt_server strategy
++
++// ===== dt_server: live IPC with Python DT model =====
++//
++// Protocol (Unix domain socket, newline-delimited JSON):
++//   C++ → Python:
++//     {"type":"INIT","candidates":["add.5","mul.7",...],"num_producers":42}
++//     {"type":"FUSION_EVENT","fusion_name":"fusion.39","producer":"add.5",
++//      "consumer":"mul.7","step":5}
++//     {"type":"DONE","total_fusions":85}
++//   Python → C++:
++//     {"type":"SCORES","priorities":{"add.5":9999,"mul.7":9998,...}}
++
++static const char* dt_scorer_path_ = std::getenv("DT_FUSION_SCORER");
++
++class DtScorerClient {
++ public:
++  DtScorerClient() : sock_fd_(-1), connected_(false) {}
++
++  ~DtScorerClient() {
++    if (sock_fd_ >= 0) {
++      close(sock_fd_);
++    }
++  }
++
++  bool Connect() {
++    if (connected_) return true;
++    if (!dt_scorer_path_) return false;
++
++    sock_fd_ = socket(AF_UNIX, SOCK_STREAM, 0);
++    if (sock_fd_ < 0) {
++      LOG(ERROR) << "DT dt_server: socket() failed: " << strerror(errno);
++      return false;
++    }
++
++    // Set receive timeout (30 seconds)
++    struct timeval tv;
++    tv.tv_sec = 30;
++    tv.tv_usec = 0;
++    setsockopt(sock_fd_, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
++
++    struct sockaddr_un addr;
++    memset(&addr, 0, sizeof(addr));
++    addr.sun_family = AF_UNIX;
++    strncpy(addr.sun_path, dt_scorer_path_, sizeof(addr.sun_path) - 1);
++
++    if (connect(sock_fd_, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
++      LOG(ERROR) << "DT dt_server: connect() failed for "
++                 << dt_scorer_path_ << ": " << strerror(errno);
++      close(sock_fd_);
++      sock_fd_ = -1;
++      return false;
++    }
++
++    connected_ = true;
++    LOG(INFO) << "DT dt_server: connected to " << dt_scorer_path_;
++    return true;
++  }
++
++  // Send INIT with all fusible candidate names.
++  // Returns true if scores were received and cached.
++  bool SendInit(const std::vector<std::string>& candidates) {
++    if (!connected_) return false;
++
++    // Build JSON: {"type":"INIT","candidates":["a","b",...],"num_producers":N}
++    std::string json = "{\"type\":\"INIT\",\"candidates\":[";
++    for (size_t i = 0; i < candidates.size(); ++i) {
++      if (i > 0) json += ",";
++      json += "\"" + EscapeJsonString(candidates[i]) + "\"";
++    }
++    json += "],\"num_producers\":" + std::to_string(candidates.size()) + "}";
++
++    SendLine(json);
++    std::string response = RecvLine();
++    if (response.empty()) {
++      LOG(ERROR) << "DT dt_server: no response to INIT";
++      return false;
++    }
++
++    ParseScoresResponse(response);
++    LOG(INFO) << "DT dt_server: INIT scored " << priority_cache_.size()
++              << " producers";
++    return true;
++  }
++
++  // Send FUSION_EVENT after a fusion is performed.
++  // Returns true if updated scores were received.
++  bool SendFusionEvent(const std::string& fusion_name,
++                       const std::string& producer,
++                       const std::string& consumer,
++                       int step) {
++    if (!connected_) return false;
++
++    std::string json = "{\"type\":\"FUSION_EVENT\""
++        ",\"fusion_name\":\"" + EscapeJsonString(fusion_name) + "\""
++        ",\"producer\":\"" + EscapeJsonString(producer) + "\""
++        ",\"consumer\":\"" + EscapeJsonString(consumer) + "\""
++        ",\"step\":" + std::to_string(step) + "}";
++
++    SendLine(json);
++
++    // Remove fused producer and consumer from cache
++    priority_cache_.erase(producer);
++    priority_cache_.erase(consumer);
++
++    std::string response = RecvLine();
++    if (response.empty()) {
++      LOG(WARNING) << "DT dt_server: no response to FUSION_EVENT step "
++                   << step;
++      return false;
++    }
++
++    ParseScoresResponse(response);
++    return true;
++  }
++
++  // Send DONE to signal fusion is complete.
++  void SendDone(int total_fusions) {
++    if (!connected_) return;
++    std::string json = "{\"type\":\"DONE\",\"total_fusions\":"
++        + std::to_string(total_fusions) + "}";
++    SendLine(json);
++    // No response expected
++  }
++
++  // Look up cached priority. Returns -1 if not found.
++  int64_t GetPriority(const std::string& name) const {
++    auto it = priority_cache_.find(name);
++    if (it != priority_cache_.end()) return it->second;
++    return -1;
++  }
++
++  bool IsConnected() const { return connected_; }
++
++ private:
++  void SendLine(const std::string& json) {
++    std::string msg = json + "\n";
++    size_t total_sent = 0;
++    while (total_sent < msg.size()) {
++      ssize_t n = send(sock_fd_, msg.c_str() + total_sent,
++                       msg.size() - total_sent, 0);
++      if (n <= 0) {
++        LOG(ERROR) << "DT dt_server: send failed: " << strerror(errno);
++        connected_ = false;
++        return;
++      }
++      total_sent += n;
++    }
++  }
++
++  std::string RecvLine() {
++    // Read until newline
++    std::string result;
++    char buf[1];
++    while (true) {
++      ssize_t n = recv(sock_fd_, buf, 1, 0);
++      if (n <= 0) {
++        if (n == 0) {
++          LOG(WARNING) << "DT dt_server: connection closed by peer";
++        } else {
++          LOG(ERROR) << "DT dt_server: recv failed: " << strerror(errno);
++        }
++        connected_ = false;
++        return "";
++      }
++      if (buf[0] == '\n') break;
++      result += buf[0];
++    }
++    return result;
++  }
++
++  // Parse {"type":"SCORES","priorities":{"name":12345,...}}
++  void ParseScoresResponse(const std::string& json) {
++    // Find "priorities":{
++    size_t pos = json.find("\"priorities\"");
++    if (pos == std::string::npos) {
++      LOG(WARNING) << "DT dt_server: no priorities in response";
++      return;
++    }
++    pos = json.find('{', pos + 12);
++    if (pos == std::string::npos) return;
++
++    // Parse key-value pairs until closing }
++    size_t end = json.rfind('}');
++    if (end == std::string::npos || end <= pos) return;
++    // Find the matching } for the priorities object
++    int depth = 1;
++    size_t priorities_end = pos + 1;
++    while (priorities_end < json.size() && depth > 0) {
++      if (json[priorities_end] == '{') depth++;
++      else if (json[priorities_end] == '}') depth--;
++      if (depth > 0) priorities_end++;
++    }
++
++    size_t search = pos + 1;
++    while (search < priorities_end) {
++      // Find key
++      size_t q1 = json.find('"', search);
++      if (q1 == std::string::npos || q1 >= priorities_end) break;
++      size_t q2 = json.find('"', q1 + 1);
++      if (q2 == std::string::npos || q2 >= priorities_end) break;
++      std::string key = json.substr(q1 + 1, q2 - q1 - 1);
++
++      // Find value (integer after colon)
++      size_t colon = json.find(':', q2);
++      if (colon == std::string::npos || colon >= priorities_end) break;
++
++      // Skip whitespace
++      size_t val_start = colon + 1;
++      while (val_start < priorities_end && json[val_start] == ' ') val_start++;
++
++      // Read number (possibly negative)
++      size_t val_end = val_start;
++      if (val_end < priorities_end && json[val_end] == '-') val_end++;
++      while (val_end < priorities_end && json[val_end] >= '0' &&
++             json[val_end] <= '9') val_end++;
++
++      if (val_end > val_start) {
++        int64_t value = std::stoll(json.substr(val_start, val_end - val_start));
++        priority_cache_[key] = value;
++      }
++
++      search = val_end;
++    }
++  }
++
++  static std::string EscapeJsonString(const std::string& s) {
++    // HLO names are simple (alphanumeric + dots), no escaping needed
++    return s;
++  }
++
++  int sock_fd_;
++  bool connected_;
++  absl::flat_hash_map<std::string, int64_t> priority_cache_;
++};
++
++// Singleton accessor
++static DtScorerClient& GetDtScorerClient() {
++  static DtScorerClient client;
++  return client;
++}
++// ===== END dt_server class =====
+
+ // Read env var once (thread-safe via static init).
+ static const char* dt_strategy_ = std::getenv("DT_FUSION_STRATEGY");
+
+@@
+ // ===== In CalculateProducerPriority(), add after json_plan branch: =====
+
+       if (strategy == "json_plan") {
+         // ... (existing json_plan code) ...
+-      } else {
++      }
++
++      if (strategy == "dt_server") {
++        // Return cached priority from Python DT server.
++        // Cache is populated by SendInit() / SendFusionEvent()
++        // called from RunImpl(), not from here.
++        DtScorerClient& client = GetDtScorerClient();
++        int64_t cached = client.GetPriority(producer->name());
++        if (cached >= 0) {
++          return absl::Microseconds(cached);
++        }
++        // Not in cache: fall through to cost-model priority.
++        // This happens for instructions not scored by Python
++        // (e.g., newly created fusion instructions before
++        //  the next FUSION_EVENT response arrives).
++      }
++
++      if (strategy != "json_plan" && strategy != "dt_server" &&
++          strategy != "random" && strategy != "perturbed" &&
++          strategy != "fanout" && strategy != "tensor_bytes" &&
++          strategy != "flop_count" && strategy != "reverse_topo" &&
++          strategy != "learned_formula") {
+         // Unknown strategy: fall through to default
+         LOG(WARNING) << "DT: Unknown strategy '" << strategy
+                      << "', using default";
+       }
+     }
+
+@@
+ // ===== In RunImpl(), add AFTER the initial priority queue is built
+ // ===== (after the BlockingCounter parallel loop completes): =====
+
++    // --- dt_server: re-score initial queue with DT model ---
++    if (dt_strategy_ != nullptr &&
++        std::string(dt_strategy_) == "dt_server") {
++      DtScorerClient& client = GetDtScorerClient();
++      if (client.Connect()) {
++        // Extract all queued producers
++        std::vector<std::pair<Priority, HloInstruction*>> entries;
++        while (!producer_priority_queue_.IsEmpty()) {
++          auto top = producer_priority_queue_.Top();
++          entries.push_back(top);
++          producer_priority_queue_.Pop();
++        }
++
++        // Collect candidate names
++        std::vector<std::string> candidate_names;
++        candidate_names.reserve(entries.size());
++        for (const auto& [_, instr] : entries) {
++          candidate_names.push_back(std::string(instr->name()));
++        }
++
++        // Send INIT and get DT priorities
++        if (client.SendInit(candidate_names)) {
++          // Rebuild queue with DT priorities
++          for (const auto& [_, instr] : entries) {
++            int64_t dt_priority = client.GetPriority(
++                std::string(instr->name()));
++            if (dt_priority >= 0) {
++              producer_priority_queue_.Push(
++                  absl::Microseconds(dt_priority), instr);
++            } else {
++              // Fallback: keep original cost-model priority
++              producer_priority_queue_.Push(
++                  entries[0].first, instr);
++            }
++          }
++          LOG(INFO) << "DT dt_server: initial queue re-scored with "
++                    << candidate_names.size() << " producers";
++        } else {
++          // INIT failed: restore original queue
++          for (const auto& [priority, instr] : entries) {
++            producer_priority_queue_.Push(priority, instr);
++          }
++          LOG(WARNING) << "DT dt_server: INIT failed, using cost-model";
++        }
++      } else {
++        LOG(WARNING) << "DT dt_server: connection failed, using cost-model";
++      }
++    }
+
+@@
+ // ===== In the main fusion loop of RunImpl(), AFTER a successful fusion
+ // ===== and BEFORE UpdatePriorities() is called: =====
+ //
+ // The fusion loop typically looks like:
+ //   while (!producer_priority_queue_.IsEmpty()) {
+ //     auto [priority, producer] = producer_priority_queue_.Top();
+ //     producer_priority_queue_.Pop();
+ //     ... find best consumer ...
+ //     ... perform fusion -> HloInstruction* fused ...
+ //     <<< INSERT HERE >>>
+ //     ... UpdatePriorities() ...
+ //   }
+
++    // --- dt_server: notify Python of fusion event ---
++    if (dt_strategy_ != nullptr &&
++        std::string(dt_strategy_) == "dt_server") {
++      static int dt_fusion_step = 0;
++      DtScorerClient& client = GetDtScorerClient();
++      if (client.IsConnected()) {
++        client.SendFusionEvent(
++            std::string(fused->name()),
++            std::string(producer->name()),
++            std::string(consumer->name()),
++            dt_fusion_step++);
++        // Cache is now updated with new priorities from Python.
++        // UpdatePriorities() will call CalculateProducerPriority()
++        // which returns cached priorities.
++      }
++    }
+
+@@
+ // ===== After the main fusion loop ends (before RunImpl returns): =====
+
++    // --- dt_server: signal completion ---
++    if (dt_strategy_ != nullptr &&
++        std::string(dt_strategy_) == "dt_server") {
++      DtScorerClient& client = GetDtScorerClient();
++      if (client.IsConnected()) {
++        client.SendDone(num_fusions);
++      }
++    }

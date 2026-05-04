@@ -293,6 +293,8 @@ def main():
     parser.add_argument("--context-len", type=int, default=20)
     parser.add_argument("--skip-computation", action="store_true", default=True)
     parser.add_argument("--max-trajs-per-module", type=int, default=0)
+    parser.add_argument("--precomputed-dir", default=None,
+                        help="Directory with pre-computed contracted graphs")
 
     # Model
     parser.add_argument("--embed-dim", type=int, default=64)
@@ -342,6 +344,7 @@ def main():
         holdout_arch=args.holdout_arch,
         skip_computation=args.skip_computation,
         max_trajectories_per_module=args.max_trajs_per_module,
+        precomputed_dir=args.precomputed_dir,
     )
 
     # Build model

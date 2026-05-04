@@ -34,6 +34,7 @@ from graph_contractor import (
     reconstruct_trajectory_states,
     contract_graph,
 )
+from precompute_graphs import _dict_to_metadata
 
 # ---------------------------------------------------------------------------
 # GPU reward loading (reused from dt_dataset_multi.py)
@@ -194,12 +195,18 @@ class DynamicFusionDTDataset(Dataset):
         max_gpu_reward: float = 1.0,
         include_approximate: bool = True,
         include_unresolved: bool = False,
+        precomputed_dir: Optional[str] = None,
     ):
         self.context_len = context_len
         self.reward_mode = reward_mode
         self.max_gpu_reward = max(max_gpu_reward, 1e-6)
         self.include_approximate = include_approximate
         self.include_unresolved = include_unresolved
+
+        # Load pre-computed graphs if available
+        self._precomputed: Dict[str, dict] = {}  # filename -> {graphs, metadatas, traj_map}
+        if precomputed_dir:
+            self._load_precomputed(precomputed_dir, module_data_list)
 
         # Build flat list of (module_idx, traj_idx, start_pos) windows
         self.windows: List[Tuple[int, int, int]] = []
@@ -225,6 +232,16 @@ class DynamicFusionDTDataset(Dataset):
         # Graph contraction cache: (module_key, traj_idx, step_pos) -> (Data, Metadata)
         self._graph_cache: Dict[Tuple[str, int, int], Tuple[Data, GraphStepMetadata]] = {}
         self._cache_max_size = 50000
+
+    def _load_precomputed(self, precomputed_dir: str, module_data_list: List[dict]):
+        """Load pre-computed contracted graphs from disk."""
+        for mdata in module_data_list:
+            filename = mdata["filename"]
+            pc_path = os.path.join(precomputed_dir, f"{filename}.pt")
+            if os.path.exists(pc_path):
+                self._precomputed[filename] = torch.load(
+                    pc_path, map_location="cpu", weights_only=False
+                )
 
     def _compute_rtg(self, traj: dict, reward_mode: str) -> List[float]:
         """Compute return-to-go for each step."""
@@ -266,6 +283,23 @@ class DynamicFusionDTDataset(Dataset):
 
         if cache_key in self._graph_cache:
             return self._graph_cache[cache_key]
+
+        # Try pre-computed data first
+        filename = mdata["filename"]
+        if filename in self._precomputed:
+            pc = self._precomputed[filename]
+            traj_map = pc["traj_map"]
+            # traj_map keys may be strings after torch.save/load
+            ti_key = str(ti) if str(ti) in traj_map else ti
+            if ti_key in traj_map:
+                step_map = traj_map[ti_key]
+                sp_key = str(step_pos) if str(step_pos) in step_map else step_pos
+                if sp_key in step_map:
+                    flat_idx = step_map[sp_key]
+                    data = pc["graphs"][flat_idx]
+                    metadata = _dict_to_metadata(pc["metadatas"][flat_idx])
+                    self._graph_cache[cache_key] = (data, metadata)
+                    return data, metadata
 
         traj = mdata["trajectories"][ti]
         g0 = mdata["g0"]
@@ -457,6 +491,7 @@ def create_dynamic_dataloaders(
     include_unresolved: bool = False,
     max_trajectories_per_module: int = 0,
     num_workers: int = 0,
+    precomputed_dir: Optional[str] = None,
     verbose: bool = True,
 ) -> Tuple[DataLoader, DataLoader, Dict]:
     """Create train/val dataloaders with dynamic graph contraction.
@@ -534,6 +569,7 @@ def create_dynamic_dataloaders(
         max_gpu_reward=max_gpu_reward,
         include_approximate=include_approximate,
         include_unresolved=include_unresolved,
+        precomputed_dir=precomputed_dir,
     )
     val_ds = DynamicFusionDTDataset(
         val_modules,
@@ -542,6 +578,7 @@ def create_dynamic_dataloaders(
         max_gpu_reward=max_gpu_reward,
         include_approximate=include_approximate,
         include_unresolved=include_unresolved,
+        precomputed_dir=precomputed_dir,
     )
 
     train_loader = DataLoader(
