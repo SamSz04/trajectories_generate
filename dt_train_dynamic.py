@@ -18,14 +18,24 @@ from __future__ import annotations
 import argparse
 import math
 import os
+import random
 import sys
 import time
 from typing import Dict, List, Optional, Tuple
 
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
+
+
+def set_seed(seed: int) -> None:
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.use_deterministic_algorithms(True, warn_only=True)
 
 from dt_model_dynamic import DynamicFusionDT
 from dt_dataset_dynamic import (
@@ -392,13 +402,17 @@ def main():
     # Output
     parser.add_argument("--checkpoint-dir", default="output/dt_dynamic_checkpoints")
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
+    parser.add_argument("--seed", type=int, default=42)
 
     args = parser.parse_args()
+
+    set_seed(args.seed)
 
     device = torch.device(args.device)
     os.makedirs(args.checkpoint_dir, exist_ok=True)
 
     print(f"=== Dynamic Fusion DT Training ===")
+    print(f"Seed: {args.seed}")
     print(f"Device: {device}")
     print(f"Loss mode: {args.loss_mode}")
     print(f"Reward mode: {args.reward_mode}")
