@@ -394,6 +394,8 @@ def main():
     parser.add_argument("--weight-decay", type=float, default=1e-4)
     parser.add_argument("--grad-clip", type=float, default=1.0)
     parser.add_argument("--patience", type=int, default=30)
+    parser.add_argument("--resume", default=None,
+                        help="Path to a checkpoint (best.pt) to resume training from")
 
     # Holdout
     parser.add_argument("--holdout-arch", default=None)
@@ -461,8 +463,21 @@ def main():
 
     best_val_acc = 0.0
     patience_counter = 0
+    start_epoch = 1
 
-    for epoch in range(1, args.epochs + 1):
+    if args.resume:
+        print(f"\nResuming from checkpoint: {args.resume}")
+        resume_ckpt = torch.load(args.resume, map_location=device, weights_only=False)
+        model.load_state_dict(resume_ckpt["model_state_dict"])
+        optimizer.load_state_dict(resume_ckpt["optimizer_state_dict"])
+        start_epoch = resume_ckpt["epoch"] + 1
+        best_val_acc = resume_ckpt["val_metrics"]["top1_acc"]
+        for _ in range(resume_ckpt["epoch"]):
+            scheduler.step()
+        print(f"Resumed at epoch {start_epoch}, best_val_acc={best_val_acc:.4f}, "
+              f"lr={optimizer.param_groups[0]['lr']:.6f}")
+
+    for epoch in range(start_epoch, args.epochs + 1):
         t0 = time.time()
 
         train_metrics = train_epoch(
